@@ -1,0 +1,24 @@
+{
+  "name": "notion-api-ts",
+  "version": "1.0.0",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "test": "node dist/test/index.js",
+    "start": "node dist/src/index.js",
+    "ts-compile": "tsc",
+    "ts-watch": "tsc -w"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "typescript": "^5.5.3"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "node-fetch": "^3.3.2"
+  }
+}

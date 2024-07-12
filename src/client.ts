@@ -1,0 +1,83 @@
+import { NOTION_API_URL } from './config.js';
+import * as log from './log.js';
+import { RecordMap } from './record-map.js';
+import { recordable } from './recordable.js';
+import { Session } from './session.js';
+import { uuid } from './util.js';
+
+export class Client {
+    public static from_token(token: string) {
+        const client = new Client();
+        client.set_token(token);
+        return client;
+    }
+
+    public session: Session;
+    public recordMap: RecordMap;
+    public get request() {
+        return this.session.request.bind(this.session);
+    }
+
+    private constructor() {
+        this.session = new Session(NOTION_API_URL);
+        this.recordMap = new RecordMap(this);
+    }
+
+    public set_token(token: string) {
+        this.session.set_cookie('token_v2', token);
+    }
+
+    public async get_block(id: string) {
+        id = uuid(id);
+        const record = await this.recordMap.get_record('block', id);
+        const block = new recordable(id, this.recordMap);
+        return block;
+    }
+
+    public async get_space(id: string) {
+        id = uuid(id);
+        const space = await this.session.request('getSpace', { spaceId: id });
+        return space;
+    }
+
+    public async get_user(id: string) {
+        id = uuid(id);
+        const user = await this.session.request('getUserAnalyticsData', { userId: id });
+        return user;
+    }
+
+    public async get_collection(id: string) {
+        id = uuid(id);
+        const collection = await this.session.request('queryCollection', { collectionId: id });
+        return collection;
+    }
+
+    public async get_collection_view(id: string) {
+        id = uuid(id);
+        const collection_view = await this.session.request('getCollectionView', { collectionId: id });
+        return collection_view;
+    }
+
+    public async get_record_values(id: string) {
+        id = uuid(id);
+        const record_values = await this.session.request('getRecordValues', { requests: [{ id, table: 'block' }] });
+        return record_values;
+    }
+
+    public async get_record_values2(ids: string[]) {
+        const record_values = await this.session.request('getRecordValues', { requests: ids.map(id => ({ id, table: 'block' })) });
+        return record_values;
+    }
+
+    public async search(params: any) {
+        const search = await this.session.request('search', params);
+        return search;
+    }
+
+    public async query_collection(params: any) {
+        const query_collection = await this.session.request('queryCollection', params);
+        return query_collection;
+    }
+
+
+}
