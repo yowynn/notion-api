@@ -70,6 +70,10 @@ export class RecordMap {
     private block: Record<string, block_record> = {};
     private space: Record<string, space_record> = {};
     private team: Record<string, team_record> = {};
+    private collection_view: Record<string, any> = {};
+    private collection: Record<string, any> = {};
+    private discussion: Record<string, any> = {};
+    private comment: Record<string, any> = {};
 
     public get records() {
         return {
@@ -104,14 +108,18 @@ export class RecordMap {
     public get_record_cache(table: RecordType, id: string) {
         const typeMap = this[table];
         if (!typeMap) {
-            throw new UnsupportedError('RecordMap.get_record', table);
+            throw new UnsupportedError('RecordMap.get_record_cache', table);
         }
         return typeMap[id];
     }
 
     public set_record(table: RecordType, record: record) {
         // log.info('RecordMap.set_record', table, record.id);
-        this[table][record.id] = record as any;
+        const typeMap = this[table];
+        if (!typeMap) {
+            throw new UnsupportedError('RecordMap.set_record', table);
+        }
+        typeMap[record.id] = record as any;
     }
 
     public update_records(recordMap: any) {
@@ -133,6 +141,7 @@ export class RecordMap {
             chunkNumber: 0,
             verticalColumns: false,
         });
+        // log.write_json('a.json', data);
         this.update_records((data as any).recordMap);
         return this.get_record_cache('block', id) as block_record;
     }

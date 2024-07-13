@@ -1,3 +1,4 @@
+import { block } from './block.js';
 import { NOTION_API_URL } from './config.js';
 import * as log from './log.js';
 import { RecordMap } from './record-map.js';
@@ -30,8 +31,8 @@ export class Client {
     public async get_block(id: string) {
         id = uuid(id);
         const record = await this.recordMap.get_record('block', id);
-        const block = new recordable(id, this.recordMap);
-        return block;
+        const block_ = new block(id, this.recordMap);
+        return block_;
     }
 
     public async get_space(id: string) {

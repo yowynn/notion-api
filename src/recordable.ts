@@ -27,7 +27,7 @@ export class recordable {
 
 }
 
-function record_accessor(path?: string, getter: ((x: any) => any) = (x: any) => x, setter: ((x: any) => any) | null = (x: any) => x) {
+export function record_accessor(path?: string, getter: ((x: any) => any) = (x: any) => x, setter: ((x: any) => any) | null = (x: any) => x) {
     return function ({ get, set }: ClassAccessorDecoratorTarget<recordable, any>, { kind, name }: ClassAccessorDecoratorContext<recordable, any>) {
         if (kind === "accessor") {
             path = path || name as string;
@@ -58,7 +58,7 @@ function record_accessor(path?: string, getter: ((x: any) => any) = (x: any) => 
     };
 }
 
-function readonly_record_accessor(path?: string, getter = (x: any) => x) {
+export function readonly_record_accessor(path?: string, getter = (x: any) => x) {
     return record_accessor(path, getter, null);
 }
 

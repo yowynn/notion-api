@@ -1,30 +1,18 @@
 import { RecordMap } from './record-map.js';
-import { recordable } from './recordable.js';
+import { record_accessor, recordable } from './recordable.js';
 
 export class block extends recordable {
+    @record_accessor('alive')
+    accessor alive!: boolean;
+
+    @record_accessor('type')
+    accessor type!: string;
+
+    @record_accessor('properties.title')
+    accessor title!: string;
 
 }
 
-export class page_block {
-    protected _id: string;
-    protected _recordMap: RecordMap;
-    public get id() {
-        return this._id;
-    }
-    public get recordMap() {
-        return this._recordMap;
-    }
-    public get record() {
-        return this.recordMap.get_record('block', this.id);
-    }
+export class page_block extends block {
 
-    public constructor(id: string, recordMap: RecordMap) {
-        this._id = id;
-        this._recordMap = recordMap;
-    }
-
-    public func1() { }
-    static func2() { }
-
-    aa = 3;
 }
