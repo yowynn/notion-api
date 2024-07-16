@@ -66,7 +66,7 @@ export interface team_record extends record {
 export type RecordType = 'block' | 'space' | 'team';
 
 export class RecordMap {
-    private clinet: Client;
+    private client: Client;
     private block: Record<string, block_record> = {};
     private space: Record<string, space_record> = {};
     private team: Record<string, team_record> = {};
@@ -84,7 +84,7 @@ export class RecordMap {
     }
 
     public constructor(client: Client) {
-        this.clinet = client;
+        this.client = client;
     }
 
     public async get_record(table: RecordType, id: string, update: boolean = false) {
@@ -95,10 +95,10 @@ export class RecordMap {
                     record = await this.request_load_page_chunk(id);
                     break;
                 case 'space':
-                    this.clinet.request('getSpace', { spaceId: id });
+                    this.client.request('getSpace', { spaceId: id });
                     break;
                 case 'team':
-                    this.clinet.request('getTeam', { teamId: id });
+                    this.client.request('getTeam', { teamId: id });
                     break;
             }
         }
@@ -134,7 +134,7 @@ export class RecordMap {
 
     public async request_load_page_chunk(id: string) {
         id = uuid(id);
-        const data = await this.clinet.request('loadPageChunk', {
+        const data = await this.client.request('loadPageChunk', {
             pageId: id,
             limit: 100,
             cursor: { stack: [] },
@@ -145,10 +145,45 @@ export class RecordMap {
         this.update_records((data as any).recordMap);
         return this.get_record_cache('block', id) as block_record;
     }
+
+    public async request_load_user_content()
+    {
+        const data = await this.client.request('loadUserContent', {});
+        this.update_records((data as any).recordMap);
+    }
+
+    public async request_get_spaces()
+    {
+        const data = await this.client.request('getSpaces', {});
+        this.update_records((data as any).recordMap);
+    }
+
+    public async request_submit_transaction(operations: any[]) {
+        const data = await this.client.request('submitTransaction', { operations });
+        // this.update_records((data as any).recordMap);
+    }
+
+    public async request_submit_transaction_set_record_values(id: string, path: string[], value: any) {
+        const operations = [
+            {
+                command: 'set',
+                table: 'block',
+                id,
+                path,
+                args: value,
+            },
+            {
+                command: 'update',
+                table: 'block',
+                id,
+                path: [],
+                args: {
+                    last_edited_by_id: this.client.user_id,
+                    last_edited_by_table: 'notion_user',
+                    last_edited_time: Date.now(),
+                },
+            }
+        ];
+        await this.request_submit_transaction(operations);
+    }
 }
-
-type key = keyof RecordMap;
-
-const a: key = 'update_records';
-
-const b = a as any instanceof RecordMap;

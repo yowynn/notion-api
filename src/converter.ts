@@ -372,3 +372,20 @@ export const markdown2richtext = (() => {
         return richText;
     };
 })();
+
+export function timestamp2date(number: number) {
+    return new Date(number);
+}
+
+export function date2timestamp(date: Date) {
+    return date.getTime();
+}
+
+export function date2string(date: Date) {
+    return date.toLocaleString();
+}
+
+export function string2date(string: string) {
+    return new Date(string);
+}
+

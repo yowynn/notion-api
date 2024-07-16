@@ -2,19 +2,34 @@ import { block } from './block.js';
 import { NOTION_API_URL } from './config.js';
 import * as log from './log.js';
 import { RecordMap } from './record-map.js';
-import { recordable } from './recordable.js';
 import { Session } from './session.js';
 import { uuid } from './util.js';
 
 export class Client {
-    public static from_token(token: string) {
+    public static async from_token(token: string) {
         const client = new Client();
-        client.set_token(token);
+        const auth = await client.session.authorize_from_token(token);
+        client._user_id = auth.user_id;
+        log.info('Login success:', auth);
         return client;
     }
 
-    public session: Session;
-    public recordMap: RecordMap;
+    public static async from_login(email: string, password: string) {
+        const client = new Client();
+        const auth = await client.session.authorize_from_login(email, password);
+        client._user_id = auth.user_id;
+        log.info('Login success:', auth);
+        return client;
+    }
+
+    private _user_id!: string;
+    public readonly session: Session;
+    public readonly recordMap: RecordMap;
+
+    public get user_id() {
+        return this._user_id;
+    }
+
     public get request() {
         return this.session.request.bind(this.session);
     }

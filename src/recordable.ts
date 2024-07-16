@@ -1,6 +1,6 @@
+import { date2timestamp, timestamp2date } from './converter.js';
 import { ReadonlyModificationError, UnsupportedError } from './error.js';
 import { RecordMap } from './record-map.js';
-import { timestamp2date } from './util.js';
 
 export class recordable {
     protected _id: string;
@@ -17,43 +17,53 @@ export class recordable {
     }
 
     @readonly_record_accessor('version')
-    accessor version!: number;
+    public accessor version!: number;
 
-    @readonly_record_accessor('created_time', timestamp2date)
-    accessor created_time!: number;
-    @readonly_record_accessor('last_edited_time', timestamp2date)
-    accessor last_edited_time!: number;
+    @record_accessor('created_time', timestamp2date, date2timestamp)
+    public accessor created_time!: Date;
 
+    @record_accessor('last_edited_time', timestamp2date, date2timestamp)
+    public accessor last_edited_time!: Date;
 
+    public get(...record_path: string[]) {
+        let record = this.record as any;
+        for (let p of record_path) {
+            record = record?.[p];
+        }
+        return record;
+    }
+
+    public async set(value: any, ...record_path: string[]) {
+        let record = this.record as any;
+        for (let p of record_path.slice(0, -1)) {
+            record = record[p];
+        }
+        record[record_path.slice(-1)[0]] = value;
+        await this._recordMap.request_submit_transaction_set_record_values(this._id, record_path, value);
+    }
 }
 
 export function record_accessor(path?: string, getter: ((x: any) => any) = (x: any) => x, setter: ((x: any) => any) | null = (x: any) => x) {
     return function ({ get, set }: ClassAccessorDecoratorTarget<recordable, any>, { kind, name }: ClassAccessorDecoratorContext<recordable, any>) {
-        if (kind === "accessor") {
+        if (kind === 'accessor') {
             path = path || name as string;
-            const paths = (path as string).split(".");
+            const record_path = (path as string).split('.');
             return {
                 get(this: recordable) {
-                    let record = this.record as any;
-                    for (let p of paths) {
-                        record = record[p];
-                    }
-                    return getter(record);
+                    const data = this.get(...record_path);
+                    return getter(data);
                 },
                 async set(this: recordable, value: any) {
                     if (setter === null) {
-                        throw new ReadonlyModificationError("record_accessor", path as string);
+                        throw new ReadonlyModificationError('record_accessor', path as string);
                     }
-                    let record = this.record as any;
-                    for (let p of paths.slice(0, -1)) {
-                        record = record[p];
-                    }
-                    record[paths.slice(-1)[0]] = setter(value);
+                    const data = setter(value);
+                    await this.set(data, ...record_path);
                 },
             } as any;
         }
         else {
-            throw new UnsupportedError("record_accessor", kind);
+            throw new UnsupportedError('record_accessor', kind);
         }
     };
 }

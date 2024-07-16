@@ -1,15 +1,15 @@
-import { RecordMap } from './record-map.js';
+import { markdown2richtext, richtext2markdown } from './converter.js';
 import { record_accessor, recordable } from './recordable.js';
 
 export class block extends recordable {
     @record_accessor('alive')
-    accessor alive!: boolean;
+    public accessor alive!: boolean;
 
     @record_accessor('type')
-    accessor type!: string;
+    public accessor type!: string;
 
-    @record_accessor('properties.title')
-    accessor title!: string;
+    @record_accessor('properties.title', richtext2markdown, markdown2richtext)
+    public accessor title!: string;
 
 }
 
