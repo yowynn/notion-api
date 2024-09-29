@@ -1,6 +1,6 @@
 {
   "name": "notion-api-ts",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "dist/src/index.js",
   "scripts": {
     "test": "node dist/test/index.js",
@@ -9,10 +9,19 @@
     "ts-watch": "tsc -w"
   },
   "type": "module",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "notion",
+    "notionapi",
+    "notion-api",
+    "typescript"
+  ],
+  "author": "Wynne",
+  "license": "MIT",
+  "description": "Unofficial TypeScript Notion API.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yowynn/notion-api"
+  },
   "devDependencies": {
     "@types/node": "^20.14.10",
     "@types/uuid": "^10.0.0",
