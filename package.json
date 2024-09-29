@@ -1,35 +1,41 @@
 {
-  "name": "notion-api-ts",
-  "version": "0.0.1",
-  "main": "dist/src/index.js",
-  "scripts": {
-    "test": "node dist/test/index.js",
-    "start": "node dist/src/index.js",
-    "ts-compile": "tsc",
-    "ts-watch": "tsc -w"
-  },
-  "type": "module",
-  "keywords": [
-    "notion",
-    "notionapi",
-    "notion-api",
-    "typescript"
-  ],
-  "author": "Wynne",
-  "license": "MIT",
+  "name": "notion-api",
+  "version": "0.0.0",
   "description": "Unofficial TypeScript Notion API.",
+  "type": "module",
+  "main": "dist/app.js",
+  "author": {
+    "name": "Wynne"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/yowynn/notion-api"
   },
-  "devDependencies": {
-    "@types/node": "^20.14.10",
-    "@types/uuid": "^10.0.0",
-    "typescript": "^5.5.3"
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "tsc --build --clean"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
     "node-fetch": "^3.3.2",
     "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.7.0",
+    "@typescript-eslint/parser": "^8.7.0",
+    "eslint": "^9.11.1",
+    "typescript": "^5.6.2"
+  },
+  "eslintConfig": {
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "ecmaVersion": "latest",
+      "sourceType": "module"
+    },
+    "plugins": [
+      "@typescript-eslint"
+    ]
   }
 }

@@ -12,5 +12,11 @@ export function warn(...args: any[]) {
 }
 
 export function write_json(path: string, data: any) {
+    const parent = path.split(/[\\\/]/).slice(0, -1).join('/');
+    if (parent !== '' && !fs.existsSync(parent)) {
+        fs.mkdirSync(parent, {
+            recursive: true,
+        });
+    }
     fs.writeFileSync(path, stringify(data));
 }
