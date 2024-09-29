@@ -1,4 +1,5 @@
 import { Client } from './client.js';
+import { DEBUG_MODE } from './config.js';
 import { UnsupportedError } from './error.js';
 import * as log from './log.js';
 import { uuid } from './util.js';
@@ -123,10 +124,18 @@ export class RecordMap {
     }
 
     public update_records(recordMap: any) {
+        if (DEBUG_MODE)
+            log.write_json('test/data-demos/recordMap.json', recordMap);
         for (const type in recordMap) {
             const records = recordMap[type];
             for (const id in records) {
-                const record = records[id].value as record;
+                let record: record;
+                if (recordMap.__version__ === 3) {
+                    record = records[id].value.value as record;
+                }
+                else {
+                    record = records[id].value as record;
+                }
                 this.set_record(type as RecordType, record);
             }
         }

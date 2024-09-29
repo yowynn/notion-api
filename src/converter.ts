@@ -1,5 +1,6 @@
 import { DEBUG_MODE } from './config.js';
 import { ArgumentError, UnsupportedError } from './error.js';
+import * as log from './log.js';
 
 const RICHTEXT_COLOR = ['gray', 'brown', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'red'];
 const RICHTEXT_BACKGROUND_COLOR = ['gray_background', 'brown_background', 'orange_background', 'yellow_background', 'green_background', 'blue_background', 'purple_background', 'pink_background', 'red_background'];
@@ -13,6 +14,9 @@ const RICHTEXT_STYLE_TAG = [
     '_',                        // underline
     'h',                        // highlight
     'm',                        // comment
+    'p',                        // mention page/block
+    'u',                        // mention user
+    'd',                        // mention date
 ];
 
 const MARKDOWN_LINE_ESCAPE = [
@@ -142,9 +146,9 @@ export const markdown2richtext = (() => {
                     text = '⁍';
                 }
             }
-            if (flagDefaultHighlight) {
-                styles_copy.push(['h', 'default']);
-            }
+            // if (flagDefaultHighlight) {
+            //     styles_copy.push(['h', 'default']);
+            // }
             richText.push([text, styles_copy]);
             text = '';
         }
