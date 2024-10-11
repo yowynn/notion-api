@@ -1,223 +1,423 @@
-export type literal_uuid = string;                              // XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 
-export type literal_property_id = string;                       // XXXX (4 random characters)
+// Version value, increment after modification
+export type literal_version = number;
 
-export type literal_date = string;                              // YYYY-MM-DD
+// Timestamp value, milliseconds since 1970-01-01T00:00:00.000Z
+export type literal_timestamp = number;
 
-export type literal_time = string;                              // HH:MM
+// Normalization value, range from 0 to 1
+export type literal_normalization_value = string;
 
-export type literal_url = string;                               // full url, or relative url base on 'https://www.notion.so'
+// UUID value, 36 characters, 8-4-4-4-12
+export type literal_uuid = string;
 
-export type literal_emoji = string;                             // emoji
+// Property ID, 4 characters, random
+export type literal_property_id = string;
 
+// Date value, YYYY-MM-DD
+export type literal_date = string;
+
+// Time value, HH:MM
+export type literal_time = string;
+
+// Emoji character
+export type literal_emoji = string;
+
+// URL value, full url, or relative url base on 'https://www.notion.so'
+export type literal_url = string;
+
+// Icon value, emoji or url
 export type literal_icon = literal_emoji | literal_url;
 
-export type literal_date_format =
+// File size value, such as '1.2MB'
+export type literal_file_size = string;
+
+// Boolean option, yes or no
+export type option_boolean = 'Yes' | 'No';
+
+// Date format option
+export type option_date_format =
     | 'relative'                                                // Relative
     | 'MM/DD/YYYY'                                              // Month/Day/Year
     | 'DD/MM/YYYY'                                              // Day/Month/Year
     | 'YYYY/MM/DD'                                              // Year/Month/Day
-    | 'll';                                                     // Full Date
+    | 'll'                                                      // Full Date
+    ;
 
-export type literal_time_format =
+// Time format option
+export type option_time_format =
     | 'LT'                                                      // 12 hour
     | 'H:mm'                                                    // 24 hour
-    | ' ';                                                      // Hidden
+    | ' '                                                       // Hidden
+    ;
 
-export type literal_highlight_color_foreground =
-    | 'gray'
-    | 'brown'
-    | 'orange'
-    | 'yellow'
-    | 'green'
-    | 'blue'
-    | 'purple'
-    | 'pink'
-    | 'red';
+// Time zone option
+export type option_time_zone = 'Africa/Abidjan' | 'Africa/Accra' | 'Africa/Addis_Ababa' | 'Africa/Algiers' | 'Africa/Asmara' | 'Africa/Asmera' | 'Africa/Bamako' | 'Africa/Bangui' | 'Africa/Banjul' | 'Africa/Bissau' | 'Africa/Blantyre' | 'Africa/Brazzaville' | 'Africa/Bujumbura' | 'Africa/Cairo' | 'Africa/Casablanca' | 'Africa/Ceuta' | 'Africa/Conakry' | 'Africa/Dakar' | 'Africa/Dar_es_Salaam' | 'Africa/Djibouti' | 'Africa/Douala' | 'Africa/El_Aaiun' | 'Africa/Freetown' | 'Africa/Gaborone' | 'Africa/Harare' | 'Africa/Johannesburg' | 'Africa/Juba' | 'Africa/Kampala' | 'Africa/Khartoum' | 'Africa/Kigali' | 'Africa/Kinshasa' | 'Africa/Lagos' | 'Africa/Libreville' | 'Africa/Lome' | 'Africa/Luanda' | 'Africa/Lubumbashi' | 'Africa/Lusaka' | 'Africa/Malabo' | 'Africa/Maputo' | 'Africa/Maseru' | 'Africa/Mbabane' | 'Africa/Mogadishu' | 'Africa/Monrovia' | 'Africa/Nairobi' | 'Africa/Ndjamena' | 'Africa/Niamey' | 'Africa/Nouakchott' | 'Africa/Ouagadougou' | 'Africa/Porto-Novo' | 'Africa/Sao_Tome' | 'Africa/Timbuktu' | 'Africa/Tripoli' | 'Africa/Tunis' | 'Africa/Windhoek' | 'America/Adak' | 'America/Anchorage' | 'America/Anguilla' | 'America/Antigua' | 'America/Araguaina' | 'America/Argentina/Buenos_Aires' | 'America/Argentina/Catamarca' | 'America/Argentina/ComodRivadavia' | 'America/Argentina/Cordoba' | 'America/Argentina/Jujuy' | 'America/Argentina/La_Rioja' | 'America/Argentina/Mendoza' | 'America/Argentina/Rio_Gallegos' | 'America/Argentina/Salta' | 'America/Argentina/San_Juan' | 'America/Argentina/San_Luis' | 'America/Argentina/Tucuman' | 'America/Argentina/Ushuaia' | 'America/Aruba' | 'America/Asuncion' | 'America/Atikokan' | 'America/Atka' | 'America/Bahia' | 'America/Bahia_Banderas' | 'America/Barbados' | 'America/Belem' | 'America/Belize' | 'America/Blanc-Sablon' | 'America/Boa_Vista' | 'America/Bogota' | 'America/Boise' | 'America/Buenos_Aires' | 'America/Cambridge_Bay' | 'America/Campo_Grande' | 'America/Cancun' | 'America/Caracas' | 'America/Catamarca' | 'America/Cayenne' | 'America/Cayman' | 'America/Chicago' | 'America/Chihuahua' | 'America/Ciudad_Juarez' | 'America/Coral_Harbour' | 'America/Cordoba' | 'America/Costa_Rica' | 'America/Creston' | 'America/Cuiaba' | 'America/Curacao' | 'America/Danmarkshavn' | 'America/Dawson' | 'America/Dawson_Creek' | 'America/Denver' | 'America/Detroit' | 'America/Dominica' | 'America/Edmonton' | 'America/Eirunepe' | 'America/El_Salvador' | 'America/Ensenada' | 'America/Fort_Nelson' | 'America/Fort_Wayne' | 'America/Fortaleza' | 'America/Glace_Bay' | 'America/Godthab' | 'America/Goose_Bay' | 'America/Grand_Turk' | 'America/Grenada' | 'America/Guadeloupe' | 'America/Guatemala' | 'America/Guayaquil' | 'America/Guyana' | 'America/Halifax' | 'America/Havana' | 'America/Hermosillo' | 'America/Indiana/Indianapolis' | 'America/Indiana/Knox' | 'America/Indiana/Marengo' | 'America/Indiana/Petersburg' | 'America/Indiana/Tell_City' | 'America/Indiana/Vevay' | 'America/Indiana/Vincennes' | 'America/Indiana/Winamac' | 'America/Indianapolis' | 'America/Inuvik' | 'America/Iqaluit' | 'America/Jamaica' | 'America/Jujuy' | 'America/Juneau' | 'America/Kentucky/Louisville' | 'America/Kentucky/Monticello' | 'America/Knox_IN' | 'America/Kralendijk' | 'America/La_Paz' | 'America/Lima' | 'America/Los_Angeles' | 'America/Louisville' | 'America/Lower_Princes' | 'America/Maceio' | 'America/Managua' | 'America/Manaus' | 'America/Marigot' | 'America/Martinique' | 'America/Matamoros' | 'America/Mazatlan' | 'America/Mendoza' | 'America/Menominee' | 'America/Merida' | 'America/Metlakatla' | 'America/Mexico_City' | 'America/Miquelon' | 'America/Moncton' | 'America/Monterrey' | 'America/Montevideo' | 'America/Montreal' | 'America/Montserrat' | 'America/Nassau' | 'America/New_York' | 'America/Nipigon' | 'America/Nome' | 'America/Noronha' | 'America/North_Dakota/Beulah' | 'America/North_Dakota/Center' | 'America/North_Dakota/New_Salem' | 'America/Nuuk' | 'America/Ojinaga' | 'America/Panama' | 'America/Pangnirtung' | 'America/Paramaribo' | 'America/Phoenix' | 'America/Port-au-Prince' | 'America/Port_of_Spain' | 'America/Porto_Acre' | 'America/Porto_Velho' | 'America/Puerto_Rico' | 'America/Punta_Arenas' | 'America/Rainy_River' | 'America/Rankin_Inlet' | 'America/Recife' | 'America/Regina' | 'America/Resolute' | 'America/Rio_Branco' | 'America/Rosario' | 'America/Santa_Isabel' | 'America/Santarem' | 'America/Santiago' | 'America/Santo_Domingo' | 'America/Sao_Paulo' | 'America/Scoresbysund' | 'America/Shiprock' | 'America/Sitka' | 'America/St_Barthelemy' | 'America/St_Johns' | 'America/St_Kitts' | 'America/St_Lucia' | 'America/St_Thomas' | 'America/St_Vincent' | 'America/Swift_Current' | 'America/Tegucigalpa' | 'America/Thule' | 'America/Thunder_Bay' | 'America/Tijuana' | 'America/Toronto' | 'America/Tortola' | 'America/Vancouver' | 'America/Virgin' | 'America/Whitehorse' | 'America/Winnipeg' | 'America/Yakutat' | 'America/Yellowknife' | 'Antarctica/Casey' | 'Antarctica/Davis' | 'Antarctica/DumontDUrville' | 'Antarctica/Macquarie' | 'Antarctica/Mawson' | 'Antarctica/McMurdo' | 'Antarctica/Palmer' | 'Antarctica/Rothera' | 'Antarctica/South_Pole' | 'Antarctica/Syowa' | 'Antarctica/Troll' | 'Antarctica/Vostok' | 'Arctic/Longyearbyen' | 'Asia/Aden' | 'Asia/Almaty' | 'Asia/Amman' | 'Asia/Anadyr' | 'Asia/Aqtau' | 'Asia/Aqtobe' | 'Asia/Ashgabat' | 'Asia/Ashkhabad' | 'Asia/Atyrau' | 'Asia/Baghdad' | 'Asia/Bahrain' | 'Asia/Baku' | 'Asia/Bangkok' | 'Asia/Barnaul' | 'Asia/Beirut' | 'Asia/Bishkek' | 'Asia/Brunei' | 'Asia/Calcutta' | 'Asia/Chita' | 'Asia/Choibalsan' | 'Asia/Chongqing' | 'Asia/Chungking' | 'Asia/Colombo' | 'Asia/Dacca' | 'Asia/Damascus' | 'Asia/Dhaka' | 'Asia/Dili' | 'Asia/Dubai' | 'Asia/Dushanbe' | 'Asia/Famagusta' | 'Asia/Gaza' | 'Asia/Harbin' | 'Asia/Hebron' | 'Asia/Ho_Chi_Minh' | 'Asia/Hong_Kong' | 'Asia/Hovd' | 'Asia/Irkutsk' | 'Asia/Istanbul' | 'Asia/Jakarta' | 'Asia/Jayapura' | 'Asia/Jerusalem' | 'Asia/Kabul' | 'Asia/Kamchatka' | 'Asia/Karachi' | 'Asia/Kashgar' | 'Asia/Kathmandu' | 'Asia/Katmandu' | 'Asia/Khandyga' | 'Asia/Kolkata' | 'Asia/Krasnoyarsk' | 'Asia/Kuala_Lumpur' | 'Asia/Kuching' | 'Asia/Kuwait' | 'Asia/Macao' | 'Asia/Macau' | 'Asia/Magadan' | 'Asia/Makassar' | 'Asia/Manila' | 'Asia/Muscat' | 'Asia/Nicosia' | 'Asia/Novokuznetsk' | 'Asia/Novosibirsk' | 'Asia/Omsk' | 'Asia/Oral' | 'Asia/Phnom_Penh' | 'Asia/Pontianak' | 'Asia/Pyongyang' | 'Asia/Qatar' | 'Asia/Qostanay' | 'Asia/Qyzylorda' | 'Asia/Rangoon' | 'Asia/Riyadh' | 'Asia/Saigon' | 'Asia/Sakhalin' | 'Asia/Samarkand' | 'Asia/Seoul' | 'Asia/Shanghai' | 'Asia/Singapore' | 'Asia/Srednekolymsk' | 'Asia/Taipei' | 'Asia/Tashkent' | 'Asia/Tbilisi' | 'Asia/Tehran' | 'Asia/Tel_Aviv' | 'Asia/Thimbu' | 'Asia/Thimphu' | 'Asia/Tokyo' | 'Asia/Tomsk' | 'Asia/Ujung_Pandang' | 'Asia/Ulaanbaatar' | 'Asia/Ulan_Bator' | 'Asia/Urumqi' | 'Asia/Ust-Nera' | 'Asia/Vientiane' | 'Asia/Vladivostok' | 'Asia/Yakutsk' | 'Asia/Yangon' | 'Asia/Yekaterinburg' | 'Asia/Yerevan' | 'Atlantic/Azores' | 'Atlantic/Bermuda' | 'Atlantic/Canary' | 'Atlantic/Cape_Verde' | 'Atlantic/Faeroe' | 'Atlantic/Faroe' | 'Atlantic/Jan_Mayen' | 'Atlantic/Madeira' | 'Atlantic/Reykjavik' | 'Atlantic/South_Georgia' | 'Atlantic/St_Helena' | 'Atlantic/Stanley' | 'Australia/ACT' | 'Australia/Adelaide' | 'Australia/Brisbane' | 'Australia/Broken_Hill' | 'Australia/Canberra' | 'Australia/Currie' | 'Australia/Darwin' | 'Australia/Eucla' | 'Australia/Hobart' | 'Australia/LHI' | 'Australia/Lindeman' | 'Australia/Lord_Howe' | 'Australia/Melbourne' | 'Australia/NSW' | 'Australia/North' | 'Australia/Perth' | 'Australia/Queensland' | 'Australia/South' | 'Australia/Sydney' | 'Australia/Tasmania' | 'Australia/Victoria' | 'Australia/West' | 'Australia/Yancowinna' | 'Brazil/Acre' | 'Brazil/DeNoronha' | 'Brazil/East' | 'Brazil/West' | 'CET' | 'Canada/Atlantic' | 'Canada/Central' | 'Canada/Eastern' | 'Canada/Mountain' | 'Canada/Newfoundland' | 'Canada/Pacific' | 'Canada/Saskatchewan' | 'Canada/Yukon' | 'Chile/Continental' | 'Chile/EasterIsland' | 'Cuba' | 'EET' | 'EST' | 'Egypt' | 'Eire' | 'Etc/GMT' | 'Etc/GMT+0' | 'Etc/GMT+1' | 'Etc/GMT+10' | 'Etc/GMT+11' | 'Etc/GMT+12' | 'Etc/GMT+2' | 'Etc/GMT+3' | 'Etc/GMT+4' | 'Etc/GMT+5' | 'Etc/GMT+6' | 'Etc/GMT+7' | 'Etc/GMT+8' | 'Etc/GMT+9' | 'Etc/GMT-0' | 'Etc/GMT-1' | 'Etc/GMT-10' | 'Etc/GMT-11' | 'Etc/GMT-12' | 'Etc/GMT-13' | 'Etc/GMT-14' | 'Etc/GMT-2' | 'Etc/GMT-3' | 'Etc/GMT-4' | 'Etc/GMT-5' | 'Etc/GMT-6' | 'Etc/GMT-7' | 'Etc/GMT-8' | 'Etc/GMT-9' | 'Etc/GMT0' | 'Etc/Greenwich' | 'Etc/UCT' | 'Etc/UTC' | 'Etc/Universal' | 'Etc/Zulu' | 'Europe/Amsterdam' | 'Europe/Andorra' | 'Europe/Astrakhan' | 'Europe/Athens' | 'Europe/Belfast' | 'Europe/Belgrade' | 'Europe/Berlin' | 'Europe/Bratislava' | 'Europe/Brussels' | 'Europe/Bucharest' | 'Europe/Budapest' | 'Europe/Busingen' | 'Europe/Chisinau' | 'Europe/Copenhagen' | 'Europe/Dublin' | 'Europe/Gibraltar' | 'Europe/Guernsey' | 'Europe/Helsinki' | 'Europe/Isle_of_Man' | 'Europe/Istanbul' | 'Europe/Jersey' | 'Europe/Kaliningrad' | 'Europe/Kiev' | 'Europe/Kirov' | 'Europe/Kyiv' | 'Europe/Lisbon' | 'Europe/Ljubljana' | 'Europe/London' | 'Europe/Luxembourg' | 'Europe/Madrid' | 'Europe/Malta' | 'Europe/Mariehamn' | 'Europe/Minsk' | 'Europe/Monaco' | 'Europe/Moscow' | 'Europe/Nicosia' | 'Europe/Oslo' | 'Europe/Paris' | 'Europe/Podgorica' | 'Europe/Prague' | 'Europe/Riga' | 'Europe/Rome' | 'Europe/Samara' | 'Europe/San_Marino' | 'Europe/Sarajevo' | 'Europe/Saratov' | 'Europe/Simferopol' | 'Europe/Skopje' | 'Europe/Sofia' | 'Europe/Stockholm' | 'Europe/Tallinn' | 'Europe/Tirane' | 'Europe/Tiraspol' | 'Europe/Ulyanovsk' | 'Europe/Uzhgorod' | 'Europe/Vaduz' | 'Europe/Vatican' | 'Europe/Vienna' | 'Europe/Vilnius' | 'Europe/Volgograd' | 'Europe/Warsaw' | 'Europe/Zagreb' | 'Europe/Zaporozhye' | 'Europe/Zurich' | 'GB' | 'GB-Eire' | 'GMT' | 'Greenwich' | 'HST' | 'Hongkong' | 'Iceland' | 'Indian/Antananarivo' | 'Indian/Chagos' | 'Indian/Christmas' | 'Indian/Cocos' | 'Indian/Comoro' | 'Indian/Kerguelen' | 'Indian/Mahe' | 'Indian/Maldives' | 'Indian/Mauritius' | 'Indian/Mayotte' | 'Indian/Reunion' | 'Iran' | 'Israel' | 'Jamaica' | 'Japan' | 'Kwajalein' | 'Libya' | 'MET' | 'MST' | 'Mexico/BajaNorte' | 'Mexico/BajaSur' | 'Mexico/General' | 'NZ' | 'NZ-CHAT' | 'Navajo' | 'PRC' | 'Pacific/Apia' | 'Pacific/Auckland' | 'Pacific/Bougainville' | 'Pacific/Chatham' | 'Pacific/Chuuk' | 'Pacific/Easter' | 'Pacific/Efate' | 'Pacific/Enderbury' | 'Pacific/Fakaofo' | 'Pacific/Fiji' | 'Pacific/Funafuti' | 'Pacific/Galapagos' | 'Pacific/Gambier' | 'Pacific/Guadalcanal' | 'Pacific/Guam' | 'Pacific/Honolulu' | 'Pacific/Johnston' | 'Pacific/Kanton' | 'Pacific/Kiritimati' | 'Pacific/Kosrae' | 'Pacific/Kwajalein' | 'Pacific/Majuro' | 'Pacific/Marquesas' | 'Pacific/Midway' | 'Pacific/Nauru' | 'Pacific/Niue' | 'Pacific/Norfolk' | 'Pacific/Noumea' | 'Pacific/Pago_Pago' | 'Pacific/Palau' | 'Pacific/Pitcairn' | 'Pacific/Pohnpei' | 'Pacific/Ponape' | 'Pacific/Port_Moresby' | 'Pacific/Rarotonga' | 'Pacific/Saipan' | 'Pacific/Samoa' | 'Pacific/Tahiti' | 'Pacific/Tarawa' | 'Pacific/Tongatapu' | 'Pacific/Truk' | 'Pacific/Wake' | 'Pacific/Wallis' | 'Pacific/Yap' | 'Poland' | 'Portugal' | 'ROC' | 'ROK' | 'Singapore' | 'Turkey' | 'UCT' | 'US/Alaska' | 'US/Aleutian' | 'US/Arizona' | 'US/Central' | 'US/East-Indiana' | 'US/Eastern' | 'US/Hawaii' | 'US/Indiana-Starke' | 'US/Michigan' | 'US/Mountain' | 'US/Pacific' | 'US/Samoa' | 'UTC' | 'Universal' | 'W-SU' | 'WET' | 'Zulu';
 
-export type literal_highlight_color_background =
-    | 'gray_background'
-    | 'brown_background'
-    | 'orange_background'
-    | 'yellow_background'
-    | 'green_background'
-    | 'blue_background'
-    | 'purple_background'
-    | 'pink_background'
-    | 'red_background';
+// Time unit option
+export type option_time_unit =
+    | 'minute'                                                  // Minute
+    | 'hour'                                                    // Hour
+    | 'day'                                                     // Day
+    | 'week'                                                    // Week
+    ;
 
-export type literal_highlight_color = 'default' | literal_highlight_color_foreground | literal_highlight_color_background;
+// Highlight color foreground option
+export type option_highlight_color_foreground =
+    | 'default'                                                 // Default
+    | 'gray'                                                    // Gray
+    | 'brown'                                                   // Brown
+    | 'orange'                                                  // Orange
+    | 'yellow'                                                  // Yellow
+    | 'teal'                                                    // Teal / Green
+    | 'blue'                                                    // Blue
+    | 'purple'                                                  // Purple
+    | 'pink'                                                    // Pink
+    | 'red'                                                     // Red
+    ;
 
-export type literal_time_zone = 'Africa/Abidjan' | 'Africa/Accra' | 'Africa/Addis_Ababa' | 'Africa/Algiers' | 'Africa/Asmara' | 'Africa/Asmera' | 'Africa/Bamako' | 'Africa/Bangui' | 'Africa/Banjul' | 'Africa/Bissau' | 'Africa/Blantyre' | 'Africa/Brazzaville' | 'Africa/Bujumbura' | 'Africa/Cairo' | 'Africa/Casablanca' | 'Africa/Ceuta' | 'Africa/Conakry' | 'Africa/Dakar' | 'Africa/Dar_es_Salaam' | 'Africa/Djibouti' | 'Africa/Douala' | 'Africa/El_Aaiun' | 'Africa/Freetown' | 'Africa/Gaborone' | 'Africa/Harare' | 'Africa/Johannesburg' | 'Africa/Juba' | 'Africa/Kampala' | 'Africa/Khartoum' | 'Africa/Kigali' | 'Africa/Kinshasa' | 'Africa/Lagos' | 'Africa/Libreville' | 'Africa/Lome' | 'Africa/Luanda' | 'Africa/Lubumbashi' | 'Africa/Lusaka' | 'Africa/Malabo' | 'Africa/Maputo' | 'Africa/Maseru' | 'Africa/Mbabane' | 'Africa/Mogadishu' | 'Africa/Monrovia' | 'Africa/Nairobi' | 'Africa/Ndjamena' | 'Africa/Niamey' | 'Africa/Nouakchott' | 'Africa/Ouagadougou' | 'Africa/Porto-Novo' | 'Africa/Sao_Tome' | 'Africa/Timbuktu' | 'Africa/Tripoli' | 'Africa/Tunis' | 'Africa/Windhoek' | 'America/Adak' | 'America/Anchorage' | 'America/Anguilla' | 'America/Antigua' | 'America/Araguaina' | 'America/Argentina/Buenos_Aires' | 'America/Argentina/Catamarca' | 'America/Argentina/ComodRivadavia' | 'America/Argentina/Cordoba' | 'America/Argentina/Jujuy' | 'America/Argentina/La_Rioja' | 'America/Argentina/Mendoza' | 'America/Argentina/Rio_Gallegos' | 'America/Argentina/Salta' | 'America/Argentina/San_Juan' | 'America/Argentina/San_Luis' | 'America/Argentina/Tucuman' | 'America/Argentina/Ushuaia' | 'America/Aruba' | 'America/Asuncion' | 'America/Atikokan' | 'America/Atka' | 'America/Bahia' | 'America/Bahia_Banderas' | 'America/Barbados' | 'America/Belem' | 'America/Belize' | 'America/Blanc-Sablon' | 'America/Boa_Vista' | 'America/Bogota' | 'America/Boise' | 'America/Buenos_Aires' | 'America/Cambridge_Bay' | 'America/Campo_Grande' | 'America/Cancun' | 'America/Caracas' | 'America/Catamarca' | 'America/Cayenne' | 'America/Cayman' | 'America/Chicago' | 'America/Chihuahua' | 'America/Ciudad_Juarez' | 'America/Coral_Harbour' | 'America/Cordoba' | 'America/Costa_Rica' | 'America/Creston' | 'America/Cuiaba' | 'America/Curacao' | 'America/Danmarkshavn' | 'America/Dawson' | 'America/Dawson_Creek' | 'America/Denver' | 'America/Detroit' | 'America/Dominica' | 'America/Edmonton' | 'America/Eirunepe' | 'America/El_Salvador' | 'America/Ensenada' | 'America/Fort_Nelson' | 'America/Fort_Wayne' | 'America/Fortaleza' | 'America/Glace_Bay' | 'America/Godthab' | 'America/Goose_Bay' | 'America/Grand_Turk' | 'America/Grenada' | 'America/Guadeloupe' | 'America/Guatemala' | 'America/Guayaquil' | 'America/Guyana' | 'America/Halifax' | 'America/Havana' | 'America/Hermosillo' | 'America/Indiana/Indianapolis' | 'America/Indiana/Knox' | 'America/Indiana/Marengo' | 'America/Indiana/Petersburg' | 'America/Indiana/Tell_City' | 'America/Indiana/Vevay' | 'America/Indiana/Vincennes' | 'America/Indiana/Winamac' | 'America/Indianapolis' | 'America/Inuvik' | 'America/Iqaluit' | 'America/Jamaica' | 'America/Jujuy' | 'America/Juneau' | 'America/Kentucky/Louisville' | 'America/Kentucky/Monticello' | 'America/Knox_IN' | 'America/Kralendijk' | 'America/La_Paz' | 'America/Lima' | 'America/Los_Angeles' | 'America/Louisville' | 'America/Lower_Princes' | 'America/Maceio' | 'America/Managua' | 'America/Manaus' | 'America/Marigot' | 'America/Martinique' | 'America/Matamoros' | 'America/Mazatlan' | 'America/Mendoza' | 'America/Menominee' | 'America/Merida' | 'America/Metlakatla' | 'America/Mexico_City' | 'America/Miquelon' | 'America/Moncton' | 'America/Monterrey' | 'America/Montevideo' | 'America/Montreal' | 'America/Montserrat' | 'America/Nassau' | 'America/New_York' | 'America/Nipigon' | 'America/Nome' | 'America/Noronha' | 'America/North_Dakota/Beulah' | 'America/North_Dakota/Center' | 'America/North_Dakota/New_Salem' | 'America/Nuuk' | 'America/Ojinaga' | 'America/Panama' | 'America/Pangnirtung' | 'America/Paramaribo' | 'America/Phoenix' | 'America/Port-au-Prince' | 'America/Port_of_Spain' | 'America/Porto_Acre' | 'America/Porto_Velho' | 'America/Puerto_Rico' | 'America/Punta_Arenas' | 'America/Rainy_River' | 'America/Rankin_Inlet' | 'America/Recife' | 'America/Regina' | 'America/Resolute' | 'America/Rio_Branco' | 'America/Rosario' | 'America/Santa_Isabel' | 'America/Santarem' | 'America/Santiago' | 'America/Santo_Domingo' | 'America/Sao_Paulo' | 'America/Scoresbysund' | 'America/Shiprock' | 'America/Sitka' | 'America/St_Barthelemy' | 'America/St_Johns' | 'America/St_Kitts' | 'America/St_Lucia' | 'America/St_Thomas' | 'America/St_Vincent' | 'America/Swift_Current' | 'America/Tegucigalpa' | 'America/Thule' | 'America/Thunder_Bay' | 'America/Tijuana' | 'America/Toronto' | 'America/Tortola' | 'America/Vancouver' | 'America/Virgin' | 'America/Whitehorse' | 'America/Winnipeg' | 'America/Yakutat' | 'America/Yellowknife' | 'Antarctica/Casey' | 'Antarctica/Davis' | 'Antarctica/DumontDUrville' | 'Antarctica/Macquarie' | 'Antarctica/Mawson' | 'Antarctica/McMurdo' | 'Antarctica/Palmer' | 'Antarctica/Rothera' | 'Antarctica/South_Pole' | 'Antarctica/Syowa' | 'Antarctica/Troll' | 'Antarctica/Vostok' | 'Arctic/Longyearbyen' | 'Asia/Aden' | 'Asia/Almaty' | 'Asia/Amman' | 'Asia/Anadyr' | 'Asia/Aqtau' | 'Asia/Aqtobe' | 'Asia/Ashgabat' | 'Asia/Ashkhabad' | 'Asia/Atyrau' | 'Asia/Baghdad' | 'Asia/Bahrain' | 'Asia/Baku' | 'Asia/Bangkok' | 'Asia/Barnaul' | 'Asia/Beirut' | 'Asia/Bishkek' | 'Asia/Brunei' | 'Asia/Calcutta' | 'Asia/Chita' | 'Asia/Choibalsan' | 'Asia/Chongqing' | 'Asia/Chungking' | 'Asia/Colombo' | 'Asia/Dacca' | 'Asia/Damascus' | 'Asia/Dhaka' | 'Asia/Dili' | 'Asia/Dubai' | 'Asia/Dushanbe' | 'Asia/Famagusta' | 'Asia/Gaza' | 'Asia/Harbin' | 'Asia/Hebron' | 'Asia/Ho_Chi_Minh' | 'Asia/Hong_Kong' | 'Asia/Hovd' | 'Asia/Irkutsk' | 'Asia/Istanbul' | 'Asia/Jakarta' | 'Asia/Jayapura' | 'Asia/Jerusalem' | 'Asia/Kabul' | 'Asia/Kamchatka' | 'Asia/Karachi' | 'Asia/Kashgar' | 'Asia/Kathmandu' | 'Asia/Katmandu' | 'Asia/Khandyga' | 'Asia/Kolkata' | 'Asia/Krasnoyarsk' | 'Asia/Kuala_Lumpur' | 'Asia/Kuching' | 'Asia/Kuwait' | 'Asia/Macao' | 'Asia/Macau' | 'Asia/Magadan' | 'Asia/Makassar' | 'Asia/Manila' | 'Asia/Muscat' | 'Asia/Nicosia' | 'Asia/Novokuznetsk' | 'Asia/Novosibirsk' | 'Asia/Omsk' | 'Asia/Oral' | 'Asia/Phnom_Penh' | 'Asia/Pontianak' | 'Asia/Pyongyang' | 'Asia/Qatar' | 'Asia/Qostanay' | 'Asia/Qyzylorda' | 'Asia/Rangoon' | 'Asia/Riyadh' | 'Asia/Saigon' | 'Asia/Sakhalin' | 'Asia/Samarkand' | 'Asia/Seoul' | 'Asia/Shanghai' | 'Asia/Singapore' | 'Asia/Srednekolymsk' | 'Asia/Taipei' | 'Asia/Tashkent' | 'Asia/Tbilisi' | 'Asia/Tehran' | 'Asia/Tel_Aviv' | 'Asia/Thimbu' | 'Asia/Thimphu' | 'Asia/Tokyo' | 'Asia/Tomsk' | 'Asia/Ujung_Pandang' | 'Asia/Ulaanbaatar' | 'Asia/Ulan_Bator' | 'Asia/Urumqi' | 'Asia/Ust-Nera' | 'Asia/Vientiane' | 'Asia/Vladivostok' | 'Asia/Yakutsk' | 'Asia/Yangon' | 'Asia/Yekaterinburg' | 'Asia/Yerevan' | 'Atlantic/Azores' | 'Atlantic/Bermuda' | 'Atlantic/Canary' | 'Atlantic/Cape_Verde' | 'Atlantic/Faeroe' | 'Atlantic/Faroe' | 'Atlantic/Jan_Mayen' | 'Atlantic/Madeira' | 'Atlantic/Reykjavik' | 'Atlantic/South_Georgia' | 'Atlantic/St_Helena' | 'Atlantic/Stanley' | 'Australia/ACT' | 'Australia/Adelaide' | 'Australia/Brisbane' | 'Australia/Broken_Hill' | 'Australia/Canberra' | 'Australia/Currie' | 'Australia/Darwin' | 'Australia/Eucla' | 'Australia/Hobart' | 'Australia/LHI' | 'Australia/Lindeman' | 'Australia/Lord_Howe' | 'Australia/Melbourne' | 'Australia/NSW' | 'Australia/North' | 'Australia/Perth' | 'Australia/Queensland' | 'Australia/South' | 'Australia/Sydney' | 'Australia/Tasmania' | 'Australia/Victoria' | 'Australia/West' | 'Australia/Yancowinna' | 'Brazil/Acre' | 'Brazil/DeNoronha' | 'Brazil/East' | 'Brazil/West' | 'CET' | 'CST6CDT' | 'Canada/Atlantic' | 'Canada/Central' | 'Canada/Eastern' | 'Canada/Mountain' | 'Canada/Newfoundland' | 'Canada/Pacific' | 'Canada/Saskatchewan' | 'Canada/Yukon' | 'Chile/Continental' | 'Chile/EasterIsland' | 'Cuba' | 'EET' | 'EST' | 'EST5EDT' | 'Egypt' | 'Eire' | 'Etc/GMT' | 'Etc/GMT+0' | 'Etc/GMT+1' | 'Etc/GMT+10' | 'Etc/GMT+11' | 'Etc/GMT+12' | 'Etc/GMT+2' | 'Etc/GMT+3' | 'Etc/GMT+4' | 'Etc/GMT+5' | 'Etc/GMT+6' | 'Etc/GMT+7' | 'Etc/GMT+8' | 'Etc/GMT+9' | 'Etc/GMT-0' | 'Etc/GMT-1' | 'Etc/GMT-10' | 'Etc/GMT-11' | 'Etc/GMT-12' | 'Etc/GMT-13' | 'Etc/GMT-14' | 'Etc/GMT-2' | 'Etc/GMT-3' | 'Etc/GMT-4' | 'Etc/GMT-5' | 'Etc/GMT-6' | 'Etc/GMT-7' | 'Etc/GMT-8' | 'Etc/GMT-9' | 'Etc/GMT0' | 'Etc/Greenwich' | 'Etc/UCT' | 'Etc/UTC' | 'Etc/Universal' | 'Etc/Zulu' | 'Europe/Amsterdam' | 'Europe/Andorra' | 'Europe/Astrakhan' | 'Europe/Athens' | 'Europe/Belfast' | 'Europe/Belgrade' | 'Europe/Berlin' | 'Europe/Bratislava' | 'Europe/Brussels' | 'Europe/Bucharest' | 'Europe/Budapest' | 'Europe/Busingen' | 'Europe/Chisinau' | 'Europe/Copenhagen' | 'Europe/Dublin' | 'Europe/Gibraltar' | 'Europe/Guernsey' | 'Europe/Helsinki' | 'Europe/Isle_of_Man' | 'Europe/Istanbul' | 'Europe/Jersey' | 'Europe/Kaliningrad' | 'Europe/Kiev' | 'Europe/Kirov' | 'Europe/Kyiv' | 'Europe/Lisbon' | 'Europe/Ljubljana' | 'Europe/London' | 'Europe/Luxembourg' | 'Europe/Madrid' | 'Europe/Malta' | 'Europe/Mariehamn' | 'Europe/Minsk' | 'Europe/Monaco' | 'Europe/Moscow' | 'Europe/Nicosia' | 'Europe/Oslo' | 'Europe/Paris' | 'Europe/Podgorica' | 'Europe/Prague' | 'Europe/Riga' | 'Europe/Rome' | 'Europe/Samara' | 'Europe/San_Marino' | 'Europe/Sarajevo' | 'Europe/Saratov' | 'Europe/Simferopol' | 'Europe/Skopje' | 'Europe/Sofia' | 'Europe/Stockholm' | 'Europe/Tallinn' | 'Europe/Tirane' | 'Europe/Tiraspol' | 'Europe/Ulyanovsk' | 'Europe/Uzhgorod' | 'Europe/Vaduz' | 'Europe/Vatican' | 'Europe/Vienna' | 'Europe/Vilnius' | 'Europe/Volgograd' | 'Europe/Warsaw' | 'Europe/Zagreb' | 'Europe/Zaporozhye' | 'Europe/Zurich' | 'GB' | 'GB-Eire' | 'GMT' | 'GMT+0' | 'GMT-0' | 'GMT0' | 'Greenwich' | 'HST' | 'Hongkong' | 'Iceland' | 'Indian/Antananarivo' | 'Indian/Chagos' | 'Indian/Christmas' | 'Indian/Cocos' | 'Indian/Comoro' | 'Indian/Kerguelen' | 'Indian/Mahe' | 'Indian/Maldives' | 'Indian/Mauritius' | 'Indian/Mayotte' | 'Indian/Reunion' | 'Iran' | 'Israel' | 'Jamaica' | 'Japan' | 'Kwajalein' | 'Libya' | 'MET' | 'MST' | 'MST7MDT' | 'Mexico/BajaNorte' | 'Mexico/BajaSur' | 'Mexico/General' | 'NZ' | 'NZ-CHAT' | 'Navajo' | 'PRC' | 'PST8PDT' | 'Pacific/Apia' | 'Pacific/Auckland' | 'Pacific/Bougainville' | 'Pacific/Chatham' | 'Pacific/Chuuk' | 'Pacific/Easter' | 'Pacific/Efate' | 'Pacific/Enderbury' | 'Pacific/Fakaofo' | 'Pacific/Fiji' | 'Pacific/Funafuti' | 'Pacific/Galapagos' | 'Pacific/Gambier' | 'Pacific/Guadalcanal' | 'Pacific/Guam' | 'Pacific/Honolulu' | 'Pacific/Johnston' | 'Pacific/Kanton' | 'Pacific/Kiritimati' | 'Pacific/Kosrae' | 'Pacific/Kwajalein' | 'Pacific/Majuro' | 'Pacific/Marquesas' | 'Pacific/Midway' | 'Pacific/Nauru' | 'Pacific/Niue' | 'Pacific/Norfolk' | 'Pacific/Noumea' | 'Pacific/Pago_Pago' | 'Pacific/Palau' | 'Pacific/Pitcairn' | 'Pacific/Pohnpei' | 'Pacific/Ponape' | 'Pacific/Port_Moresby' | 'Pacific/Rarotonga' | 'Pacific/Saipan' | 'Pacific/Samoa' | 'Pacific/Tahiti' | 'Pacific/Tarawa' | 'Pacific/Tongatapu' | 'Pacific/Truk' | 'Pacific/Wake' | 'Pacific/Wallis' | 'Pacific/Yap' | 'Poland' | 'Portugal' | 'ROC' | 'ROK' | 'Singapore' | 'Turkey' | 'UCT' | 'US/Alaska' | 'US/Aleutian' | 'US/Arizona' | 'US/Central' | 'US/East-Indiana' | 'US/Eastern' | 'US/Hawaii' | 'US/Indiana-Starke' | 'US/Michigan' | 'US/Mountain' | 'US/Pacific' | 'US/Pacific-New' | 'US/Samoa' | 'UTC' | 'Universal' | 'W-SU' | 'WET' | 'Zulu';
+// Highlight color background option
+export type option_highlight_color_background =
+    | 'default_background'                                      // Default background
+    | 'gray_background'                                         // Gray background
+    | 'brown_background'                                        // Brown background
+    | 'orange_background'                                       // Orange background
+    | 'yellow_background'                                       // Yellow background
+    | 'teal_background'                                         // Teal / Green background
+    | 'blue_background'                                         // Blue background
+    | 'purple_background'                                       // Purple background
+    | 'pink_background'                                         // Pink background
+    | 'red_background'                                          // Red background
+    ;
 
-export type literal_code_language = 'ABAP' | 'Agda' | 'Arduino' | 'Assembly' | 'Bash' | 'BASIC' | 'BNF' | 'C' | 'C#' | 'C++' | 'Clojure' | 'CoffeeScript' | 'Coq' | 'CSS' | 'Dart' | 'Dhall' | 'Diff' | 'Docker' | 'EBNF' | 'Elixir' | 'Elm' | 'Erlang' | 'F#' | 'Flow' | 'Fortran' | 'Gherkin' | 'GLSL' | 'Go' | 'GraphQL' | 'Groovy' | 'Haskell' | 'HTML' | 'Idris' | 'Java' | 'JavaScript' | 'JSON' | 'Julia' | 'Kotlin' | 'LaTeX' | 'Less' | 'Lisp' | 'LiveScript' | 'LLVM IR' | 'Lua' | 'Makefile' | 'Markdown' | 'Markup' | 'MATLAB' | 'Mathematica' | 'Mermaid' | 'Nix' | 'Notion Formula' | 'Objective-C' | 'OCaml' | 'Pascal' | 'Perl' | 'PHP' | 'Plain Text' | 'PowerShell' | 'Prolog' | 'Protobuf' | 'PureScript' | 'Python' | 'R' | 'Racket' | 'Reason' | 'Ruby' | 'Rust' | 'Sass' | 'Scala' | 'Scheme' | 'Scss' | 'Shell' | 'Solidity' | 'SQL' | 'Swift' | 'TOML' | 'TypeScript' | 'VB.Net' | 'Verilog' | 'VHDL' | 'Visual Basic' | 'WebAssembly' | 'XML' | 'YAML';
+// Highlight color option
+export type option_highlight_color = option_highlight_color_foreground | option_highlight_color_background;
 
-export type literal_permission_role =
-    | 'editor'                                                  // full access
-    | 'read_and_write'                                          // can edit
-    | 'comment_only'                                            // can comment
-    | 'reader';                                                 // can read
+// Bullet list marker option
+export type option_bullet_list_marker =
+    | 'disc'                                                    // •
+    | 'circle'                                                  // ◦
+    | 'square'                                                  // ▪
+    ;
 
-export type date_reminder = {
-    time: literal_time;                                         // always '09:00'
-    unit:
-    | 'day'                                                     // with value: 0 (on the day), 1 (1 day before), 2 (2 days before)
-    | 'week';                                                   // with value: 1 (1 week before)
-    value: number;
-    defaultTimeZone: literal_time_zone;
+// Numbered list type option
+export type option_numbered_list_marker =
+    | 'numbers'                                                 // 1.
+    | 'letters'                                                 // a.
+    | 'roman'                                                   // i.
+    ;
+
+// Code language option
+export type option_code_language = 'ABAP' | 'Agda' | 'Arduino' | 'Assembly' | 'Bash' | 'BASIC' | 'BNF' | 'C' | 'C#' | 'C++' | 'Clojure' | 'CoffeeScript' | 'Coq' | 'CSS' | 'Dart' | 'Dhall' | 'Diff' | 'Docker' | 'EBNF' | 'Elixir' | 'Elm' | 'Erlang' | 'F#' | 'Flow' | 'Fortran' | 'Gherkin' | 'GLSL' | 'Go' | 'GraphQL' | 'Groovy' | 'Haskell' | 'HTML' | 'Idris' | 'Java' | 'JavaScript' | 'JSON' | 'Julia' | 'Kotlin' | 'LaTeX' | 'Less' | 'Lisp' | 'LiveScript' | 'LLVM IR' | 'Lua' | 'Makefile' | 'Markdown' | 'Markup' | 'MATLAB' | 'Mathematica' | 'Mermaid' | 'Nix' | 'Notion Formula' | 'Objective-C' | 'OCaml' | 'Pascal' | 'Perl' | 'PHP' | 'Plain Text' | 'PowerShell' | 'Prolog' | 'Protobuf' | 'PureScript' | 'Python' | 'R' | 'Racket' | 'Reason' | 'Ruby' | 'Rust' | 'Sass' | 'Scala' | 'Scheme' | 'Scss' | 'Shell' | 'Solidity' | 'SQL' | 'Swift' | 'TOML' | 'TypeScript' | 'VB.Net' | 'Verilog' | 'VHDL' | 'Visual Basic' | 'WebAssembly' | 'XML' | 'YAML';
+
+// Code preview mode option
+export type option_code_preview_mode =
+    | 'code'                                                    // Code only
+    | 'preview'                                                 // Preview only
+    | 'split_view'                                              // Code and Preview
+    ;
+
+// Quote size option
+export type option_quote_size =
+    | 'large'                                                   // Large visual size
+    ;
+
+// Image alignment option
+export type option_image_alignment =
+    | 'left'                                                    // Left
+    | 'center'                                                  // Center
+    | 'right'                                                   // Right
+    ;
+
+// Image mask option
+export type option_image_mask =
+    | 'Circle'                                                  // Circle mask
+    | 'None'                                                    // No mask (rectangle)
+    ;
+
+// Measurement unit option
+export type option_measurement_unit =
+    | '%'                                                       // Percentage
+    ;
+
+// Page font option
+export type option_page_font =
+    | 'default'                                                 // Default
+    | 'serif'                                                   // Serif
+    | 'mono'                                                    // Monospace
+    ;
+
+// Section comments option
+export type option_section_comments =
+    | 'section_show'                                            // Expanded
+    | 'section_hide'                                            // Off
+    ;
+
+// Section backlinks option
+export type option_section_backlinks =
+    | 'section_show'                                            // Expanded
+    | 'section_hide'                                            // Off
+    | 'section_collapsed'                                       // Collapsed (and show in popover)
+    ;
+
+// Section margin comments option
+export type option_section_margin_comments =
+    | 'inline'                                                  // Inline (default)
+    | 'minimal'                                                 // Minimal
+    ;
+
+// Float table of contents state option
+export type option_float_toc_state =
+    | 'minimal'                                                 // Minimal
+    | 'off'                                                     // Off
+    ;
+
+// Permission role option
+export type option_permission_role =
+    | 'editor'                                                  // Full access
+    | 'read_and_write'                                          // Can edit
+    | 'comment_only'                                            // Can comment
+    | 'reader'                                                  // Can read
+    ;
+
+// Record type collection
+export type collection_record_type =
+    | 'block'                                                   // Block
+    | 'collection_view'                                         // Collection view
+    | 'collection'                                              // Collection
+    | 'discussion'                                              // Discussion
+    | 'comment'                                                 // Comment
+    | 'team'                                                    // Team
+    | 'space'                                                   // Space
+    | 'notion_user'                                             // Notion user
+    | 'bot'                                                     // Bot
+    | 'user_root'                                               // User root
+    | 'user_settings'                                           // User settings
+    | 'space_view'                                              // Space view
+    ;
+
+// Block type collection
+export type collection_block_type =
+    | 'text'                                                    // Text
+    | 'header'                                                  // Heading 1
+    | 'sub_header'                                              // Heading 2
+    | 'sub_sub_header'                                          // Heading 3
+    | 'to_do'                                                   // To-do
+    | 'bulleted_list'                                           // Bulleted List
+    | 'numbered_list'                                           // Numbered List
+    | 'toggle'                                                  // Toggle list
+    | 'code'                                                    // Code
+    | 'quote'                                                   // Quote
+    | 'callout'                                                 // Callout
+    | 'equation'                                                // Block equation
+    | 'transclusion_container'                                  // Synced block (source)
+    | 'transclusion_reference'                                  // Synced block (reference)
+    | 'column_list'                                             // Columns (list)
+    | 'column'                                                  // Columns (column)
+    | 'table'                                                   // Table
+    | 'table_row'                                               // Table (row)
+    | 'divider'                                                 // Divider
+    | 'alias'                                                   // Link to page (block)
+    | 'image'                                                   // Image
+    | 'page'                                                    // Page
+    | 'collection_view_page'                                    // Collection view page
+    | 'collection_view'                                         // Collection view
+    | 'bookmark'                                                // Bookmark
+    | 'file'                                                    // File
+    | 'embed'                                                   // Embed
+    ;
+
+// Date type collection
+export type collection_date_type =
+    | 'date'                                                    // Date
+    | 'datetime'                                                // Datetime
+    | 'daterange'                                               // Date range
+    | 'datetimerange'                                           // Datetime range
+    ;
+
+// Annotation tag collection
+export type collection_annotation_tag =
+    | 'b'                                                       // Bold
+    | 'i'                                                       // Italic
+    | '_'                                                       // Underline
+    | 's'                                                       // Strikethrough
+    | 'c'                                                       // Code
+    | 'e'                                                       // Equation
+    | 'h'                                                       // Highlight
+    | 'a'                                                       // Link
+    | 'u'                                                       // User mention
+    | 'd'                                                       // Date mention
+    | 'tv'                                                      // Template variable mention
+    | 'p'                                                       // Page mention
+    | 'm'                                                       // Margin comment
+    | 'sa'                                                      // Suggested annotation
+    | 'sua'                                                     // Suggested un-annotation
+    | 'si'                                                      // Suggested insertion
+    | 'sr'                                                      // Suggested removal
+    ;
+
+// Template variable type collection
+export type collection_template_variable_type =
+    | 'now'                                                     // Time when duplicated
+    | 'today'                                                   // Date when duplicated
+    | 'me'                                                      // User when duplicated
+    ;
+
+// Reminder (0 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, 1 hour, 2 hours, 1 day, 2 days, 1 week before)
+export type reminder = {
+    time: literal_time;                                         // Time of reminder which over days, always '09:00'
+    unit: option_time_unit;                                     // Time unit
+    value: number;                                              // Time value
+    defaultTimeZone: option_time_zone;                          // Time zone of `time`
 };
 
-export type datetime_reminder = {
-    unit:
-    | 'minute'                                                  // with value: 0, 5, 10, 15, 30
-    | 'hour';                                                   // with value: 1, 2
-    value: number;
-} | date_reminder;                                              // day with value: 1 (1 day before), 2 (2 days before)
-
-export type date_point = {
+// Date: date
+export type date_date = {
     type: 'date';
-    reminder?: date_reminder;
-    start_date: literal_date;
-    date_format: literal_date_format;
+    reminder?: reminder;                                        // Reminder (1 day, 2 days, 1 week before)
+    start_date: literal_date;                                   // Date
+    date_format: option_date_format;                            // Date format
 };
 
-export type datetime_point = {
+// Date: datetime
+export type date_datetime = {
     type: 'datetime';
-    reminder?: datetime_reminder;
-    time_zone: literal_time_zone;
-    start_date: literal_date;
-    start_time: literal_time;
-    date_format: literal_date_format;
-    time_format: literal_time_format;
+    reminder?: reminder;                                        // Reminder (0 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, 1 hour, 2 hours, 1 day, 2 days before)
+    time_zone: option_time_zone;                                // Time zone
+    start_date: literal_date;                                   // Date
+    start_time: literal_time;                                   // Time
+    date_format: option_date_format;                            // Date format
+    time_format: option_time_format;                            // Time format
 };
 
-export type date_range = {
+// Date: date range
+export type date_daterange = {
     type: 'daterange';
-    reminder?: date_reminder;
-    start_date: literal_date;
-    end_date: literal_date;
-    date_format: literal_date_format;
+    reminder?: reminder;                                        // Reminder (1 day, 2 days, 1 week before)
+    start_date: literal_date;                                   // Start date
+    end_date: literal_date;                                     // End date
+    date_format: option_date_format;                            // Date format
 };
 
-export type datetime_range = {
+// Date: datetime range
+export type date_datetimerange = {
     type: 'datetimerange';
-    reminder?: datetime_reminder;
-    time_zone: literal_time_zone;
-    start_date: literal_date;
-    start_time: literal_time;
-    end_date: literal_date;
-    end_time: literal_time;
-    date_format: literal_date_format;
-    time_format: literal_time_format;
+    reminder?: reminder;                                        // Reminder (0 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, 1 hour, 2 hours, 1 day, 2 days before)
+    time_zone: option_time_zone;                                // Time zone
+    start_date: literal_date;                                   // Start date
+    start_time: literal_time;                                   // Start time
+    end_date: literal_date;                                     // End date
+    end_time: literal_time;                                     // End time
+    date_format: option_date_format;                            // Date format
+    time_format: option_time_format;                            // Time format
 };
 
-export type date = date_point | datetime_point | date_range | datetime_range;
+// Date
+export type date = date_date | date_datetime | date_daterange | date_datetimerange;
 
-// bold
+// Annotation: bold
 export type annotation_bold = [
     'b',
 ];
 
-// italic
+// Annotation: italic
 export type annotation_italic = [
     'i',
 ];
 
-// underline
+// Annotation: underline
 export type annotation_underline = [
     '_',
 ];
 
-// strikethrough
+// Annotation: strikethrough
 export type annotation_strikethrough = [
     's',
 ];
 
-// code
+// Annotation: code
 export type annotation_code = [
     'c',
 ];
 
-// equation (replace text with '⁍')
+// Annotation: equation (replace text with '⁍')
 export type annotation_equation = [
     'e',
-    string,                                                     // expression
+    string,                                                     // Expression
 ];
 
-// highlight
+// Annotation: highlight
 export type annotation_highlight = [
     'h',
-    literal_highlight_color,                                    // color
+    option_highlight_color,                                     // Color
 ];
 
-// link
+// Annotation: link
 export type annotation_link = [
     'a',
-    literal_url,                                                // url
+    literal_url,                                                // URL
 ];
 
-// mention user (replace text with '‣')
+// Annotation: user mention (replace text with '‣')
 export type annotation_user = [
     'u',
-    literal_uuid,                                               // refer: notion_user
+    literal_uuid,                                               // Refer: notion_user
 ];
 
-// mention date (replace text with '‣')
+// Annotation: date mention (replace text with '‣')
 export type annotation_date = [
     'd',
-    date,                                                       // refer: date
+    date,                                                       // Date
 ];
 
-// mention template value (replace text with '‣')
-export type annotation_template = [
+// Annotation: template variable mention (replace text with '‣')
+export type annotation_template_variable = [
     'tv',
     {
-        type:
-        | 'now'                                                 // Time when duplicated
-        | 'today'                                               // Date when duplicated
-        | 'me';                                                 // User when duplicated
+        type: collection_template_variable_type,                // Template variable type
     }
 ];
 
-// mention page (replace text with '‣')
+// Annotation: page mention (replace text with '‣')
 export type annotation_page = [
     'p',
-    literal_uuid,                                               // refer: block
-    literal_uuid,                                               // refer: space
+    literal_uuid,                                               // Refer: block (page is a block)
+    literal_uuid,                                               // Refer: space
 ];
 
-// comment
-export type annotation_comment = [
+// Annotation: margin comment
+export type annotation_margin_comment = [
     'm',
-    literal_uuid,                                               // refer: discussion
+    literal_uuid,                                               // Refer: discussion (comment is a child of discussion)
 ];
 
-// suggested annotation
-export type annotation_suggest_annotation = [
+// Annotation: suggested annotation
+export type annotation_suggested_annotation = [
     'sa',
-    literal_uuid,                                               // refer: discussion
-    annotation,
+    literal_uuid,                                               // Refer: discussion (suggestion is a child of discussion)
+    annotation,                                                 // Annotation suggested to add
 ];
 
-// suggested un-annotation
-export type annotation_suggest_unannotation = [
+// Annotation: suggested un-annotation
+export type annotation_suggested_unannotation = [
     'sua',
-    literal_uuid,                                               // refer: discussion
-    annotation,
+    literal_uuid,                                               // Refer: discussion (suggestion is a child of discussion)
+    annotation,                                                 // Annotation suggested to remove
 ];
 
-// suggested insertion
-export type annotation_suggest_insertion = [
+// Annotation: suggested insertion
+export type annotation_suggested_insertion = [
     'si',
-    literal_uuid,                                               // refer: discussion
+    literal_uuid,                                               // Refer: discussion (suggestion is a child of discussion)
 ];
 
-// suggested removal
-export type annotation_suggest_removal = [
+// Annotation: suggested removal
+export type annotation_suggested_removal = [
     'sr',
-    literal_uuid,                                               // refer: discussion
+    literal_uuid,                                               // Refer: discussion (suggestion is a child of discussion)
 ];
 
+// Annotation
 export type annotation =
     | annotation_bold
     | annotation_italic
@@ -229,39 +429,455 @@ export type annotation =
     | annotation_link
     | annotation_user
     | annotation_date
-    | annotation_template
+    | annotation_template_variable
     | annotation_page
-    | annotation_comment
-    | annotation_suggest_annotation
-    | annotation_suggest_unannotation
-    | annotation_suggest_insertion
-    | annotation_suggest_removal;
+    | annotation_margin_comment
+    | annotation_suggested_annotation
+    | annotation_suggested_unannotation
+    | annotation_suggested_insertion
+    | annotation_suggested_removal
+    ;
 
-export type rich_text_item = [
-    string,                                                     // text
-    Array<annotation>?,                                         // annotations
-];
+// Rich text
+export type rich_text = Array<[
+    string,                                                     // Plain text
+    Array<annotation>?,                                         // Annotations
+]>;
 
-export type rich_text = Array<rich_text_item>;
-
-export type record_base = {
-    id: literal_uuid;
-    version: number;                                            // after modification, version++
+// Reference pointer, pointer to a record with record type
+export type reference_pointer = {
+    id: literal_uuid;                                           // Refer: record
+    table: collection_record_type;                              // Record type
+    spaceId: literal_uuid;                                      // Refer: space, the space where the record is located
 };
 
-export type record_editable = record_base & {
-    created_time: number;                                       // timestamp
-    last_edited_time: number;                                   // timestamp
-    created_by_table:
-    | 'notion_user'
-    | 'bot';
-    created_by_id: literal_uuid;
-    last_edited_by_table:
-    | 'notion_user'
-    | 'bot';
-    last_edited_by_id: literal_uuid;
+// Image edit metadata (for local image cropping)
+export type image_edit_metadata = {
+    crop: {                                                     // Crop data:
+        x: number;                                              // X coordinate
+        y: number;                                              // Y coordinate
+        unit: option_measurement_unit;                          // Measurement unit
+        width: number;                                          // Width
+        height: number;                                         // Height
+    };
+    mask: option_image_mask;                                    // Mask
 };
 
+
+// Visibilities of page sections
+export type page_section_visibility = {
+    comments: option_section_comments;                          // Comments
+    backlinks: option_section_backlinks;                        // Backlinks
+    margin_comments: option_section_margin_comments;            // Margin comments
+}
+
+// Record core
+export type record_core = {
+    id: literal_uuid;                                           // UUID
+    version: literal_version;                                   // Version
+};
+
+// Record: block
+export type record_block = record_core & {
+    id: literal_uuid;                                           // UUID
+    version: literal_version;                                   // Version
+    format?: {                                                  // Format of block:
+        copied_from_pointer?: reference_pointer;                // Refer: block, the block that this block is duplicated from
+    };
+    created_time: literal_timestamp;                            // Created time
+    last_edited_time: literal_timestamp;                        // Last edited time
+    parent_id: literal_uuid;                                    // Refer: block, the parent block
+    parent_table: collection_block_type;                        // Parent block type
+    alive: boolean;                                             // Alive or in trash
+    copied_from?: literal_uuid;                                 // Refer: block, the same as `format.copied_from_pointer`
+    created_by_table: collection_record_type;                   // Created by record type
+    created_by_id: literal_uuid;                                // Refer: record, created by record
+    last_edited_by_table: collection_record_type;               // Last edited by record type
+    last_edited_by_id: literal_uuid;                            // Refer: record, last edited by record
+    space_id: literal_uuid;                                     // Refer: space, the space where the block is located
+}
+
+// Block: text
+export type block_text = record_block & {
+    type: 'text';
+    properties?: {                                              // Properties:
+        title?: rich_text;                                      // Text content
+    };
+    content?: Array<literal_uuid>;                              // Refer: block, children blocks
+    format?: {                                                  // Format of block:
+        block_color?: option_highlight_color;                   // Block color
+    };
+};
+
+// Block: heading 1
+export type block_header = record_block & {
+    type: 'header';
+    properties?: {                                              // Properties:
+        title?: rich_text;                                      // Heading content
+    };
+    content?: Array<literal_uuid>;                              // Refer: block, children blocks, only if toggleable
+    format: {                                                   // Format of block:
+        toggleable?: boolean;                                   // Toggleable (can have children blocks)
+        block_color?: option_highlight_color;                   // Block color
+    };
+};
+
+// Block: heading 2
+export type block_sub_header = record_block & {
+    type: 'sub_header';
+    properties?: {                                              // Properties:
+        title?: rich_text;                                      // Heading content
+    };
+    content?: Array<literal_uuid>;                              // Refer: block, children blocks, only if toggleable
+    format: {                                                   // Format of block:
+        toggleable?: boolean;                                   // Toggleable (can have children blocks)
+        block_color?: option_highlight_color;                   // Block color
+    };
+};
+
+// Block: heading 3
+export type block_sub_sub_header = record_block & {
+    type: 'sub_sub_header';
+    properties?: {                                              // Properties:
+        title?: rich_text;                                      // Heading content
+    };
+    content?: Array<literal_uuid>;                              // Refer: block, children blocks, only if toggleable
+    format: {                                                   // Format of block:
+        toggleable?: boolean;                                   // Toggleable (can have children blocks)
+        block_color?: option_highlight_color;                   // Block color
+    };
+};
+
+// Block: to-do
+export type block_to_do = record_block & {
+    type: 'to_do';
+    properties?: {                                              // Properties:
+        title?: rich_text;                                      // To-do description
+        checked?: [[option_boolean]];                           // Checked or not
+    };
+    content?: Array<literal_uuid>;                              // Refer: block, children blocks
+    format?: {                                                  // Format of block:
+        block_color?: option_highlight_color;                   // Block color
+    };
+};
+
+// Block: bulleted list
+export type block_bulleted_list = record_block & {
+    type: 'bulleted_list';
+    properties?: {                                              // Properties:
+        title?: rich_text;                                      // List item description
+    };
+    content?: Array<literal_uuid>;                              // Refer: block, children blocks
+    format?: {                                                  // Format of block:
+        bullet_list_format?: option_bullet_list_marker;         // Bullet list marker, default is 'disc', 'circle', 'square' cyclically
+        block_color?: option_highlight_color;                   // Block color
+    };
+};
+
+// Block: numbered list
+export type block_numbered_list = record_block & {
+    type: 'numbered_list';
+    properties?: {                                              // Properties:
+        title?: rich_text;                                      // List item description
+    };
+    content?: Array<literal_uuid>;                              // Refer: block, children blocks
+    format?: {                                                  // Format of block:
+        list_format?: option_numbered_list_marker;              // Numbered list type, default is 'numbers', 'letters', 'roman' cyclically
+        block_color?: option_highlight_color;                   // Block color
+    };
+};
+
+// Block: toggle
+export type block_toggle = record_block & {
+    type: 'toggle';
+    properties?: {                                              // Properties:
+        title?: rich_text;                                      // Toggle title
+    };
+    content?: Array<literal_uuid>;                              // Refer: block, children blocks
+    format: {                                                   // Format of block:
+        block_color?: option_highlight_color;                   // Block color
+    };
+};
+
+// Block: code
+export type block_code = record_block & {
+    type: 'code';
+    properties: {                                               // Properties:
+        title?: rich_text;                                      // Code content
+        language: [[option_code_language]];                     // Code programming language
+        caption?: rich_text;                                    // Caption of code
+    };
+    format?: {                                                  // Format of block:
+        code_wrap: boolean;                                     // Code wrap or not
+        code_preview_format?: option_code_preview_mode;         // Code preview mode (just for mermaid code)
+    };
+};
+
+// Block: quote
+export type block_quote = record_block & {
+    type: 'quote';
+    properties?: {                                              // Properties:
+        title?: rich_text;                                      // Quote content
+    };
+    content?: Array<literal_uuid>;                              // Refer: block, children blocks
+    format?: {                                                  // Format of block:
+        quote_size?: option_quote_size;                         // Quote size
+        block_color?: option_highlight_color;                   // Block color
+    };
+};
+
+// Block: callout
+export type block_callout = record_block & {
+    type: 'callout';
+    properties?: {                                              // Properties:
+        title?: rich_text;                                      // Callout title, if callout version is 1
+    };
+    content?: Array<literal_uuid>;                              // Refer: block, children blocks
+    format?: {                                                  // Format of block:
+        page_icon?: literal_icon;                               // Callout icon
+        block_color?: option_highlight_color;                   // Block color
+        callout_version?: number;                               // Callout version, 2 means new callout, which is without title property
+    };
+};
+
+// Block: equation
+export type block_equation = record_block & {
+    type: 'equation';
+    properties?: {                                              // Properties:
+        title?: rich_text;                                      // Equation description
+    };
+    format?: {                                                  // Format of block:
+        block_color?: option_highlight_color;                   // Block color
+    };
+};
+
+// Block: synced block (source)
+export type block_transclusion_container = record_block & {
+    type: 'transclusion_container';
+    content?: Array<literal_uuid>;                              // Refer: block, children blocks
+};
+
+// Block: synced block (reference)
+export type block_transclusion_reference = record_block & {
+    type: 'transclusion_reference';
+    format: {                                                   // Format of block:
+        transclusion_reference_pointer: reference_pointer;      // Refer: block, the block to be referenced
+    };
+};
+
+// Block: columns (list)
+export type block_column_list = record_block & {
+    type: 'column_list';
+    content: Array<literal_uuid>;                               // Refer: block, children blocks (block_column)
+};
+
+// Block: columns (column)
+export type block_column = record_block & {
+    type: 'column';
+    content?: Array<literal_uuid>;                               // Refer: block, children blocks
+    format?: {                                                   // Format of block:
+        column_ratio: number;                                    // Column ratio, default is 1
+    };
+};
+
+// Block: table
+export type block_table = record_block & {
+    type: 'table';
+    content: Array<literal_uuid>;                               // Refer: block, children blocks (table_row)
+    format: {                                                   // Format of block:
+        table_block_row_header?: boolean;                       // With row header or not
+        table_block_column_order: Array<literal_property_id>;   // Column order
+        table_block_column_format?: Record<literal_property_id, {
+            color?: option_highlight_color;                     // Column color
+            width?: number;                                     // Column width (px)
+        }>;
+        table_block_column_header?: boolean;                    // With column header or not
+    };
+};
+
+// Block: table (row)
+export type block_table_row = record_block & {
+    type: 'table_row';
+    properties: {                                               // Cell of columns:
+        [key: literal_property_id]: rich_text;                  // Cell content
+    };
+    format?: {                                                  // Format of block:
+        block_color?: option_highlight_color;                   // Block color
+    };
+};
+
+// Block: divider
+export type block_divider = record_block & {
+    type: 'divider';
+};
+
+// Block: link to page (block)
+export type block_alias = record_block & {
+    type: 'alias';
+    format: {                                                   // Format of block:
+        alias_pointer: reference_pointer;                       // Refer: block, the block to be linked
+    };
+};
+
+// Block: image
+export type block_image = record_block & {
+    type: 'image';
+    properties?: {                                              // Properties:
+        size?: [[literal_file_size]];                           // Image size
+        title?: [[string]];                                     // Image file name
+        source?: [[literal_url]];                               // Image source URL
+        caption?: rich_text;                                    // Image caption
+        alt_text: [[string]];                                   // Image alt text, for screen reader
+    };
+    format?: {                                                  // Format of block:
+        block_width: number;                                    // Visual image width (px)
+        block_height: number;                                   // Visual image height (px)
+        display_source: literal_url;                            // Image source URL
+        block_alignment?: option_image_alignment;               // Image alignment, default is 'center'
+        image_hyperlink?: literal_url;                          // Image hyperlink
+        original_source?: literal_url;                          // Original image source URL, if image is edited
+        block_full_width?: boolean;                             // Full width mode, width is always full and height is manually set
+        block_page_width?: boolean;                             // Page width mode, width is always page width and height is automatically set
+        block_aspect_ratio?: number;                            // Aspect ratio, height / width
+        image_edit_metadata?: image_edit_metadata;              // Image edit metadata (for local image cropping)
+        block_preserve_scale: boolean;                          // Preserve image scale or not, always true
+    };
+};
+
+// Block: page
+export type block_page = record_block & {
+    type: 'page';
+    properties?: {                                              // Properties:
+        title?: rich_text;                                      // Page title
+    };
+    content?: Array<literal_uuid>;                              // Refer: block, page content blocks
+    format?: {                                                  // Format of block:
+        page_font?: option_page_font;                           // Page font, default is 'default'
+        page_icon?: literal_icon;                               // Page icon
+        page_cover?: literal_url;                               // Page cover
+        block_locked?: boolean;                                 // Page locked or not
+        block_locked_by?: literal_uuid;                         // Refer: notion_user, the user who locked the page
+        page_full_width?: boolean;                              // Full width mode, page width is automatically set to full width
+        page_small_text?: boolean;                              // Small text mode, page text is smaller
+        page_cover_position?: literal_normalization_value;      // Page cover position, 0 is bottom, 1 is top, default is 0.5
+        page_section_visibility?: page_section_visibility;       // Visibilities of page sections
+        page_floating_table_of_contents?: {
+            state: option_float_toc_state;                      // Float table of contents state
+        }
+    };
+};
+
+// Block: collection view page
+export type block_collection_view_page = record_block & {
+    type: 'collection_view_page';
+    view_ids: Array<literal_uuid>;                              // Refer: collection_view, collection view IDs
+    collection_id: literal_uuid;                                // Refer: collection, the original database
+    format?: {                                                  // Format of block:
+        block_locked?: boolean;                                 // Page locked or not
+        block_locked_by?: literal_uuid;                         // Refer: notion_user, the user who locked the page
+        collection_pointer: reference_pointer;                  // Refer: collection, the same as `collection_id`
+    };
+};
+
+// Block: collection view
+export type block_collection_view = record_block & {
+    type: 'collection_view';
+    properties?: {                                              // Properties:
+        title?: rich_text;                                      // Link view page title, only for linked database
+    };
+    view_ids: Array<literal_uuid>;                              // Refer: collection_view, collection view IDs
+    collection_id?: literal_uuid;                               // Refer: collection, only for original database
+    format?: {                                                  // Format of block:
+        page_icon?: literal_icon;                               // Link view page icon, only for linked database
+        page_cover?: literal_url;                               // Link view page cover, only for linked database
+        block_locked?: boolean;                                 // Page locked or not
+        block_locked_by?: literal_uuid;                         // Refer: notion_user, the user who locked the page
+        page_cover_position?: literal_normalization_value;      // Link view page cover position, only for linked database
+        collection_pointer: reference_pointer;                  // Refer: collection, only for original database
+    };
+};
+
+// Block: bookmark
+export type block_bookmark = record_block & {
+    type: 'bookmark';
+    properties?: {                                              // Properties:
+        link?: [[literal_url]];                                 // Web page URL
+        title?: [[string]];                                     // Web page title
+        caption?: rich_text;                                    // Bookmark caption
+        description?: [[string]];                               // Web page description
+    };
+    format?: {                                                  // Format of block:
+        block_color?: option_highlight_color;                   // Block color
+        bookmark_icon?: literal_icon;                           // Web page icon
+    };
+};
+
+// Block: file
+export type block_file = record_block & {
+    type: 'file';
+    properties?: {                                              // Properties:
+        size?: [[literal_file_size]];                           // File size
+        title?: [[string]];                                     // File name
+        source?: [[literal_url]];                               // File source URL
+        caption?: rich_text;                                    // File caption
+    };
+    format?: {                                                  // Format of block:
+        block_color?: option_highlight_color;                   // Block color
+    };
+};
+
+// Block: embed
+export type block_embed = record_block & {
+    type: 'embed';
+    properties?: {                                              // Properties:
+        size?: [[literal_file_size]];                           // Embed file size
+        title?: [[string]];                                     // Embed file name
+        source?: [[literal_url]];                               // Embed source URL
+        caption?: rich_text;                                    // Embed caption
+    };
+    format?: {                                                  // Format of block:
+        block_width: number;                                    // Visual embed width (px)
+        block_height: number;                                   // Visual embed height (px)
+        block_alignment?: option_image_alignment;               // Embed alignment, default is 'center'
+        block_full_width?: boolean;                             // Full width mode, width is always full and height is manually set
+        block_page_width?: boolean;                             // Page width mode, width is always page width and height is automatically set
+        block_preserve_scale: boolean;                          // Preserve embed scale or not, always true
+    };
+};
+
+// Block
+export type block =
+    | block_text                                                // Text
+    | block_header                                              // Heading 1
+    | block_sub_header                                          // Heading 2
+    | block_sub_sub_header                                      // Heading 3
+    | block_to_do                                               // To-do
+    | block_bulleted_list                                       // Bulleted list
+    | block_numbered_list                                       // Numbered list
+    | block_toggle                                              // Toggle
+    | block_code                                                // Code
+    | block_quote                                               // Quote
+    | block_callout                                             // Callout
+    | block_equation                                            // Equation
+    | block_transclusion_container                              // Synced block (source)
+    | block_transclusion_reference                              // Synced block (reference)
+    | block_column_list                                         // Columns (list)
+    | block_column                                              // Columns (column)
+    | block_table                                               // Table
+    | block_table_row                                           // Table (row)
+    | block_divider                                             // Divider
+    | block_alias                                               // Link to page (block)
+    | block_image                                               // Image
+    | block_page                                                // Page
+    | block_collection_view_page                                // Collection view page
+    | block_collection_view                                     // Collection view
+    | block_bookmark                                            // Bookmark
+    | block_file                                                // File
+    | block_embed                                               // Embed
+    ;
+
+
+/*
 export type notion_user = record_base & {
     email: string;                                              // email
     given_name: string;
@@ -341,7 +957,7 @@ export type team = record_editable & {
     settings: Record<string, unknown>;                          // TODO
     is_default: boolean;
     permissions: Array<{
-        role: literal_permission_role;
+        role: option_permission_role;
         type:
         | 'explicit_team_owner_permission'                      // teamspace owners permission, with team_id
         | 'explicit_team_permission'                            // teamspace members permission, with team_id
@@ -363,7 +979,7 @@ export type team = record_editable & {
 export type space = record_editable & {
     name: string;
     permissions: Array<{
-        role: literal_permission_role;
+        role: option_permission_role;
         type:
         | 'user_permission';                                     // user permission, with user_id
         user_id: literal_uuid;                                  // refer: notion_user, member's uuid
@@ -399,249 +1015,4 @@ export type space = record_editable & {
     short_id_str: string;
 };
 
-export type block_base = record_editable & {
-    properties?: {
-        title: rich_text;
-    };
-    content?: Array<literal_uuid>;                              // refer: block
-    format?: {
-        block_color?: literal_highlight_color;
-        copied_from_pointer?: {                                 // *if the block is duplicated from template
-            id: literal_uuid;                                   // refer: block
-            table: 'block';
-            spaceId: literal_uuid;                              // refer: space
-        };
-        social_media_image_preview_url?: literal_url;           // the url of the image to use for social media previews
-    };
-    parent_id: literal_uuid;                                    // refer: parent_table
-    parent_table: 'block';
-    alive: boolean;
-    copied_from?: literal_uuid;                                 // refer: block // *if the block is duplicated from template
-    space_id: literal_uuid;                                     // refer: space
-};
-
-// block: Text
-export type block_text = block_base & {
-    type: 'text';
-};
-
-// block: Heading 1 (Toggle)
-export type block_header = block_base & ({
-    type: 'header';
-    content: never;
-} | {
-    type: 'header';
-    format: {
-        toggleable: true;
-    };
-});
-
-// block: Heading 2 (Toggle)
-export type block_sub_header = block_base & ({
-    type: 'sub_header';
-    content: never;
-} | {
-    type: 'sub_header';
-    format: {
-        toggleable: true;
-    };
-});
-
-// block: Heading 3 (Toggle)
-export type block_sub_sub_header = block_base & ({
-    type: 'sub_sub_header';
-    content: never;
-} | {
-    type: 'sub_sub_header';
-    format: {
-        toggleable: true;
-    };
-});
-
-// block: To-do
-export type block_to_do = block_base & {
-    type: 'to_do';
-    properties?: {
-        checked?: [
-            | 'Yes'
-            | 'No',
-        ];
-    };
-};
-
-// block: Bulleted list
-export type block_bulleted_list = block_base & {
-    type: 'bulleted_list';
-    format?: {
-        bullet_list_format?:
-        | 'disc'                                                // •
-        | 'circle'                                              // ◦
-        | 'square';                                             // ▪
-    };
-};
-
-// block: Numbered list
-export type block_numbered_list = block_base & {
-    type: 'numbered_list';
-    format?: {
-        list_format?:
-        | 'numbers'                                             // 1.
-        | 'letters'                                             // a.
-        | 'roman';                                              // i.
-    };
-};
-
-// block: Toggle list
-export type block_toggle = block_base & {
-    type: 'toggle';
-};
-
-// block: Code
-export type block_code = block_base & {
-    type: 'code';
-    properties?: {
-        caption?: rich_text;
-        language: [[literal_code_language]];
-    };
-    content: never;
-    format?: {
-        code_wrap: boolean;
-        code_preview_format?:                                   // option for mermaid code
-        | 'code'
-        | 'preview'
-        | 'split_view';
-    };
-};
-
-// block: Quote
-export type block_quote = block_base & {
-    type: 'quote';
-    format?: {
-        quote_size?: 'large';                                   // the visual size of the quote will be larger
-    };
-};
-
-// block: Callout
-export type block_callout = block_base & {
-    type: 'callout';
-    format: {
-        page_icon: literal_icon;                                // icon url (amazon s3)
-    };
-};
-
-// block: Block equation
-export type block_equation = block_base & {
-    type: 'equation';
-    content: never;
-};
-
-// block: Synced block
-export type block_transclusion_container = block_base & {
-    type: 'transclusion_container';
-    properties: never;
-};
-export type block_transclusion_reference = block_base & {
-    type: 'transclusion_reference';
-    properties: never;
-    content: never;
-    format: {
-        transclusion_reference_pointer: {
-            id: literal_uuid;                                   // refer: block
-            table: 'block';
-            spaceId: literal_uuid;                              // refer: space
-        };
-    };
-};
-
-// block: Columns
-export type block_column_list = block_base & {
-    type: 'column_list';
-    properties: never;
-    content: Array<literal_uuid>;                               // refer: block (block_column)
-};
-export type block_column = block_base & {
-    type: 'column';
-    properties: never;
-    content: Array<literal_uuid>;                               // refer: block
-}
-
-// block: Table
-export type block_table = block_base & {
-    type: 'table';
-    properties: never;
-    content: Array<literal_uuid>;                               // refer: block (table_row)
-    format: {
-        table_block_row_header?: boolean;
-        table_block_column_header?: boolean;
-        table_block_column_order: Array<literal_property_id>;
-        table_block_column_format: Record<literal_property_id, {
-            width: number;                                      // column width (px)
-            color?: literal_highlight_color;                    // column color
-        }>;
-    };
-};
-export type block_table_row = block_base & {
-    type: 'table_row';
-    properties: Record<literal_property_id, rich_text>;
-    content: never;
-};
-
-// block: Divider
-export type block_divider = block_base & {
-    type: 'divider';
-    properties: never;
-    content: never;
-};
-
-// block: Link to page
-export type block_alias = block_base & {
-    type: 'alias';
-    properties: never;
-    content: never;
-    format: {
-        alias_pointer: {
-            id: literal_uuid;                                   // refer: block
-            table: 'block';
-            spaceId: literal_uuid;                              // refer: space
-        };
-    };
-};
-
-// block: Image
-export type block_image = block_base & {
-    type: 'image';
-    properties?: {
-        size?: [[string]];                                      // upload only, "104.4KB"
-        title?: rich_text;                                      // upload only, image name
-        source: [[literal_url]];                                // image url (amazon s3)
-        caption?: rich_text;                                    // image caption
-        alt_text?: [[string]];                                  // image alt text
-    };
-    format: {
-        block_width?: number;                                   // block visual width (px)
-        block_height?: number;                                  // block visual height (px)
-        display_source: literal_url;                            // image url (amazon s3), same as properties.source
-        block_alignment:
-        | 'left'
-        | 'center'
-        | 'right';
-        original_source?: literal_url;                          // upload and crop only, image url (amazon s3), original image
-        block_full_width: boolean;                              // block full width
-        block_page_width: boolean;                              // block page width
-        block_aspect_ratio: number;                             // height / width
-        image_edit_metadata?: {                                 // upload only, image edit metadata
-            crop: {
-                x: number;
-                y: number;
-                unit: '%';
-                width: number;
-                height: number;
-            };
-            mask:
-            | 'Circle'                                          // circle mask
-            | 'None';                                           // no mask
-        };
-        block_preserve_scale: true;
-    };
-    file_ids?: Array<literal_uuid>;                             // refer: file, upload only
-};
+*/
