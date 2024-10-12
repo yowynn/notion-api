@@ -1,13 +1,25 @@
-console.log('Hello world');
-
 import { Client } from './src/client.js';
-import { NOTION_TOKEN_V2 } from './src/config.js';
-import * as log from './src/log.js';
+import { config } from './src/config.js';
+import { log } from './src/log.js';
 import { uuid } from './src/util.js';
 
-const client = await Client.from_token(NOTION_TOKEN_V2);
-var url, block;
+console.log('Hello world');
 
-url = process.env.URL_OR_UUID as string;
-block = await client.get_block(url);
-console.log('>>>>>>>>>>>>', JSON.stringify(block.record, null, 2));
+const client = await Client.from_token(config.NOTION_TOKEN_V2);
+var url = process.env.URL_OR_UUID as string;
+
+var id = uuid(url);
+console.log('id:', id);
+// var record = (await client.get_block(id)).record;
+var record = await client.request('syncRecordValues', {
+    requests: [
+        {
+            pointer: {
+                table: 'block',
+                id: id,
+            },
+            version: -1,
+        },
+    ],
+});
+console.log('>>>>>>>>>>>>', JSON.stringify(record, null, 2));

@@ -1,8 +1,9 @@
 import { Client } from './client.js';
-import { DEBUG_MODE } from './config.js';
+import { config } from './config.js';
 import { UnsupportedError } from './error.js';
-import * as log from './log.js';
+import { log } from './log.js';
 import { uuid } from './util.js';
+import * as types from './record-types.js';
 
 interface record {
     id: string;
@@ -75,19 +76,28 @@ export class RecordMap {
     private discussion: Record<string, any> = {};
     private comment: Record<string, any> = {};
 
-    public get records() {
-        return {
-            block: this.block,
-            space: this.space,
-            team: this.team,
-        };
-    }
+    private data: Partial<Record<types.collection_record_type, Record<types.literal_uuid, types.record>>>;
+
 
     public constructor(client: Client) {
         this.client = client;
+        this.data = {
+            block: {} as Record<types.literal_uuid, types.block>,
+            space: {} as Record<types.literal_uuid, types.record>,
+            team: {} as Record<types.literal_uuid, types.record>,
+            collection_view: {} as Record<types.literal_uuid, types.record>,
+            collection: {} as Record<types.literal_uuid, types.record>,
+            discussion: {} as Record<types.literal_uuid, types.record>,
+            comment: {} as Record<types.literal_uuid, types.record>,
+            notion_user: {} as Record<types.literal_uuid, types.record>,
+            user_root: {} as Record<types.literal_uuid, types.record>,
+            user_settings: {} as Record<types.literal_uuid, types.record>,
+            bot: {} as Record<types.literal_uuid, types.record>,
+            space_view: {} as Record<types.literal_uuid, types.record>,
+        };
     }
 
-    public async get_record(table: RecordType, id: string, update: boolean = false) {
+    public async get_record(table: types.collection_record_type, id: types.literal_uuid, update: boolean = false) {
         let record = this.get_record_cache(table, id);
         if (!record || update) {
             switch (table) {
@@ -105,43 +115,43 @@ export class RecordMap {
         return record;
     }
 
-    public get_record_cache(table: RecordType, id: string) {
-        const typeMap = this[table];
+    public get_record_cache(table: types.collection_record_type, id: types.literal_uuid) {
+        const typeMap = this.data[table];
         if (!typeMap) {
             throw new UnsupportedError('RecordMap.get_record_cache', table);
         }
         return typeMap[id];
     }
 
-    public set_record(table: RecordType, record: record) {
-        // log.info('RecordMap.set_record', table, record.id);
-        const typeMap = this[table];
+    public set_record(table: types.collection_record_type, record: types.record) {
+        const typeMap = this.data[table];
         if (!typeMap) {
             throw new UnsupportedError('RecordMap.set_record', table);
         }
-        typeMap[record.id] = record as any;
+        typeMap[record.id] = record;
     }
 
-    public update_records(recordMap: any) {
-        if (DEBUG_MODE)
+    public cache_records(recordMap: any) {
+        if (config.DEBUG_MODE)
             log.write_json('test/data-demos/recordMap.json', recordMap);
         for (const type in recordMap) {
             const records = recordMap[type];
             for (const id in records) {
-                let record: record;
+                let record: types.record;
                 if (recordMap.__version__ === 3) {
-                    record = records[id].value.value as record;
+                    record = records[id].value.value as types.record;
                 }
                 else {
-                    record = records[id].value as record;
+                    record = records[id].value as types.record;
                 }
-                this.set_record(type as RecordType, record);
+                this.set_record(type as types.collection_record_type, record);
             }
         }
+
+
     }
 
-    public async request_load_page_chunk(id: string) {
-        id = uuid(id);
+    public async request_load_page_chunk(id: types.literal_uuid) {
         const data = await this.client.request('loadPageChunk', {
             pageId: id,
             limit: 100,
@@ -149,19 +159,18 @@ export class RecordMap {
             chunkNumber: 0,
             verticalColumns: false,
         });
-        // log.write_json('a.json', data);
-        this.update_records((data as any).recordMap);
+        this.cache_records((data as any).recordMap);
         return this.get_record_cache('block', id) as block_record;
     }
 
     public async request_load_user_content() {
         const data = await this.client.request('loadUserContent', {});
-        this.update_records((data as any).recordMap);
+        this.cache_records((data as any).recordMap);
     }
 
     public async request_get_spaces() {
         const data = await this.client.request('getSpaces', {});
-        this.update_records((data as any).recordMap);
+        this.cache_records((data as any).recordMap);
     }
 
     public async request_submit_transaction(operations: any[]) {

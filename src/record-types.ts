@@ -495,6 +495,12 @@ export type record_block = record_core & {
     space_id: literal_uuid;                                     // Refer: space, the space where the block is located
 }
 
+// Record
+export type record =
+    | record_core                                               // Abstract record
+    | record_block                                              // Block
+    ;
+
 // Block: text
 export type block_text = record_block & {
     type: 'text';

@@ -1,9 +1,9 @@
 import { Client } from './client.js';
-import { NOTION_TOKEN_V2 } from './config.js';
+import { config } from './config.js';
 import * as log from './log.js';
 import { uuid } from './util.js';
 
-const client = await Client.from_token(NOTION_TOKEN_V2);
+const client = await Client.from_token(config.NOTION_TOKEN_V2);
 var url, block;
 
 url = 'https://www.notion.so/yowynn/06f20ba0631548579a156c3ff413f98e?pvs=4#eb6122ba84004c859e21b0b841cb502a';

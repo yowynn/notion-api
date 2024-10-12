@@ -1,6 +1,5 @@
-import { DEBUG_MODE } from './config.js';
+import { config } from './config.js';
 import { ArgumentError, UnsupportedError } from './error.js';
-import * as log from './log.js';
 
 const RICHTEXT_COLOR = ['gray', 'brown', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'red'];
 const RICHTEXT_BACKGROUND_COLOR = ['gray_background', 'brown_background', 'orange_background', 'yellow_background', 'green_background', 'blue_background', 'purple_background', 'pink_background', 'red_background'];
@@ -52,10 +51,10 @@ export function richtext2markdown(richText: any[]) {
         let text = origin.replace(charlist2regexp(MARKDOWN_LINE_ESCAPE), '\\$&');
         text = text.replace(/\n/g, '<br>');
         const styles = item[1] || [];
-        if (DEBUG_MODE)
+        if (config.DEBUG_MODE)
             if (item[2])
                 throw new UnsupportedError('richtext2markdown', item);
-        if (DEBUG_MODE)
+        if (config.DEBUG_MODE)
             for (const style of styles)
                 if (!RICHTEXT_STYLE_TAG.includes(style[0]))
                     throw new UnsupportedError('richtext2markdown', style[0]);
@@ -105,12 +104,12 @@ export function richtext2markdown(richText: any[]) {
                         style_html_str += `background-color: ${param.split('_')[0]}; `;
                     }
                     else {
-                        if (DEBUG_MODE)
+                        if (config.DEBUG_MODE)
                             throw new UnsupportedError('richtext2markdown', style);
                     }
                     break;
                 default:
-                    if (DEBUG_MODE)
+                    if (config.DEBUG_MODE)
                         throw new UnsupportedError('richtext2markdown', style);
             }
         }

@@ -1,23 +1,23 @@
 import { block } from './block.js';
-import { NOTION_API_URL } from './config.js';
-import * as log from './log.js';
+import { config } from './config.js';
+import { log } from './log.js';
 import { RecordMap } from './record-map.js';
 import { Session } from './session.js';
 import { uuid } from './util.js';
 
 export class Client {
-    public static async from_token(token: string) {
+    public static async from_token(token: string): Promise<Client> {
         const client = new Client();
         const auth = await client.session.authorize_from_token(token);
-        client._user_id = auth.user_id;
+        client.user_id = auth.user_id;
         log.info('Login success:', auth);
         return client;
     }
 
-    public static async from_login(email: string, password: string) {
+    public static async from_login(email: string, password: string): Promise<Client> {
         const client = new Client();
         const auth = await client.session.authorize_from_login(email, password);
-        client._user_id = auth.user_id;
+        client.user_id = auth.user_id;
         log.info('Login success:', auth);
         return client;
     }
@@ -30,17 +30,17 @@ export class Client {
         return this._user_id;
     }
 
-    public get request() {
-        return this.session.request.bind(this.session);
+    private set user_id(value: string) {
+        this._user_id = value;
     }
 
     private constructor() {
-        this.session = new Session(NOTION_API_URL);
+        this.session = new Session(config.NOTION_API_URL);
         this.recordMap = new RecordMap(this);
     }
 
-    public set_token(token: string) {
-        this.session.set_cookie('token_v2', token);
+    public async request(path: string, body: any = {}): Promise<any> {
+        return this.session.request(path, body);
     }
 
     public async get_block(id: string) {

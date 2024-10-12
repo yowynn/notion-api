@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
-import { NOTION_CLIENT_VERSION, USER_AGENT } from './config.js';
+import { config } from './config.js';
 import { ArgumentError, ResponseError, UnsupportedError } from './error.js';
-import * as log from './log.js';
+import { log } from './log.js';
 import { read_from_stdin, stringify } from './util.js';
 
 export class Session {
@@ -12,7 +12,7 @@ export class Session {
 
     public constructor(apiUrl: string, userAgent?: string) {
         this.apiUrl = apiUrl;
-        this.userAgent = userAgent || USER_AGENT;
+        this.userAgent = userAgent || config.USER_AGENT;
     }
 
     public get_cookie(name: string) {
@@ -47,7 +47,7 @@ export class Session {
         return {
             'content-type': 'application/json; charset=utf-8',
             'user-agent': this.userAgent,
-            'notion-client-version': NOTION_CLIENT_VERSION,
+            'notion-client-version': config.NOTION_CLIENT_VERSION,
             cookie: this.get_cookie_string(),
             ...this._headers,
         };
