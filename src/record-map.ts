@@ -123,7 +123,7 @@ export class RecordMap {
         return typeMap[id];
     }
 
-    public set_record(table: types.collection_record_type, record: types.record) {
+    public cache_record(table: types.collection_record_type, record: types.record) {
         const typeMap = this.data[table];
         if (!typeMap) {
             throw new UnsupportedError('RecordMap.set_record', table);
@@ -144,11 +144,9 @@ export class RecordMap {
                 else {
                     record = records[id].value as types.record;
                 }
-                this.set_record(type as types.collection_record_type, record);
+                this.cache_record(type as types.collection_record_type, record);
             }
         }
-
-
     }
 
     public async request_load_page_chunk(id: types.literal_uuid) {
@@ -161,6 +159,22 @@ export class RecordMap {
         });
         this.cache_records((data as any).recordMap);
         return this.get_record_cache('block', id) as block_record;
+    }
+
+    public async request_sync_record_values(table: types.collection_record_type, id: types.literal_uuid) {
+        const data = await this.client.request('syncRecordValues', {
+            requests: [
+                {
+                    pointer: {
+                        table: table,
+                        id: id,
+                    },
+                    version: -1,
+                },
+            ],
+        });
+        this.cache_records((data as any).recordMap);
+        return this.get_record_cache(table, id) as types.record;
     }
 
     public async request_load_user_content() {
