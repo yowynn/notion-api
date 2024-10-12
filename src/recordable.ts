@@ -71,5 +71,3 @@ export function record_accessor(path?: string, getter: ((x: any) => any) = (x: a
 export function readonly_record_accessor(path?: string, getter = (x: any) => x) {
     return record_accessor(path, getter, null);
 }
-
-

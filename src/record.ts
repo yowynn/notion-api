@@ -1,4 +1,3 @@
-
 // Version value, increment after modification
 export type literal_version = number;
 
@@ -419,23 +418,23 @@ export type annotation_suggested_removal = [
 
 // Annotation
 export type annotation =
-    | annotation_bold
-    | annotation_italic
-    | annotation_underline
-    | annotation_strikethrough
-    | annotation_code
-    | annotation_equation
-    | annotation_highlight
-    | annotation_link
-    | annotation_user
-    | annotation_date
-    | annotation_template_variable
-    | annotation_page
-    | annotation_margin_comment
-    | annotation_suggested_annotation
-    | annotation_suggested_unannotation
-    | annotation_suggested_insertion
-    | annotation_suggested_removal
+    | annotation_bold                                           // Boldld
+    | annotation_italic                                         // Italic
+    | annotation_underline                                      // Underline
+    | annotation_strikethrough                                  // Strikethrough
+    | annotation_code                                           // Code
+    | annotation_equation                                       // Equation
+    | annotation_highlight                                      // Highlight
+    | annotation_link                                           // Link
+    | annotation_user                                           // User mention
+    | annotation_date                                           // Date mention
+    | annotation_template_variable                              // Template variable mention
+    | annotation_page                                           // Page mention
+    | annotation_margin_comment                                 // Margin comment
+    | annotation_suggested_annotation                           // Suggested annotation
+    | annotation_suggested_unannotation                         // Suggested un-annotation
+    | annotation_suggested_insertion                            // Suggested insertion
+    | annotation_suggested_removal                              // Suggested removal
     ;
 
 // Rich text
@@ -462,7 +461,6 @@ export type image_edit_metadata = {
     };
     mask: option_image_mask;                                    // Mask
 };
-
 
 // Visibilities of page sections
 export type page_section_visibility = {
@@ -755,6 +753,7 @@ export type block_page = record_block & {
         page_font?: option_page_font;                           // Page font, default is 'default'
         page_icon?: literal_icon;                               // Page icon
         page_cover?: literal_url;                               // Page cover
+        block_color?: option_highlight_color;                   // Block color
         block_locked?: boolean;                                 // Page locked or not
         block_locked_by?: literal_uuid;                         // Refer: notion_user, the user who locked the page
         page_full_width?: boolean;                              // Full width mode, page width is automatically set to full width
@@ -773,6 +772,7 @@ export type block_collection_view_page = record_block & {
     view_ids: Array<literal_uuid>;                              // Refer: collection_view, collection view IDs
     collection_id: literal_uuid;                                // Refer: collection, the original database
     format?: {                                                  // Format of block:
+        block_color?: option_highlight_color;                   // Block color
         block_locked?: boolean;                                 // Page locked or not
         block_locked_by?: literal_uuid;                         // Refer: notion_user, the user who locked the page
         collection_pointer: reference_pointer;                  // Refer: collection, the same as `collection_id`
@@ -809,6 +809,7 @@ export type block_bookmark = record_block & {
     format?: {                                                  // Format of block:
         block_color?: option_highlight_color;                   // Block color
         bookmark_icon?: literal_icon;                           // Web page icon
+        bookmark_cover?: literal_url;                           // Web page cover
     };
 };
 
@@ -875,7 +876,6 @@ export type block =
     | block_file                                                // File
     | block_embed                                               // Embed
     ;
-
 
 /*
 export type notion_user = record_base & {

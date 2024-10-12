@@ -15,7 +15,6 @@ interface record {
     last_edited_by_id: string;
 }
 
-
 export interface block_record extends record {
     type: string;
     properties: Record<string, unknown>;
@@ -155,14 +154,12 @@ export class RecordMap {
         return this.get_record_cache('block', id) as block_record;
     }
 
-    public async request_load_user_content()
-    {
+    public async request_load_user_content() {
         const data = await this.client.request('loadUserContent', {});
         this.update_records((data as any).recordMap);
     }
 
-    public async request_get_spaces()
-    {
+    public async request_get_spaces() {
         const data = await this.client.request('getSpaces', {});
         this.update_records((data as any).recordMap);
     }

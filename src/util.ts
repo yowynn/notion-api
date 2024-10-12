@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { NOTION_BASE_URL } from './config.js';
 import { ArgumentError } from './error.js';
 
-
 export function uuid(id_or_url: string) {
     let re = id_or_url;
     if (/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(re)) {    // most common case
@@ -52,5 +51,3 @@ export async function read_from_stdin(prompt: string) {
     });
     return data;
 }
-
-

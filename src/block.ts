@@ -10,9 +10,7 @@ export class block extends recordable {
 
     @record_accessor('properties.title', richtext2markdown, markdown2richtext)
     public accessor title!: string;
-
 }
 
 export class page_block extends block {
-
 }

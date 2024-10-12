@@ -361,7 +361,6 @@ export const markdown2richtext = (() => {
             }
             index++;
         }
-
     }
     return function (markdown: string) {
         richText = [];
@@ -392,4 +391,3 @@ export function date2string(date: Date) {
 export function string2date(string: string) {
     return new Date(string);
 }
-

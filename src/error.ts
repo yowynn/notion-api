@@ -27,7 +27,6 @@ export class UnsupportedError extends Error {
     }
 }
 
-
 export class ReadonlyModificationError extends Error {
     constructor(kind: string, path: string) {
         super(`Cannot modify readonly ${kind}: ${path}`);

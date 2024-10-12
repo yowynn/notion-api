@@ -94,6 +94,4 @@ export class Client {
         const query_collection = await this.session.request('queryCollection', params);
         return query_collection;
     }
-
-
 }

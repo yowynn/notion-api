@@ -1,8 +1,6 @@
 import * as fs from 'fs';
 import { stringify } from './util.js';
 
-
-
 export function info(...args: any[]) {
     console.log(stringify(...args));
 }
