@@ -418,7 +418,7 @@ export type annotation_suggested_removal = [
 
 // Annotation
 export type annotation =
-    | annotation_bold                                           // Boldld
+    | annotation_bold                                           // Bold
     | annotation_italic                                         // Italic
     | annotation_underline                                      // Underline
     | annotation_strikethrough                                  // Strikethrough
