@@ -219,8 +219,8 @@ export type collection_block_type =
     | 'alias'                                                   // Link to page (block)
     | 'image'                                                   // Image
     | 'page'                                                    // Page
-    | 'collection_view_page'                                    // Collection view page
-    | 'collection_view'                                         // Collection view
+    | 'collection_view_page'                                    // Database page / wiki page
+    | 'collection_view'                                         // Database view / linked database view
     | 'bookmark'                                                // Bookmark
     | 'file'                                                    // File
     | 'embed'                                                   // Embed
@@ -484,8 +484,8 @@ export type record_block = record_core & {
     };
     created_time: literal_timestamp;                            // Created time
     last_edited_time: literal_timestamp;                        // Last edited time
-    parent_id: literal_uuid;                                    // Refer: block, the parent block
-    parent_table: collection_block_type;                        // Parent block type
+    parent_id: literal_uuid;                                    // Refer: record, parent record
+    parent_table: collection_record_type;                       // Parent record type, almost 'block' or 'collection', sometimes 'team' or 'space'
     alive: boolean;                                             // Alive or in trash
     copied_from?: literal_uuid;                                 // Refer: block, the same as `format.copied_from_pointer`
     created_by_table: collection_record_type;                   // Created by record type
@@ -508,40 +508,46 @@ export type block_text = record_block & {
 };
 
 // Block: heading 1
+// * case 1: normal heading
+// * case 2: toggleable heading
 export type block_header = record_block & {
     type: 'header';
     properties?: {                                              // Properties:
         title?: rich_text;                                      // Heading content
     };
-    content?: Array<literal_uuid>;                              // Refer: block, children blocks, only if toggleable
+    content?: Array<literal_uuid>;                              // Refer: block, children blocks // * case 2
     format: {                                                   // Format of block:
-        toggleable?: boolean;                                   // Toggleable (can have children blocks)
+        toggleable?: boolean;                                   // Toggleable // * case 2
         block_color?: option_highlight_color;                   // Block color
     };
 };
 
 // Block: heading 2
+// * case 1: normal heading
+// * case 2: toggleable heading
 export type block_sub_header = record_block & {
     type: 'sub_header';
     properties?: {                                              // Properties:
         title?: rich_text;                                      // Heading content
     };
-    content?: Array<literal_uuid>;                              // Refer: block, children blocks, only if toggleable
+    content?: Array<literal_uuid>;                              // Refer: block, children blocks // * case 2
     format: {                                                   // Format of block:
-        toggleable?: boolean;                                   // Toggleable (can have children blocks)
+        toggleable?: boolean;                                   // Toggleable // * case 2
         block_color?: option_highlight_color;                   // Block color
     };
 };
 
 // Block: heading 3
+// * case 1: normal heading
+// * case 2: toggleable heading
 export type block_sub_sub_header = record_block & {
     type: 'sub_sub_header';
     properties?: {                                              // Properties:
         title?: rich_text;                                      // Heading content
     };
-    content?: Array<literal_uuid>;                              // Refer: block, children blocks, only if toggleable
+    content?: Array<literal_uuid>;                              // Refer: block, children blocks // * case 2
     format: {                                                   // Format of block:
-        toggleable?: boolean;                                   // Toggleable (can have children blocks)
+        toggleable?: boolean;                                   // Toggleable // * case 2
         block_color?: option_highlight_color;                   // Block color
     };
 };
@@ -598,6 +604,8 @@ export type block_toggle = record_block & {
 };
 
 // Block: code
+// * case 1: normal code
+// * case 2: mermaid code
 export type block_code = record_block & {
     type: 'code';
     properties: {                                               // Properties:
@@ -607,7 +615,7 @@ export type block_code = record_block & {
     };
     format?: {                                                  // Format of block:
         code_wrap: boolean;                                     // Code wrap or not
-        code_preview_format?: option_code_preview_mode;         // Code preview mode (just for mermaid code)
+        code_preview_format?: option_code_preview_mode;         // Code preview mode // * case 2
     };
 };
 
@@ -625,16 +633,18 @@ export type block_quote = record_block & {
 };
 
 // Block: callout
+// * case 1: callout version 1, with a visible title
+// * case 2: callout version 2, no title, only icon
 export type block_callout = record_block & {
     type: 'callout';
-    properties?: {                                              // Properties:
-        title?: rich_text;                                      // Callout title, if callout version is 1
+    properties?: {                                              // Properties: // * case 1
+        title?: rich_text;                                      // Callout title // * case 1
     };
     content?: Array<literal_uuid>;                              // Refer: block, children blocks
     format?: {                                                  // Format of block:
         page_icon?: literal_icon;                               // Callout icon
         block_color?: option_highlight_color;                   // Block color
-        callout_version?: number;                               // Callout version, 2 means new callout, which is without title property
+        callout_version?: number;                               // Callout version, 2 means new callout // * case 2
     };
 };
 
@@ -697,7 +707,7 @@ export type block_table = record_block & {
 export type block_table_row = record_block & {
     type: 'table_row';
     properties: {                                               // Cell of columns:
-        [key: literal_property_id]: rich_text;                  // Cell content
+        [key in literal_property_id]: rich_text;                // Cell content
     };
     format?: {                                                  // Format of block:
         block_color?: option_highlight_color;                   // Block color
@@ -718,27 +728,29 @@ export type block_alias = record_block & {
 };
 
 // Block: image
+// * case 1: uploaded image
+// * case 2: external image
 export type block_image = record_block & {
     type: 'image';
     properties?: {                                              // Properties:
-        size?: [[literal_file_size]];                           // Image size
-        title?: [[string]];                                     // Image file name
-        source?: [[literal_url]];                               // Image source URL
+        size?: [[literal_file_size]];                           // Image size // * case 1
+        title?: [[string]];                                     // Image file name // * case 1
+        source: [[literal_url]];                                // Image source URL
         caption?: rich_text;                                    // Image caption
-        alt_text: [[string]];                                   // Image alt text, for screen reader
+        alt_text?: [[string]];                                  // Image alt text, for screen reader
     };
     format?: {                                                  // Format of block:
-        block_width: number;                                    // Visual image width (px)
-        block_height: number;                                   // Visual image height (px)
+        block_width?: number;                                   // Visual image width (px)
+        block_height?: number;                                  // Visual image height (px)
         display_source: literal_url;                            // Image source URL
         block_alignment?: option_image_alignment;               // Image alignment, default is 'center'
         image_hyperlink?: literal_url;                          // Image hyperlink
-        original_source?: literal_url;                          // Original image source URL, if image is edited
+        original_source?: literal_url;                          // Original image source URL, if image is edited // * case 1
         block_full_width?: boolean;                             // Full width mode, width is always full and height is manually set
         block_page_width?: boolean;                             // Page width mode, width is always page width and height is automatically set
-        block_aspect_ratio?: number;                            // Aspect ratio, height / width
-        image_edit_metadata?: image_edit_metadata;              // Image edit metadata (for local image cropping)
-        block_preserve_scale: boolean;                          // Preserve image scale or not, always true
+        block_aspect_ratio?: number;                            // Aspect ratio, height / width // * case 1
+        image_edit_metadata?: image_edit_metadata;              // Image edit metadata (for local image cropping) // * case 1
+        block_preserve_scale?: boolean;                         // Preserve image scale or not, always true // * case 1
     };
 };
 
@@ -750,6 +762,7 @@ export type block_page = record_block & {
     };
     content?: Array<literal_uuid>;                              // Refer: block, page content blocks
     format?: {                                                  // Format of block:
+        site_id?: literal_uuid;                                 // Refer: site, if published to web
         page_font?: option_page_font;                           // Page font, default is 'default'
         page_icon?: literal_icon;                               // Page icon
         page_cover?: literal_url;                               // Page cover
@@ -759,40 +772,56 @@ export type block_page = record_block & {
         page_full_width?: boolean;                              // Full width mode, page width is automatically set to full width
         page_small_text?: boolean;                              // Small text mode, page text is smaller
         page_cover_position?: literal_normalization_value;      // Page cover position, 0 is bottom, 1 is top, default is 0.5
-        page_section_visibility?: page_section_visibility;       // Visibilities of page sections
+        page_section_visibility?: page_section_visibility;      // Visibilities of page sections
+        social_media_image_preview_url?: literal_url;           // Social media image preview URL, auto-generated
         page_floating_table_of_contents?: {
             state: option_float_toc_state;                      // Float table of contents state
-        }
+        };
     };
 };
 
-// Block: collection view page
+// Block: database page / wiki page
+// * case 1: page of database
+// * case 2: page of wiki
 export type block_collection_view_page = record_block & {
     type: 'collection_view_page';
+    properties?: {                                              // Properties: // * case 2
+        title?: rich_text;                                      // Page title, same to the collection record title // * case 2
+    };
+    content?: Array<literal_uuid>;                              // Refer: block, wiki homepage content blocks // * case 2
     view_ids: Array<literal_uuid>;                              // Refer: collection_view, collection view IDs
     collection_id: literal_uuid;                                // Refer: collection, the original database
     format?: {                                                  // Format of block:
+        app_id?: literal_uuid;                                  // Refer: app (TODO: what is this?) // * case 2
+        site_id?: literal_uuid;                                 // Refer: site, if published to web
+        app_uri_map?: {                                         // (TODO: what is this?) // * case 2
+            'notion://wiki_collection': literal_uuid;           // Refer: collection, the same as `collection_id` // * case 2
+        }
         block_color?: option_highlight_color;                   // Block color
         block_locked?: boolean;                                 // Page locked or not
+        app_config_uri?: literal_url;                           // like "notion://wiki_block" (TODO: what is this?) // * case 2
         block_locked_by?: literal_uuid;                         // Refer: notion_user, the user who locked the page
         collection_pointer: reference_pointer;                  // Refer: collection, the same as `collection_id`
+        social_media_image_preview_url?: literal_url;           // Social media image preview URL, auto-generated
     };
 };
 
-// Block: collection view
+// Block: database view / linked database view
+// * case 1: view of database
+// * case 2: view of linked database
 export type block_collection_view = record_block & {
     type: 'collection_view';
-    properties?: {                                              // Properties:
-        title?: rich_text;                                      // Link view page title, only for linked database
+    properties?: {                                              // Properties: // * case 2
+        title?: rich_text;                                      // Link view page title // * case 2
     };
     view_ids: Array<literal_uuid>;                              // Refer: collection_view, collection view IDs
     collection_id?: literal_uuid;                               // Refer: collection, only for original database
     format?: {                                                  // Format of block:
-        page_icon?: literal_icon;                               // Link view page icon, only for linked database
-        page_cover?: literal_url;                               // Link view page cover, only for linked database
+        page_icon?: literal_icon;                               // Link view page icon // * case 2
+        page_cover?: literal_url;                               // Link view page cover // * case 2
         block_locked?: boolean;                                 // Page locked or not
         block_locked_by?: literal_uuid;                         // Refer: notion_user, the user who locked the page
-        page_cover_position?: literal_normalization_value;      // Link view page cover position, only for linked database
+        page_cover_position?: literal_normalization_value;      // Link view page cover position // * case 2
         collection_pointer: reference_pointer;                  // Refer: collection, only for original database
     };
 };
@@ -814,12 +843,14 @@ export type block_bookmark = record_block & {
 };
 
 // Block: file
+// * case 1: uploaded file
+// * case 2: external file
 export type block_file = record_block & {
     type: 'file';
     properties?: {                                              // Properties:
-        size?: [[literal_file_size]];                           // File size
+        size?: [[literal_file_size]];                           // File size // * case 1
         title?: [[string]];                                     // File name
-        source?: [[literal_url]];                               // File source URL
+        source: [[literal_url]];                                // File source URL
         caption?: rich_text;                                    // File caption
     };
     format?: {                                                  // Format of block:
@@ -828,21 +859,23 @@ export type block_file = record_block & {
 };
 
 // Block: embed
+// * case 1: uploaded embed
+// * case 2: external embed
 export type block_embed = record_block & {
     type: 'embed';
     properties?: {                                              // Properties:
-        size?: [[literal_file_size]];                           // Embed file size
-        title?: [[string]];                                     // Embed file name
-        source?: [[literal_url]];                               // Embed source URL
+        size?: [[literal_file_size]];                           // Embed file size // * case 1
+        title?: [[string]];                                     // Embed file name // * case 1
+        source: [[literal_url]];                                // Embed source URL
         caption?: rich_text;                                    // Embed caption
     };
     format?: {                                                  // Format of block:
-        block_width: number;                                    // Visual embed width (px)
-        block_height: number;                                   // Visual embed height (px)
+        block_width?: number;                                   // Visual embed width (px)
+        block_height?: number;                                  // Visual embed height (px)
         block_alignment?: option_image_alignment;               // Embed alignment, default is 'center'
         block_full_width?: boolean;                             // Full width mode, width is always full and height is manually set
         block_page_width?: boolean;                             // Page width mode, width is always page width and height is automatically set
-        block_preserve_scale: boolean;                          // Preserve embed scale or not, always true
+        block_preserve_scale?: boolean;                         // Preserve embed scale or not
     };
 };
 
@@ -870,8 +903,8 @@ export type block =
     | block_alias                                               // Link to page (block)
     | block_image                                               // Image
     | block_page                                                // Page
-    | block_collection_view_page                                // Collection view page
-    | block_collection_view                                     // Collection view
+    | block_collection_view_page                                // Database page / wiki page
+    | block_collection_view                                     // Database view / linked database view
     | block_bookmark                                            // Bookmark
     | block_file                                                // File
     | block_embed                                               // Embed
