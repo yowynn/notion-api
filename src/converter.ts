@@ -46,7 +46,7 @@ function charlist2regexp(charlist: string[], flags: string = 'g') {
 
 export function richtext2markdown(richText: any[]) {
     let markdown = '';
-    for (const item of richText) {
+    for (const item of richText ?? []) {
         let origin = item[0] as string;
         let text = origin.replace(charlist2regexp(MARKDOWN_LINE_ESCAPE), '\\$&');
         text = text.replace(/\n/g, '<br>');
