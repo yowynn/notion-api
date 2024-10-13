@@ -53,16 +53,17 @@ export class Session {
         };
     }
 
-    public async request(path: string, body: any = {}): Promise<any> {
-        log.info(`Requesting ${path}`);
-        const response = await fetch(`${this.apiUrl}/${path}`, {
+    public async request(api: string, body: any = {}): Promise<any> {
+        log.info(`Requesting ${api}`);
+        const response = await fetch(`${this.apiUrl}/${api}`, {
             method: 'POST',
             headers: this.get_headers(),
             body: JSON.stringify(body),
         });
         if (!response.ok) {
-            const text = stringify(await response.json());
-            throw new ResponseError(path, response, text);
+            const text = stringify(await response.text());
+            console.log('error data:', JSON.stringify(body, null, 4));
+            throw new ResponseError(api, response, text);
         }
         // set cookies
         const set_cookie = response.headers.get('set-cookie');
