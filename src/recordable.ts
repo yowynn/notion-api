@@ -36,10 +36,13 @@ export class recordable {
     public async set(value: any, ...record_path: string[]) {
         let record = this.record as any;
         for (let p of record_path.slice(0, -1)) {
+            if (!record[p]) {
+                record[p] = {};
+            }
             record = record[p];
         }
         record[record_path.slice(-1)[0]] = value;
-        await this._recordMap.request_submit_transaction_set_record_values(this._id, record_path, value);
+        await this._recordMap.set_block_property(this._id, record_path, value);
     }
 }
 
