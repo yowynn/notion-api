@@ -193,6 +193,7 @@ export type collection_record_type =
     | 'user_root'                                               // User root
     | 'user_settings'                                           // User settings
     | 'space_view'                                              // Space view
+    | 'space_user'                                              // Space/user relation, witch id is '<space_id>|<user_id>'
     ;
 
 /** Block type collection */
@@ -447,7 +448,7 @@ export type rich_text = Array<[
 export type reference_pointer = {
     id: literal_uuid;                                           // Refer: record
     table: collection_record_type;                              // Record type
-    spaceId: literal_uuid;                                      // Refer: space, the space where the record is located
+    spaceId?: literal_uuid;                                     // Refer: space, the space where the record is located
 };
 
 /** Image edit metadata (for local image cropping) */
@@ -511,12 +512,13 @@ export type block_text = record_block & {
     };
 };
 
-/** Block: heading 1
-  *
-  * case 1: normal heading
-  *
-  * case 2: toggleable heading
-  */
+/**
+ * Block: heading 1
+ *
+ * case 1: normal heading
+ *
+ * case 2: toggleable heading
+ */
 export type block_header = record_block & {
     type: 'header';
     properties?: {                                              // Properties:
@@ -529,12 +531,13 @@ export type block_header = record_block & {
     };
 };
 
-/** Block: heading 2
-  *
-  * case 1: normal heading
-  *
-  * case 2: toggleable heading
-  */
+/**
+ * Block: heading 2
+ *
+ * case 1: normal heading
+ *
+ * case 2: toggleable heading
+ */
 export type block_sub_header = record_block & {
     type: 'sub_header';
     properties?: {                                              // Properties:
@@ -547,12 +550,13 @@ export type block_sub_header = record_block & {
     };
 };
 
-/** Block: heading 3
-  *
-  * case 1: normal heading
-  *
-  * case 2: toggleable heading
-  */
+/**
+ * Block: heading 3
+ *
+ * case 1: normal heading
+ *
+ * case 2: toggleable heading
+ */
 export type block_sub_sub_header = record_block & {
     type: 'sub_sub_header';
     properties?: {                                              // Properties:
@@ -616,12 +620,13 @@ export type block_toggle = record_block & {
     };
 };
 
-/** Block: code
-  *
-  * case 1: normal code
-  *
-  * case 2: mermaid code
-  */
+/**
+ * Block: code
+ *
+ * case 1: normal code
+ *
+ * case 2: mermaid code
+ */
 export type block_code = record_block & {
     type: 'code';
     properties: {                                               // Properties:
@@ -648,12 +653,13 @@ export type block_quote = record_block & {
     };
 };
 
-/** Block: callout
-  *
-  * case 1: callout version 1, with a visible title
-  *
-  * case 2: callout version 2, no title, only icon
-  */
+/**
+ * Block: callout
+ *
+ * case 1: callout version 1, with a visible title
+ *
+ * case 2: callout version 2, no title, only icon
+ */
 export type block_callout = record_block & {
     type: 'callout';
     properties?: {                                              // Properties: // * case 1
@@ -746,12 +752,13 @@ export type block_alias = record_block & {
     };
 };
 
-/** Block: image
-  *
-  * case 1: uploaded image
-  *
-  * case 2: external image
-  */
+/**
+ * Block: image
+ *
+ * case 1: uploaded image
+ *
+ * case 2: external image
+ */
 export type block_image = record_block & {
     type: 'image';
     properties?: {                                              // Properties:
@@ -802,12 +809,13 @@ export type block_page = record_block & {
     };
 };
 
-/** Block: database page / wiki page
-  *
-  * case 1: page of database
-  *
-  * case 2: page of wiki
-  */
+/**
+ * Block: database page / wiki page
+ *
+ * case 1: page of database
+ *
+ * case 2: page of wiki
+ */
 export type block_collection_view_page = record_block & {
     type: 'collection_view_page';
     properties?: {                                              // Properties: // * case 2
@@ -832,12 +840,13 @@ export type block_collection_view_page = record_block & {
 };
 
 
-/** Block: database view / linked database view
-  *
-  * case 1: view of database
-  *
-  * case 2: view of linked database
-  */
+/**
+ * Block: database view / linked database view
+ *
+ * case 1: view of database
+ *
+ * case 2: view of linked database
+ */
 export type block_collection_view = record_block & {
     type: 'collection_view';
     properties?: {                                              // Properties: // * case 2
@@ -871,12 +880,13 @@ export type block_bookmark = record_block & {
     };
 };
 
-/** Block: file
-  *
-  * case 1: uploaded file
-  *
-  * case 2: external file
-  */
+/**
+ * Block: file
+ *
+ * case 1: uploaded file
+ *
+ * case 2: external file
+ */
 export type block_file = record_block & {
     type: 'file';
     properties?: {                                              // Properties:
@@ -890,12 +900,13 @@ export type block_file = record_block & {
     };
 };
 
-/** Block: embed
-  *
-  * case 1: uploaded embed
-  *
-  * case 2: external embed
-  */
+/**
+ * Block: embed
+ *
+ * case 1: uploaded embed
+ *
+ * case 2: external embed
+ */
 export type block_embed = record_block & {
     type: 'embed';
     properties?: {                                              // Properties:
