@@ -86,6 +86,10 @@ export class RecordMap {
         return data;
     }
 
+    public async load_page_chunk(block_id: types.literal_uuid) {
+        await this.call_api(api.loadCachedPageChunk(block_id));
+    }
+
     public async set_block_property(id: types.literal_uuid, path: string[], value: any) {
         const now = Date.now();
         const last_edited_args = {

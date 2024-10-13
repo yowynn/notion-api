@@ -1,19 +1,32 @@
+import { Client } from './client.js';
 import { date2timestamp, timestamp2date } from './converter.js';
 import { ReadonlyModificationError, UnsupportedError } from './error.js';
-import { RecordMap } from './record-map.js';
+import * as types from './record-types.js';
 
-export class recordable {
-    protected _id: string;
-    protected _recordMap: RecordMap;
+
+export class record {
+    protected _record: types.record;
+    protected _client: Client;
+
+    protected get recordMap() {
+        return this._client.recordMap;
+    }
+
+    public get table(): types.collection_record_type | null {
+        return null;
+    }
+
     public get record() {
-        return this._recordMap.get_record_cache('block', this._id);
+        return this._record;
     }
     public get id() {
-        return this._id;
+        return this.record.id;
     }
-    public constructor(id: string, recordMap: RecordMap) {
-        this._id = id;
-        this._recordMap = recordMap;
+
+    public constructor(client: Client, record: types.record) {
+
+        this._client = client;
+        this._record = record;
     }
 
     @readonly_record_accessor('version')
@@ -42,21 +55,21 @@ export class recordable {
             record = record[p];
         }
         record[record_path.slice(-1)[0]] = value;
-        await this._recordMap.set_block_property(this._id, record_path, value);
+        await this.recordMap.set_block_property(this.id, record_path, value);
     }
 }
 
-export function record_accessor(path?: string, getter: ((x: any) => any) = (x: any) => x, setter: ((x: any) => any) | null = (x: any) => x) {
-    return function ({ get, set }: ClassAccessorDecoratorTarget<recordable, any>, { kind, name }: ClassAccessorDecoratorContext<recordable, any>) {
+export function record_accessor(path?: string, getter: ((x: any) => any) = x => x, setter: ((x: any) => any) | null = x => x) {
+    return function ({ get, set }: ClassAccessorDecoratorTarget<record, any>, { kind, name }: ClassAccessorDecoratorContext<record, any>) {
         if (kind === 'accessor') {
             path = path || name as string;
             const record_path = (path as string).split('.');
             return {
-                get(this: recordable) {
+                get(this: record) {
                     const data = this.get(...record_path);
                     return getter(data);
                 },
-                async set(this: recordable, value: any) {
+                async set(this: record, value: any) {
                     if (setter === null) {
                         throw new ReadonlyModificationError('record_accessor', path as string);
                     }
