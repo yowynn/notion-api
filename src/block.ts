@@ -1,12 +1,12 @@
 import { read } from 'fs';
 import { markdown2richtext, richtext2markdown } from './converter.js';
 import { record_accessor, readonly_record_accessor, record } from './record.js';
-import * as types from './record-types.js';
+import * as rt from './record-types.js';
 import { new_record } from './record-factory.js';
 
 export class block extends record {
     public get table() {
-        return 'block' as types.collection_record_type;
+        return 'block' as rt.collection_record_type;
     }
 
     @record_accessor('alive')
@@ -22,7 +22,7 @@ export class block extends record {
     public accessor child_count!: number;
 
     public async get_parent<T = record>() {
-        var current_record = this.record as types.record_block
+        var current_record = this.record as rt.record_block
         var parent_record = await this.recordMap.get_record(current_record.parent_table, current_record.parent_id);
         return new_record(this._client, parent_record, current_record.parent_table) as T;
     }

@@ -1,5 +1,5 @@
 import { new_uuid } from './util.js';
-import * as types from './record-types.js';
+import * as rt from './record-types.js';
 
 export type api_data = {
     api: string;
@@ -7,13 +7,13 @@ export type api_data = {
 };
 
 type transaction = {
-    id?: types.literal_uuid;
+    id?: rt.literal_uuid;
     operations: transaction_operation[];
-    spaceId?: types.literal_uuid;
+    spaceId?: rt.literal_uuid;
 };
 
 type transaction_operation = {
-    pointer: types.reference_pointer;
+    pointer: rt.reference_pointer;
     path: string[];
     command: string;
     args: any;
@@ -24,7 +24,7 @@ type transaction_operation = {
  *
  * return record type: `any`
  */
-export const syncRecordValues = function (record_pointers: types.reference_pointer[]) {
+export const syncRecordValues = function (record_pointers: rt.reference_pointer[]) {
     return {
         // * also: `syncRecordValuesMain`, `syncRecordValuesSpace`
         api: 'syncRecordValues',
@@ -42,7 +42,7 @@ export const syncRecordValues = function (record_pointers: types.reference_point
  *
  * return record type: `any`
  */
-export const syncRecordValue = function (table: types.collection_record_type, id: types.literal_uuid) {
+export const syncRecordValue = function (table: rt.collection_record_type, id: rt.literal_uuid) {
     return syncRecordValues([{ table, id }]);
 };
 
@@ -51,7 +51,7 @@ export const syncRecordValue = function (table: types.collection_record_type, id
  *
  * return record type: `block`, `discussion`, `collection`, `comment`, `collection_view`, `team`, ...
  */
-export const loadCachedPageChunks = function (ids: types.literal_uuid[], limit: number = 100) {
+export const loadCachedPageChunks = function (ids: rt.literal_uuid[], limit: number = 100) {
     return {
         api: 'loadCachedPageChunks',
         data: {
@@ -73,7 +73,7 @@ export const loadCachedPageChunks = function (ids: types.literal_uuid[], limit: 
  *
  * return record type: `block`, `discussion`, `collection`, `comment`, `collection_view`, `team`, ...
  */
-export const loadCachedPageChunk = function (id: types.literal_uuid, limit: number = 100) {
+export const loadCachedPageChunk = function (id: rt.literal_uuid, limit: number = 100) {
     return {
         api: 'loadCachedPageChunk',
         data: {
@@ -93,7 +93,7 @@ export const loadCachedPageChunk = function (id: types.literal_uuid, limit: numb
  * @see loadCachedPageChunk
  * @alias loadCachedPageChunk
  */
-export const loadPageChunk = function (id: types.literal_uuid, limit: number = 100) {
+export const loadPageChunk = function (id: rt.literal_uuid, limit: number = 100) {
     return {
         // * also: `loadCachedPageChunk`
         api: 'loadPageChunk',
@@ -136,7 +136,7 @@ export const getSpaces = function () {
  *
  * return record type: `team`
  */
-export const getTeams = function (spaceId: types.literal_uuid) {
+export const getTeams = function (spaceId: rt.literal_uuid) {
     return {
         api: 'getTeams',
         data: {

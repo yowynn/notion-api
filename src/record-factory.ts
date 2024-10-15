@@ -1,7 +1,7 @@
 import * as block from './block.js';
 import { Client } from './client.js';
 import { record } from './record.js';
-import * as types from './record-types.js';
+import * as rt from './record-types.js';
 
 const type_map: { [key: string]: new (client: any, record: any) => record } = {};
 
@@ -11,7 +11,7 @@ for (const key in block) {
     type_map[key] = (block as any)[key];
 }
 
-export const new_record = (client: Client, record: types.record, table: types.collection_record_type = 'block') => {
+export const new_record = (client: Client, record: rt.record, table: rt.collection_record_type = 'block') => {
     const type = (record as any).type;
     let type_key = table;
     if (type) {

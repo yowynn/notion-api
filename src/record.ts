@@ -1,18 +1,18 @@
 import { Client } from './client.js';
 import { date2timestamp, timestamp2date } from './converter.js';
 import { ReadonlyModificationError, UnsupportedError } from './error.js';
-import * as types from './record-types.js';
+import * as rt from './record-types.js';
 
 
 export class record {
-    protected _record: types.record;
+    protected _record: rt.record;
     protected _client: Client;
 
     protected get recordMap() {
         return this._client.recordMap;
     }
 
-    public get table(): types.collection_record_type | null {
+    public get table(): rt.collection_record_type | null {
         return null;
     }
 
@@ -23,10 +23,14 @@ export class record {
         return this.record.id;
     }
 
-    public constructor(client: Client, record: types.record) {
+    public constructor(client: Client, record: rt.record) {
 
         this._client = client;
         this._record = record;
+    }
+
+    public async refresh(update = false) {
+        this._record = await this.recordMap.get_record(this.table as rt.collection_record_type, this.id, update) ?? this._record;
     }
 
     @readonly_record_accessor('version')

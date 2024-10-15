@@ -382,7 +382,7 @@ export type annotation_template_variable = [
 export type annotation_page = [
     'p',
     literal_uuid,                                               // Refer: block (page is a block)
-    literal_uuid,                                               // Refer: space
+    literal_uuid?,                                              // Refer: space
 ];
 
 /** Annotation: margin comment */

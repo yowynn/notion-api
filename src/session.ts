@@ -54,7 +54,7 @@ export class Session {
     }
 
     public async request(api: string, body: any = {}): Promise<any> {
-        // log.info(`Requesting ${api}`);
+        log.info(`Requesting ${api}`);
         const response = await fetch(`${this.apiUrl}/${api}`, {
             method: 'POST',
             headers: this.get_headers(),

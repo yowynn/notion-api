@@ -49,7 +49,7 @@ export class Client {
         if (loadPageChunk) {
             await this.recordMap.load_page_chunk(id);
         }
-        const r = await this.recordMap.get_record('block', id);
+        const r = await this.recordMap.get_record('block', id, !loadPageChunk);
         const block = new_record(this, r, 'block');
         return block as block;
     }
