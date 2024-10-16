@@ -41,33 +41,33 @@ export class RecordMap {
     }
 
     public get_record_cache(table: rt.collection_record_type, id: rt.literal_uuid) {
-        const typeMap = this.map[table];
-        if (!typeMap) {
+        const type_map = this.map[table];
+        if (!type_map) {
             throw new UnsupportedError('RecordMap.get_record_cache', table);
         }
-        return typeMap[id];
+        return type_map[id];
     }
 
     private cache_record(table: rt.collection_record_type, record: rt.record) {
-        const typeMap = this.map[table];
-        if (!typeMap) {
+        const type_map = this.map[table];
+        if (!type_map) {
             console.error('UnsupportedError: RecordMap.set_record', table);
             return;
         }
-        typeMap[record.id] = record;
+        type_map[record.id] = record;
     }
 
     private cache_records(data: any) {
-        const recordMap = data?.recordMap;
-        if (!recordMap) {
+        const record_map = data?.recordMap;
+        if (!record_map) {
             return;
         }
-        const recordMapVersion = recordMap.__version__;
-        for (const type in recordMap) {
-            const records = recordMap[type];
+        const record_map_version = record_map.__version__;
+        for (const type in record_map) {
+            const records = record_map[type];
             for (const id in records) {
                 let record: rt.record;
-                if (recordMapVersion === 3) {
+                if (record_map_version === 3) {
                     record = records[id].value.value as rt.record;
                 }
                 else {
@@ -81,7 +81,7 @@ export class RecordMap {
     public async call_api(api: api.api_data) {
         const data = await this.client.request(api.api, api.data);
         if (config.DEBUG_MODE)
-            log.write_json('test/data-demos/recordMap.json', data);
+            log.write_json('test/data-demos/record_map.json', data);
         this.cache_records(data);
         return data;
     }

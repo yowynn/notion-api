@@ -492,6 +492,9 @@ export type record_block = record_core & {
     last_edited_by_table: collection_record_type;               // Last edited by record type
     last_edited_by_id: literal_uuid;                            // Refer: record, last edited by record
     space_id: literal_uuid;                                     // Refer: space, the space where the block is located
+    moved_to_trash_table?: collection_record_type;              // Moved to trash by record type
+    moved_to_trash_id?: literal_uuid;                           // Refer: record, moved to trash by record
+    moved_to_trash_time?: literal_timestamp;                    // Moved to trash time
 }
 
 /** Record */

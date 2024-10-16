@@ -8,8 +8,8 @@ export class record {
     protected _record: rt.record;
     protected _client: Client;
 
-    protected get recordMap() {
-        return this._client.recordMap;
+    protected get record_map() {
+        return this._client.record_map;
     }
 
     public get table(): rt.collection_record_type | null {
@@ -30,7 +30,7 @@ export class record {
     }
 
     public async refresh(update = false) {
-        this._record = await this.recordMap.get_record(this.table as rt.collection_record_type, this.id, update) ?? this._record;
+        this._record = await this.record_map.get_record(this.table as rt.collection_record_type, this.id, update) ?? this._record;
     }
 
     @readonly_record_accessor('version')
@@ -59,7 +59,7 @@ export class record {
             record = record[p];
         }
         record[record_path.slice(-1)[0]] = value;
-        await this.recordMap.set_block_property(this.id, record_path, value);
+        await this.record_map.set_block_property(this.id, record_path, value);
     }
 }
 

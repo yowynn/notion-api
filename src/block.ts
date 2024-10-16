@@ -23,7 +23,7 @@ export class block extends record {
 
     public async get_parent<T = record>() {
         var current_record = this.record as rt.record_block
-        var parent_record = await this.recordMap.get_record(current_record.parent_table, current_record.parent_id);
+        var parent_record = await this.record_map.get_record(current_record.parent_table, current_record.parent_id);
         return new_record(this._client, parent_record, current_record.parent_table) as T;
     }
 
@@ -33,7 +33,7 @@ export class block extends record {
         if (!child_id) {
             return undefined as unknown as T;
         }
-        var child_record = await this.recordMap.get_record('block', child_id);
+        var child_record = await this.record_map.get_record('block', child_id);
         return new_record(this._client, child_record, 'block') as T;
     }
 }

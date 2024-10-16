@@ -25,7 +25,7 @@ export class Client {
 
     private _user_id!: string;
     public readonly session: Session;
-    public readonly recordMap: RecordMap;
+    public readonly record_map: RecordMap;
 
     public get user_id() {
         return this._user_id;
@@ -37,7 +37,7 @@ export class Client {
 
     private constructor() {
         this.session = new Session(config.NOTION_API_URL);
-        this.recordMap = new RecordMap(this);
+        this.record_map = new RecordMap(this);
     }
 
     public async request(path: string, body: any = {}): Promise<any> {
@@ -47,9 +47,9 @@ export class Client {
     public async get_block(id: string, loadPageChunk: boolean = true) {
         id = uuid(id);
         if (loadPageChunk) {
-            await this.recordMap.load_page_chunk(id);
+            await this.record_map.load_page_chunk(id);
         }
-        const r = await this.recordMap.get_record('block', id, !loadPageChunk);
+        const r = await this.record_map.get_record('block', id, !loadPageChunk);
         const block = new_record(this, r, 'block');
         return block as block;
     }

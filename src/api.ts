@@ -47,7 +47,7 @@ export const syncRecordValue = function (table: rt.collection_record_type, id: r
 };
 
 /**
- * API: get a list of blocks data, and their associated records
+ * API: get a list of blocks data, and their associated records (cached)
  *
  * return record type: `block`, `discussion`, `collection`, `comment`, `collection_view`, `team`, ...
  */
@@ -69,7 +69,7 @@ export const loadCachedPageChunks = function (ids: rt.literal_uuid[], limit: num
 };
 
 /**
- * API: get a block data, and its associated records
+ * API: get a block data, and its associated records (cached)
  *
  * return record type: `block`, `discussion`, `collection`, `comment`, `collection_view`, `team`, ...
  */
@@ -89,9 +89,9 @@ export const loadCachedPageChunk = function (id: rt.literal_uuid, limit: number 
 };
 
 /**
- * @deprecated
- * @see loadCachedPageChunk
- * @alias loadCachedPageChunk
+ * API: get a block data, and its associated records
+ *
+ * return record type: `block`, `discussion`, `collection`, `comment`, `collection_view`, `team`, ...
  */
 export const loadPageChunk = function (id: rt.literal_uuid, limit: number = 100) {
     return {
