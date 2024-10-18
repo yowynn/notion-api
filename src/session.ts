@@ -1,112 +1,87 @@
 import fetch from 'node-fetch';
-import { config } from './config.js';
+
+import type * as rt from './record-types.js';
+import config from './config.js';
+import log from './log.js';
 import { ArgumentError, ResponseError, UnsupportedError } from './error.js';
-import { log } from './log.js';
-import { read_from_stdin, stringify } from './util.js';
+import { input } from './util.js';
 
-export class Session {
-    private userAgent: string;
-    private apiUrl: string;
+export default class Session {
+    private _baseUrl: rt.literal_url;
     private _headers: Record<string, string> = {};
-    private _cookies: Record<string, string> = {};
+    private _cookie: Record<string, string> = {};
 
-    public constructor(apiUrl: string, userAgent?: string) {
-        this.apiUrl = apiUrl;
-        this.userAgent = userAgent || config.USER_AGENT;
+    public constructor(baseUrl: rt.literal_url) {
+        this._baseUrl = baseUrl;
+        this.headers['content-type'] = 'application/json';
+        this.headers['user-agent'] = config.NOTION_CLIENT_USER_AGENT;
     }
 
-    public get_cookie(name: string) {
-        return this._cookies[name];
+    public get cookie() {
+        return this._cookie;
     }
 
-    public set_cookie(name: string, value: string) {
-        this._cookies[name] = value;
+    public get headers() {
+        this._headers['cookie'] = this.cookieString;
+        return this._headers;
     }
 
-    public clear_cookies() {
-        this._cookies = {};
+    private get cookieString() {
+        return Object.entries(this._cookie).map(([name, value]) => `${name}=${value}`).join('; ');
     }
 
-    public get_header(name: string) {
-        return this._headers[name];
-    }
-
-    public set_header(name: string, value: string) {
-        this._headers[name] = value;
-    }
-
-    public clear_headers() {
-        this._headers = {};
-    }
-
-    private get_cookie_string() {
-        return Object.entries(this._cookies).map(([name, value]) => `${name}=${value}`).join('; ');
-    }
-
-    private get_headers() {
-        return {
-            'content-type': 'application/json; charset=utf-8',
-            'user-agent': this.userAgent,
-            'notion-client-version': config.NOTION_CLIENT_VERSION,
-            cookie: this.get_cookie_string(),
-            ...this._headers,
-        };
-    }
-
-    public async request(api: string, body: any = {}): Promise<any> {
-        log.info(`Requesting ${api}`);
-        const response = await fetch(`${this.apiUrl}/${api}`, {
-            method: 'POST',
-            headers: this.get_headers(),
-            body: JSON.stringify(body),
+    public async request(method: string, endpoint: string, payload: object = {}): Promise<any> {
+        log.info(`requesting: ${endpoint}`);
+        const response = await fetch(`${this._baseUrl}/${endpoint}`, {
+            method,
+            headers: this.headers,
+            body: JSON.stringify(payload),
         });
         if (!response.ok) {
-            const text = stringify(await response.text());
-            console.log('error data:', JSON.stringify(body, null, 4));
-            throw new ResponseError(api, response, text);
+            const text = await response.text();
+            console.log('error data:', JSON.stringify(payload, null, 4));
+            throw new ResponseError(endpoint, response, text);
         }
-        // set cookies
-        const set_cookie = response.headers.get('set-cookie');
-        if (set_cookie) {
-            const cookies = set_cookie.split(',').map(x => x.split(';')?.[0]?.trim());
-            for (const cookie of cookies) {
-                const [name, value] = cookie.split('=');
-                this.set_cookie(name, value);
+        const setCookie = response.headers.get('set-cookie');
+        if (setCookie) {
+            const pairs = setCookie.split(',').map(x => x.split(';')![0]!.trim().split('='));
+            for (const [name, value] of pairs) {
+                this.cookie[name] = value;
             }
         }
         return await response.json() as any;
     }
 
-    public async authorize_from_token(token_v2: string) {
-        this.set_cookie('token_v2', token_v2);
+    public async authorizeFromToken(token: string) {
+        this.cookie['token_v2'] = token;
         // request some api to get user_id
-        const data = await this.request('getUserAnalyticsSettings');
-        const user_id = data?.user_id as string;
-        if (!user_id) {
-            throw new ArgumentError('authorize_from_token', 'token', token_v2, 'Invalid token');
+        const data = await this.request('POST', 'getUserAnalyticsSettings');
+        const userID = data?.user_id as rt.literal_uuid;
+        if (!userID) {
+            throw new ArgumentError('authorize_from_token', 'token', token, 'Invalid token');
         }
-        return { user_id, token_v2 };
+        return userID;
     }
 
-    public async authorize_from_login(email: string, password: string) {
-        const loginOptions = await this.request('getLoginOptions', { email });
+    public async authorizeFromLogin(email: string, password: string) {
+        const loginOptions = await this.request('POST', 'getLoginOptions', { email });
         if (!loginOptions.hasAccount) {
             throw new ArgumentError('authorize_from_login', 'email', email, 'Account does not exist');
         }
         if (loginOptions.mustReverify) {
             throw new UnsupportedError('authorize_from_login', 'mustReverify');
         }
-        let user_id: string;
+        let userID: rt.literal_uuid;
         if (loginOptions.passwordSignIn) {
-            const loginData = await this.request('loginWithEmail', {
+            const loginData = await this.request('POST', 'loginWithEmail', {
                 email,
                 password,
                 loginOptionsToken: loginOptions.loginOptionsToken,
             });
-            user_id = loginData.userId as string;
+            userID = loginData.userId as rt.literal_uuid;
         }
         else {
-            const temporaryState = await this.request('sendTemporaryPassword', {
+            const temporaryState = await this.request('POST', 'sendTemporaryPassword', {
                 email,
                 loginOptionsToken: loginOptions.loginOptionsToken,
                 disableLoginLink: false,
@@ -114,16 +89,16 @@ export class Session {
                 isSignup: false,
                 shouldHidePasscode: false,
             });
-            password = await read_from_stdin(`Input code from email sent to ${email}: `);
-            const loginData = await this.request('loginWithEmail', {
+            password = await input(`Input code from email sent to ${email}: `);
+            const loginData = await this.request('POST', 'loginWithEmail', {
                 password,
                 state: temporaryState.csrfState,
             });
-            user_id = loginData.userId as string;
+            userID = loginData.userId as rt.literal_uuid;
         }
-        if (!user_id) {
+        if (!userID) {
             throw new UnsupportedError('authorize_from_login', 'unknown error during login');
         }
-        return { user_id, token_v2: this.get_cookie('token_v2') };
+        return userID;
     }
 }

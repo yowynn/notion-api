@@ -1,7 +1,5 @@
-import { config } from './config.js';
-import { ArgumentError, UnsupportedError } from './error.js';
-import { from_rich_text, to_rich_text } from './markdown.js';
-import * as rt from './record-types.js';
+import type * as rt from './record-types.js';
+import { fromRichText, toRichText } from './markdown.js';
 
 export const rt$date2string = function (date: rt.date) {
     switch (date.type) {
@@ -18,11 +16,11 @@ export const rt$date2string = function (date: rt.date) {
 
 
 export const markdown2richtext = function (markdown: string) {
-    return to_rich_text(markdown);
+    return toRichText(markdown);
 }
 
 export const richtext2markdown = function (richtext: rt.rich_text) {
-    return from_rich_text(richtext);
+    return fromRichText(richtext);
 }
 
 export function timestamp2date(number: number) {

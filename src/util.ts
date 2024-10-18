@@ -1,14 +1,15 @@
 import * as readline from 'readline';
 import { v4 as uuidv4 } from 'uuid';
-import { config } from './config.js';
+
+import config from './config.js';
 import { ArgumentError } from './error.js';
 
-export function uuid(id_or_url: string) {
-    let re = id_or_url;
+export function uuid(idOrUrl: string) {
+    let re = idOrUrl;
     if (/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(re)) {    // most common case
         return re;
     }
-    if (re.startsWith(config.NOTION_BASE_URL)) {
+    if (re.startsWith(config.NOTION_URL)) {
         re = re.split('#').slice(-1)[0].split('/').slice(-1)[0].split('&p=').slice(-1)[0].split('?')[0].split('-').slice(-1)[0];
     }
     if (/^[a-f0-9]{32}$/i.test(re)) {
@@ -18,16 +19,16 @@ export function uuid(id_or_url: string) {
         return re.toLowerCase();
     }
     else {
-        throw new ArgumentError('uuid', 'id_or_url', id_or_url);
+        throw new ArgumentError('uuid', 'idOrUrl', idOrUrl);
     }
 }
 
-export function new_uuid() {
+export function newUuid() {
     return uuidv4();
 }
 
 export function stringify(...args: any[]) {
-    const new_args = args.map((item) => {
+    const newArgs = args.map((item) => {
         switch (typeof item) {
             case 'object':
                 return JSON.stringify(item, null, 4);
@@ -35,10 +36,10 @@ export function stringify(...args: any[]) {
                 return item;
         }
     });
-    return new_args.join(' ');
+    return newArgs.join(' ');
 }
 
-export async function read_from_stdin(prompt: string) {
+export async function input(prompt: string) {
     const data = await new Promise<string>(resolve => {
         const rl = readline.createInterface({
             input: process.stdin,

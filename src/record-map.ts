@@ -1,20 +1,19 @@
-import { Client } from './client.js';
-import { config } from './config.js';
+import type * as rt from './record-types.js';
+import type Client from './client.js';
+import config from './config.js';
+import log from './log.js';
 import { UnsupportedError } from './error.js';
-import { log } from './log.js';
-import * as rt from './record-types.js';
-import * as api from './api.js';
 
-type record_map = Partial<Record<rt.collection_record_type, Record<rt.literal_uuid, rt.record>>>;
 
-export class RecordMap {
-    private client: Client;
-    private map: record_map;
+
+export default class RecordMap {
+    private _client: Client;
+    private _map: rt.record_map;
 
 
     public constructor(client: Client) {
-        this.client = client;
-        this.map = {
+        this._client = client;
+        this._map = {
             block: {} as Record<rt.literal_uuid, rt.block>,
             space: {} as Record<rt.literal_uuid, rt.record>,
             team: {} as Record<rt.literal_uuid, rt.record>,
@@ -31,106 +30,58 @@ export class RecordMap {
         };
     }
 
-    public async get_record(table: rt.collection_record_type, id: rt.literal_uuid, update: boolean = true) {
-        let record = this.get_record_cache(table, id);
+    public async get(table: rt.collection_record_type, id: rt.literal_uuid, update: boolean = true, loadPage: boolean = true) {
+        let record = this.getLocal(table, id);
         if (!record || update) {
-            await this.call_api(api.syncRecordValue(table, id));
-            record = this.get_record_cache(table, id);
+            if (table === 'block' && loadPage) {
+                const data = await this._client.sessionApi.loadPage(id);
+                this.merge(data?.recordMap);
+            }
+            else {
+                const data = await this._client.sessionApi.syncRecord(table, id);
+                this.merge(data?.recordMap);
+            }
+            record = this.getLocal(table, id);
         }
         return record;
     }
 
-    public get_record_cache(table: rt.collection_record_type, id: rt.literal_uuid) {
-        const type_map = this.map[table];
-        if (!type_map) {
-            throw new UnsupportedError('RecordMap.get_record_cache', table);
+    public getLocal(table: rt.collection_record_type, id: rt.literal_uuid) {
+        const tableMap = this._map[table];
+        if (!tableMap) {
+            throw new UnsupportedError('RecordMap.getLocal', table);
         }
-        return type_map[id];
+        return tableMap[id];
     }
 
-    private cache_record(table: rt.collection_record_type, record: rt.record) {
-        const type_map = this.map[table];
-        if (!type_map) {
-            console.error('UnsupportedError: RecordMap.set_record', table);
+    public merge(map: any) {
+        if (!map) {
             return;
         }
-        type_map[record.id] = record;
-    }
-
-    private cache_records(data: any) {
-        const record_map = data?.recordMap;
-        if (!record_map) {
-            return;
+        if (config.DEBUG_MODE) {
+            log.writeFile('test/data-demos/record_map.json', map);
         }
-        const record_map_version = record_map.__version__;
-        for (const type in record_map) {
-            const records = record_map[type];
-            for (const id in records) {
-                let record: rt.record;
-                if (record_map_version === 3) {
-                    record = records[id].value.value as rt.record;
+        const mapVersion = map.__version__ as number;
+        for (const table in map) {
+            const records = map[table];
+            const tableMap = this._map[table as rt.collection_record_type];
+            if (tableMap) {
+                for (const id in records) {
+                    let record: rt.record;
+                    if (mapVersion === 3) {
+                        record = records[id].value.value as rt.record;
+                    }
+                    else {
+                        record = records[id].value as rt.record;
+                    }
+                    tableMap[id] = record;
                 }
-                else {
-                    record = records[id].value as rt.record;
-                }
-                this.cache_record(type as rt.collection_record_type, record);
             }
-        }
-    }
-
-    public async call_api(api: api.api_data) {
-        const data = await this.client.request(api.api, api.data);
-        if (config.DEBUG_MODE)
-            log.write_json('test/data-demos/record_map.json', data);
-        this.cache_records(data);
-        return data;
-    }
-
-    public async load_page_chunk(block_id: rt.literal_uuid) {
-        await this.call_api(api.loadPageChunk(block_id));
-    }
-
-    public async set_block_property(id: rt.literal_uuid, path: string[], value: any) {
-        const now = Date.now();
-        const last_edited_args = {
-            last_edited_by_id: this.client.user_id,
-            last_edited_by_table: 'notion_user',
-            last_edited_time: now,
-        }
-        // find page parent
-        const parent = await this.get_block_parent_page(id);
-
-        const operations = [
-            {
-                pointer: { table: 'block' as rt.collection_record_type, id: id },
-                path,
-                command: 'set',
-                args: value,
-            },
-            {
-                pointer: { table: 'block' as rt.collection_record_type, id: id },
-                path: [],
-                command: 'update',
-                args: last_edited_args,
+            else {
+                console.error('UnsupportedError: RecordMap.set_record', table);
+                return;
             }
-        ];
-        if (parent.id !== id) {
-            operations.push({
-                pointer: { table: 'block' as rt.collection_record_type, id: parent.id },
-                path: [],
-                command: 'update',
-                args: last_edited_args,
-            });
-        }
-        await this.call_api(api.saveTransactionFanout(operations));
-        await this.get_record('block', id, true);
-    }
 
-    private async get_block_parent_page(id: string) {
-        var record = await this.get_record('block', id, false) as rt.block;
-        while (record.type !== 'page' && record.type !== 'collection_view_page' && record.type !== 'collection_view' && record.parent_table === 'block') {
-            record = await this.get_record('block', record.parent_id, false) as rt.block;
         }
-        return record;
     }
 }

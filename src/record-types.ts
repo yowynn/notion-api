@@ -197,64 +197,14 @@ export type collection_record_type =
     ;
 
 /** Block type collection */
-export type collection_block_type =
-    | 'text'                                                    // Text
-    | 'header'                                                  // Heading 1
-    | 'sub_header'                                              // Heading 2
-    | 'sub_sub_header'                                          // Heading 3
-    | 'to_do'                                                   // To-do
-    | 'bulleted_list'                                           // Bulleted List
-    | 'numbered_list'                                           // Numbered List
-    | 'toggle'                                                  // Toggle list
-    | 'code'                                                    // Code
-    | 'quote'                                                   // Quote
-    | 'callout'                                                 // Callout
-    | 'equation'                                                // Block equation
-    | 'transclusion_container'                                  // Synced block (source)
-    | 'transclusion_reference'                                  // Synced block (reference)
-    | 'column_list'                                             // Columns (list)
-    | 'column'                                                  // Columns (column)
-    | 'table'                                                   // Table
-    | 'table_row'                                               // Table (row)
-    | 'divider'                                                 // Divider
-    | 'alias'                                                   // Link to page (block)
-    | 'image'                                                   // Image
-    | 'page'                                                    // Page
-    | 'collection_view_page'                                    // Database page / wiki page
-    | 'collection_view'                                         // Database view / linked database view
-    | 'bookmark'                                                // Bookmark
-    | 'file'                                                    // File
-    | 'embed'                                                   // Embed
-    ;
+export type collection_block_type = block['type'];
 
 /** Date type collection */
-export type collection_date_type =
-    | 'date'                                                    // Date
-    | 'datetime'                                                // Datetime
-    | 'daterange'                                               // Date range
-    | 'datetimerange'                                           // Datetime range
-    ;
+export type collection_date_type = date['type'];
 
 /** Annotation tag collection */
-export type collection_annotation_tag =
-    | 'b'                                                       // Bold
-    | 'i'                                                       // Italic
-    | '_'                                                       // Underline
-    | 's'                                                       // Strikethrough
-    | 'c'                                                       // Code
-    | 'e'                                                       // Equation
-    | 'h'                                                       // Highlight
-    | 'a'                                                       // Link
-    | 'u'                                                       // User mention
-    | 'd'                                                       // Date mention
-    | 'tv'                                                      // Template variable mention
-    | 'p'                                                       // Page mention
-    | 'm'                                                       // Margin comment
-    | 'sa'                                                      // Suggested annotation
-    | 'sua'                                                     // Suggested un-annotation
-    | 'si'                                                      // Suggested insertion
-    | 'sr'                                                      // Suggested removal
-    ;
+export type collection_annotation_tag = annotation[0];
+
 
 /** Template variable type collection */
 export type collection_template_variable_type =
@@ -469,6 +419,9 @@ export type page_section_visibility = {
     backlinks: option_section_backlinks;                        // Backlinks
     margin_comments: option_section_margin_comments;            // Margin comments
 }
+
+/** Record map */
+export type record_map = Partial<Record<collection_record_type, Record<literal_uuid, record>>>;
 
 /** Record core */
 export type record_core = {

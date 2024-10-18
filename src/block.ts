@@ -1,10 +1,9 @@
-import { read } from 'fs';
+import type * as rt from './record-types.js';
+import Record, { as_record, record_accessor, readonly_record_accessor } from './record.js';
 import { markdown2richtext, richtext2markdown } from './converter.js';
-import { record_accessor, readonly_record_accessor, record } from './record.js';
-import * as rt from './record-types.js';
-import { new_record } from './record-factory.js';
 
-export class block extends record {
+@as_record
+export default class block extends Record {
     public get table() {
         return 'block' as rt.collection_record_type;
     }
@@ -21,10 +20,10 @@ export class block extends record {
     @readonly_record_accessor('content', (x) => (x as any[] ?? []).length)
     public accessor child_count!: number;
 
-    public async get_parent<T = record>() {
+    public async get_parent<T = Record>() {
         var current_record = this.record as rt.record_block
-        var parent_record = await this.record_map.get_record(current_record.parent_table, current_record.parent_id);
-        return new_record(this._client, parent_record, current_record.parent_table) as T;
+        var parent_record = await this.record_map.get(current_record.parent_table, current_record.parent_id);
+        return Record.new_record(this._client, parent_record, current_record.parent_table) as T;
     }
 
     public async get_child<T = block>(index: number) {
@@ -33,7 +32,7 @@ export class block extends record {
         if (!child_id) {
             return undefined as unknown as T;
         }
-        var child_record = await this.record_map.get_record('block', child_id);
-        return new_record(this._client, child_record, 'block') as T;
+        var child_record = await this.record_map.get('block', child_id);
+        return Record.new_record(this._client, child_record, 'block') as T;
     }
 }

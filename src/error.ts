@@ -1,13 +1,13 @@
-import { Response } from 'node-fetch';
+import type { Response } from 'node-fetch';
 export class ArgumentError extends Error {
-    constructor(func_name: string, arg_name: string, arg_value: any, additional_info?: string) {
-        if (additional_info) {
-            additional_info = ` (${additional_info})`;
+    constructor(funcName: string, argName: string, argValue: any, additionalInfo?: string) {
+        if (additionalInfo) {
+            additionalInfo = ` (${additionalInfo})`;
         }
         else {
-            additional_info = '';
+            additionalInfo = '';
         }
-        super(`Invalid argument ${arg_name} in function ${func_name}: ${arg_value}${additional_info}`);
+        super(`Invalid argument ${argName} in function ${funcName}: ${argValue}${additionalInfo}`);
         this.name = 'ArgumentError';
     }
 }

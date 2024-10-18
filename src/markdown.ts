@@ -1,8 +1,8 @@
+import type * as rt from './record-types.js';
+import config from './config.js';
+import log from './log.js';
 import { rt$date2string } from './converter.js';
-import * as rt from './record-types.js';
-import { config } from './config.js';
 import { ArgumentError, UnsupportedError } from './error.js';
-import { log } from './log.js';
 
 const ORDERED_ANNOTATION_TAG: rt.collection_annotation_tag[] = [
     'p',                                                        // Page mention
@@ -53,10 +53,10 @@ const MARKDOWN_ESCAPE_REGEX = new RegExp(`[${MARKDOWN_ESCAPE_CHARLIST.join('').r
 
 const EMPTY = [] as any[];
 
-export const from_rich_text = function (rich_text: rt.rich_text, use_html_tag: boolean = true, reference: rt.reference_pointer[] = []) {
+export const fromRichText = function (richText: rt.rich_text, useHtmlTags: boolean = true, reference: rt.reference_pointer[] = []) {
     let markdown = '';
-    let bold_alt = false;
-    for (const item of rich_text) {
+    let boldAlt = false;
+    for (const item of richText) {
         let styles = '';
         let text = item[0];
         let annotations = item[1] ?? EMPTY as rt.annotation[];
@@ -66,15 +66,15 @@ export const from_rich_text = function (rich_text: rt.rich_text, use_html_tag: b
             const tag = annotation[0];
             switch (tag) {
                 case 'b': {
-                    text = bold_alt ? `__${text}__` : `**${text}**`;
+                    text = boldAlt ? `__${text}__` : `**${text}**`;
                     break;
                 }
                 case 'i': {
-                    text = bold_alt ? `_${text}_` : `*${text}*`;
+                    text = boldAlt ? `_${text}_` : `*${text}*`;
                     break;
                 }
                 case '_': {
-                    text = use_html_tag ? `<u>${text}</u>` : text;
+                    text = useHtmlTags ? `<u>${text}</u>` : text;
                     break;
                 }
                 case 's': {
@@ -108,17 +108,17 @@ export const from_rich_text = function (rich_text: rt.rich_text, use_html_tag: b
                     break;
                 }
                 case 'u': {
-                    const user_id = annotation[1];
-                    if (use_html_tag) {
-                        text = `<notion notion_user="${user_id}">@${text}</notion>`;
+                    const userId = annotation[1];
+                    if (useHtmlTags) {
+                        text = `<notion notion_user="${userId}">@${text}</notion>`;
                     }
-                    reference.push({ table: 'notion_user', id: user_id });
+                    reference.push({ table: 'notion_user', id: userId });
                     break;
                 }
                 case 'd': {
                     const date = annotation[1];
                     text = rt$date2string(date);
-                    if (use_html_tag) {
+                    if (useHtmlTags) {
                         text = `<notion date="${Buffer.from(JSON.stringify(date)).toString('base64')}">${text}</notion>`;
                     }
                     break;
@@ -126,17 +126,17 @@ export const from_rich_text = function (rich_text: rt.rich_text, use_html_tag: b
                 case 'tv': {
                     const tv = annotation[1];
                     text = `@${tv.type}`
-                    if (use_html_tag) {
+                    if (useHtmlTags) {
                         text = `<notion template_variable="${tv.type}">${text}</notion>`;
                     }
                     break;
                 }
                 case 'p': {
-                    const block_id = annotation[1];
-                    if (use_html_tag) {
-                        text = `<notion block="${block_id}">${text}</notion>`;
+                    const blockId = annotation[1];
+                    if (useHtmlTags) {
+                        text = `<notion block="${blockId}">${text}</notion>`;
                     }
-                    reference.push({ table: 'block', id: block_id });
+                    reference.push({ table: 'block', id: blockId });
                     break;
                 }
                 case 'm':
@@ -160,31 +160,31 @@ export const from_rich_text = function (rich_text: rt.rich_text, use_html_tag: b
     return markdown;
 }
 
-export const to_rich_text = function (markdown: string) {
-    const parse_tag = (tag: string) => {
+export const toRichText = function (markdown: string) {
+    const parseHtmlTag = (tag: string) => {
         const match = tag.match(/<(\/?)([a-zA-Z0-9-]+)([^>]*)(\/?)>/);
         if (!match) {
             throw new ArgumentError('parse_tag', 'tag', tag, 'Invalid tag');
         }
-        const is_close_tag = match[1] === '/';
-        const tag_name = match[2];
+        const isCloseTag = match[1] === '/';
+        const tagName = match[2];
         const attributes = {} as { [key: string]: string; };
-        const attr_match = match[3].match(/([a-zA-Z0-9-]+)="(.*?)"/g);
-        if (attr_match) {
-            for (const attr of attr_match) {
+        const attrMatch = match[3].match(/([a-zA-Z0-9-]+)="(.*?)"/g);
+        if (attrMatch) {
+            for (const attr of attrMatch) {
                 const [_, key, value] = attr.match(/([a-zA-Z0-9-]+)="(.*?)"/) as RegExpMatchArray;
                 attributes[key] = value;
             }
         }
-        const is_self_closed = match[4] === '/';
-        return { tag: tag_name, attributes, is_close_tag, is_self_closed };
+        const isSelfClosed = match[4] === '/';
+        return { tag: tagName, attributes, isCloseTag, isSelfClosed };
     }
-    const rich_text = [] as rt.rich_text;
+    const richText = [] as rt.rich_text;
     let text = '';
     let annotations = [] as rt.annotation[];
-    const push_text = () => {
+    const pushText = () => {
         if (text) {
-            rich_text.push([text, [...annotations]]);
+            richText.push([text, [...annotations]]);
             text = '';
         }
     };
@@ -196,7 +196,7 @@ export const to_rich_text = function (markdown: string) {
     while (true) {
         let char = markdown[index];
         if (!char) {
-            push_text();
+            pushText();
             break;
         }
         else if (escape) {
@@ -207,7 +207,7 @@ export const to_rich_text = function (markdown: string) {
             escape = true;
         }
         else if (char === '*') {
-            push_text();
+            pushText();
             const sign_b = markdown[index + 1] === '*';
             const sign_i = markdown[index + 1] !== '*' || markdown[index + 2] === '*';
             const tag = stack[lastp];
@@ -259,7 +259,7 @@ export const to_rich_text = function (markdown: string) {
             }
         }
         else if (char === '_') {
-            push_text();
+            pushText();
             const sign_b = markdown[index + 1] === '_';
             const sign_i = markdown[index + 1] !== '_' || markdown[index + 2] === '_';
             const tag = stack[lastp];
@@ -312,7 +312,7 @@ export const to_rich_text = function (markdown: string) {
         }
         else if (char === '~') {
             if (markdown[index + 1] === '~') {
-                push_text();
+                pushText();
                 if (stack[lastp] === '~~') {
                     const s = annotations.pop()!; // pop s
                     lastp--;
@@ -328,7 +328,7 @@ export const to_rich_text = function (markdown: string) {
             }
         }
         else if (char === '`') {
-            push_text();
+            pushText();
             let count = 0;
             while (char = markdown[index + ++count]) {
                 if (char === '`') {
@@ -342,20 +342,20 @@ export const to_rich_text = function (markdown: string) {
             }
             annotations.push(['c']);
             text = markdown.slice(index + 1, index + count).replace(/``/g, '`');
-            push_text();
+            pushText();
             annotations.pop();
             index += count;
         }
         else if (char === '$') {
-            push_text();
+            pushText();
             let count = 0;
-            let sub_escape = false;
+            let subEscape = false;
             while (char = markdown[index + ++count]) {
-                if (sub_escape) {
-                    sub_escape = false;
+                if (subEscape) {
+                    subEscape = false;
                 }
                 else if (char === '\\') {
-                    sub_escape = true;
+                    subEscape = true;
                 }
                 else if (char === '$') {
                     break;
@@ -363,18 +363,18 @@ export const to_rich_text = function (markdown: string) {
             }
             annotations.push(['e', markdown.slice(index + 1, index + count)]);
             text = '⁍';
-            push_text();
+            pushText();
             annotations.pop();
             index += count;
         }
         else if (char === '[') {
-            push_text();
+            pushText();
             annotations.push(['a', '']);
             stack[++lastp] = '[';
         }
         else if (char === ']') {
             if (stack[lastp] === '[') {
-                push_text();
+                pushText();
                 const a = annotations.pop()!; // pop a
                 lastp--;
                 if (markdown[index + 1] === '(') {
@@ -390,33 +390,33 @@ export const to_rich_text = function (markdown: string) {
         }
         else if (char === '<') {
             const end = markdown.indexOf('>', index);
-            const tag_info = parse_tag(markdown.slice(index, end + 1));
-            const [tag, annotation_count_text] = stack[lastp].split(':');
-            if (tag_info.is_close_tag && tag === tag_info.tag) {
-                const annotation_count = annotation_count_text ? Number(annotation_count_text) : 1;
-                if (tag_info.tag === 'notion') {
+            const tagInfo = parseHtmlTag(markdown.slice(index, end + 1));
+            const [tag, annotationCountText] = stack[lastp].split(':');
+            if (tagInfo.isCloseTag && tag === tagInfo.tag) {
+                const annotationCount = annotationCountText ? Number(annotationCountText) : 1;
+                if (tagInfo.tag === 'notion') {
                     text = '‣';
                 }
-                push_text();
-                for (let i = 0; i < annotation_count; i++) {
+                pushText();
+                for (let i = 0; i < annotationCount; i++) {
                     annotations.pop();
                 }
                 lastp--;
             }
             else {
-                switch (tag_info.tag) {
+                switch (tagInfo.tag) {
                     case 'br': {
                         text += '\n';
                     }
                     case 'u': {
-                        push_text();
+                        pushText();
                         annotations.push(['_']);
                         stack[++lastp] = 'u';
                         break;
                     }
                     case 'span': {
-                        push_text();
-                        const style = tag_info.attributes.style;
+                        pushText();
+                        const style = tagInfo.attributes.style;
                         if (style) {
                             const styles = {} as { [key: string]: string; };
                             const match = style.match(/([a-zA-Z0-9-]+): ([^;]+);/g);
@@ -427,14 +427,14 @@ export const to_rich_text = function (markdown: string) {
                                 }
                             }
                             const color = styles.color;
-                            const background_color = styles['background-color'];
+                            const backgroundColor = styles['background-color'];
                             let count = 0;
                             if (color) {
                                 annotations.push(['h', color as rt.option_highlight_color]);
                                 count++;
                             }
-                            if (background_color) {
-                                annotations.push(['h', `${background_color}_background` as rt.option_highlight_color]);
+                            if (backgroundColor) {
+                                annotations.push(['h', `${backgroundColor}_background` as rt.option_highlight_color]);
                                 count++;
                             }
                         }
@@ -442,11 +442,11 @@ export const to_rich_text = function (markdown: string) {
                         break;
                     }
                     case 'notion': {
-                        push_text();
-                        const date = tag_info.attributes.date;
-                        const user = tag_info.attributes.notion_user as rt.literal_uuid;
-                        const block = tag_info.attributes.block as rt.literal_uuid;
-                        const tv = tag_info.attributes.template_variable as rt.collection_template_variable_type;
+                        pushText();
+                        const date = tagInfo.attributes.date;
+                        const user = tagInfo.attributes.notion_user as rt.literal_uuid;
+                        const block = tagInfo.attributes.block as rt.literal_uuid;
+                        const tv = tagInfo.attributes.template_variable as rt.collection_template_variable_type;
                         if (date) {
                             annotations.push(['d', JSON.parse(Buffer.from(date, 'base64').toString())]);
                         }
@@ -474,8 +474,7 @@ export const to_rich_text = function (markdown: string) {
         }
         index++;
     }
-    // log.info('to_rich_text', rich_text);
-    return rich_text;
+    return richText;
 };
 
 
