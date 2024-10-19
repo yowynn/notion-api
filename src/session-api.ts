@@ -28,12 +28,12 @@ export default class SessionApi {
      *
      * return record type: `any`
      */
-    public async syncRecords(recordPointers: rt.reference_pointer[]) {
+    public async syncRecords(pointerList: rt.reference_pointer[]) {
         const endpoint = 'syncRecordValues';
         // * also: const endpoint = 'syncRecordValuesMain';
         // * also: const endpoint = 'syncRecordValuesSpace';
         const payload = {
-            requests: recordPointers.map(pointer => ({
+            requests: pointerList.map(pointer => ({
                 pointer,
                 version: -1,
             })),
@@ -46,8 +46,8 @@ export default class SessionApi {
      *
      * return record type: `any`
      */
-    public async syncRecord(table: rt.collection_record_type, id: rt.literal_uuid) {
-        return this.syncRecords([{ table, id }]);
+    public async syncRecord(pointer: rt.reference_pointer) {
+        return this.syncRecords([pointer]);
     }
 
     /**

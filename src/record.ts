@@ -8,7 +8,7 @@ const recordTypeMap: { [key: string]: new (client: any, record: any) => Record; 
 
 @as_record()
 export default class Record {
-    static create(client: Client, record: rt.record, table: rt.collection_record_type = 'block') {
+    static wrap(client: Client, record: rt.record, table: rt.collection_record_type = 'block') {
         const type = (record as any).type;
         let key = table;
         if (type) {
@@ -70,7 +70,7 @@ export default class Record {
         }
         record[propertyPath.slice(-1)[0]] = value;
         this._taskCount++;
-        await this._client.action.setRecordProperty('block', this.id, propertyPath, value);
+        await this._client.action.setRecordProperty({ table: 'block', id: this.id }, propertyPath, value);
         this._taskCount--;
     }
 
@@ -78,7 +78,7 @@ export default class Record {
         while (this._taskCount > 0) {
             await new Promise(resolve => setTimeout(resolve, 10));
         }
-        this._record = await this.recordMap.get(this.table as rt.collection_record_type, this.id, update) ?? this._record;
+        this._record = await this.recordMap.get({ table: this.table as rt.collection_record_type, id: this.id }) ?? this._record;
     }
 }
 

@@ -30,20 +30,50 @@ export default class Transation {
         this._isSilent = false;
     }
 
-    public opSet(table: rt.collection_record_type, id: rt.literal_uuid, path: string[], args: any) {
+    public opSet(pointer: rt.reference_pointer, path: string[], args: any) {
         const operation = {
             command: 'set',
-            pointer: { table, id },
+            pointer,
             path,
             args,
         }
         this.addOperation(operation);
     }
 
-    public opUpdate(table: rt.collection_record_type, id: rt.literal_uuid, path: string[], args: any) {
+    public opUpdate(pointer: rt.reference_pointer, path: string[], args: any) {
         const operation = {
             command: 'update',
-            pointer: { table, id },
+            pointer,
+            path,
+            args,
+        }
+        this.addOperation(operation);
+    }
+
+    public opListRemove(pointer: rt.reference_pointer, path: string[], args: { id: any }) {
+        const operation = {
+            command: 'listRemove',
+            pointer,
+            path,
+            args,
+        }
+        this.addOperation(operation);
+    }
+
+    public opListBefore(pointer: rt.reference_pointer, path: string[], args: { before?: any, id: any }) {
+        const operation = {
+            command: 'listBefore',
+            pointer,
+            path,
+            args,
+        }
+        this.addOperation(operation);
+    }
+
+    public opListAfter(pointer: rt.reference_pointer, path: string[], args: { after?: any, id: any }) {
+        const operation = {
+            command: 'listAfter',
+            pointer,
             path,
             args,
         }
@@ -90,30 +120,31 @@ export default class Transation {
             last_edited_by_table: 'notion_user',
             last_edited_time: Date.now(),
         }
-        const editedRecordIds: rt.literal_uuid[] = [];
+        const editedPointerList: rt.reference_pointer[] = [];
         for (let operation of operations) {
             if (operation.command === 'set' || operation.command === 'update') {
-                editedRecordIds.push(operation.pointer.id);
+                editedPointerList.push(operation.pointer);
                 if (operation.pointer.table === 'block') {
-                    const page = await this.getParentPage(operation.pointer.id);
-                    if (page?.id !== operation.pointer.id) {
-                        editedRecordIds.push(page.id);
+                    const pagePointer = await this.getParentPage(operation.pointer);
+                    if (pagePointer?.id !== operation.pointer.id) {
+                        editedPointerList.push(pagePointer);
                     }
                 }
             }
         }
-        editedRecordIds.forEach((id, index) => {
-            if (editedRecordIds.indexOf(id) === index) {
-                this.opUpdate('block', id, [], lastEditedInfo);
-            }
+        editedPointerList.forEach(pointer => {
+            this.opUpdate(pointer, [], lastEditedInfo);
         });
     }
 
-    private async getParentPage(id: rt.literal_uuid) {
-        var record = await this._client.recordMap.get('block', id, false) as rt.block;
+    private async getParentPage(pointer: rt.reference_pointer) {
+        var record = await this._client.recordMap.get(pointer) as rt.block;
+        const newPointer = Object.assign({}, pointer);
         while (record.type !== 'page' && record.type !== 'collection_view_page' && record.type !== 'collection_view' && record.parent_table === 'block') {
-            record = await this._client.recordMap.get('block', record.parent_id, false) as rt.block;
+            newPointer.table = record.parent_table;
+            newPointer.id = record.parent_id;
+            record = await this._client.recordMap.get(newPointer) as rt.block;
         }
-        return record;
+        return newPointer;
     }
 }

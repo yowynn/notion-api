@@ -47,7 +47,7 @@ export default class Client {
 
         this.recordMap = new RecordMap(this);
         this.transaction = new Transation(this);
-        this.action = new Action(this.transaction);
+        this.action = new Action(this);
     }
 
     public beginTransaction(isSilent: boolean = false) {
@@ -60,8 +60,33 @@ export default class Client {
 
     public async getBlock(id: string, loadPageChunk: boolean = true) {
         id = uuid(id);
-        const r = await this.recordMap.get('block', id, true, loadPageChunk);
-        const block = Record.create(this, r, 'block') as Block;
+        const r = await this.recordMap.get({ table: 'block', id }, true, loadPageChunk);
+        const block = Record.wrap(this, r, 'block') as Block;
+        return block;
+    }
+
+    public async createBlock(type: rt.collection_block_type, where: 'before' | 'after' | 'child', anchorBlock: Block) {
+        const ancherRecord = anchorBlock.record as rt.block;
+        const pointer = await this.action.createRecordPlaceholder('block', type);
+        switch (where) {
+            case 'before': {
+                const parentPointer = { table: ancherRecord.parent_table, id: ancherRecord.parent_id, spaceId: ancherRecord.space_id };
+                await this.action.setRecordParent(pointer, parentPointer, -1, anchorBlock.id);
+                break;
+            }
+            case 'after': {
+                const parentPointer = { table: ancherRecord.parent_table, id: ancherRecord.parent_id, spaceId: ancherRecord.space_id };
+                await this.action.setRecordParent(pointer, parentPointer, 1, anchorBlock.id);
+                break;
+            }
+            case 'child': {
+                const parentPointer = { table: anchorBlock.table, id: anchorBlock.id, spaceId: ancherRecord.space_id };
+                await this.action.setRecordParent(pointer, parentPointer);
+                break;
+            }
+        }
+        const r = await this.recordMap.get(pointer);
+        const block = Record.wrap(this, r, 'block') as Block;
         return block;
     }
 }

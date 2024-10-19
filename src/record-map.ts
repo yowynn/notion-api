@@ -27,28 +27,42 @@ export default class RecordMap {
         };
     }
 
-    public async get(table: rt.collection_record_type, id: rt.literal_uuid, update: boolean = true, loadPage: boolean = true) {
-        let record = this.getLocal(table, id);
+    public async get(pointer: rt.reference_pointer, update: boolean = false, loadPage: boolean = false) {
+        let record = this.getLocal(pointer);
         if (!record || update) {
-            if (table === 'block' && loadPage) {
-                const data = await this._client.sessionApi.loadPage(id);
+            if (pointer.table === 'block' && loadPage) {
+                const data = await this._client.sessionApi.loadPage(pointer.id);
                 this.merge(data?.recordMap);
             }
             else {
-                const data = await this._client.sessionApi.syncRecord(table, id);
+                const data = await this._client.sessionApi.syncRecord(pointer);
                 this.merge(data?.recordMap);
             }
-            record = this.getLocal(table, id);
+            record = this.getLocal(pointer);
         }
         return record;
     }
 
-    public getLocal(table: rt.collection_record_type, id: rt.literal_uuid) {
-        const tableMap = this._map[table];
+    public async getList(pointerList: rt.reference_pointer[]) {
+        const data = await this._client.sessionApi.syncRecords(pointerList);
+        this.merge(data?.recordMap);
+        return pointerList.map(pointer => this.getLocal(pointer));
+    }
+
+    public getLocal(pointer: rt.reference_pointer) {
+        const tableMap = this._map[pointer.table];
         if (!tableMap) {
-            throw new UnsupportedError('RecordMap.getLocal', table);
+            throw new UnsupportedError('RecordMap.getLocal', pointer.table);
         }
-        return tableMap[id];
+        return tableMap[pointer.id];
+    }
+
+    public setLocal(pointer: rt.reference_pointer, record: rt.record) {
+        const tableMap = this._map[pointer.table];
+        if (!tableMap) {
+            throw new UnsupportedError('RecordMap.setLocal', pointer.table);
+        }
+        tableMap[pointer.id] = record;
     }
 
     public merge(map: any) {
