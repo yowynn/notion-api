@@ -50,6 +50,14 @@ export default class Client {
         this.action = new Action(this.transaction);
     }
 
+    public beginTransaction(isSilent: boolean = false) {
+        this.transaction.begin(isSilent);
+    }
+
+    public async endTransaction(refreshRecords: boolean = false) {
+        await this.transaction.end(refreshRecords);
+    }
+
     public async getBlock(id: string, loadPageChunk: boolean = true) {
         id = uuid(id);
         const r = await this.recordMap.get('block', id, true, loadPageChunk);

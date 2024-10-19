@@ -56,7 +56,7 @@ export default class RecordMap {
             return;
         }
         if (config.DEBUG_MODE) {
-            log.writeFile('test/data-demos/record_map.json', map);
+            log.writeFile('test/data-demos/recordMap.json', map);
         }
         const mapVersion = map.__version__ as number;
         for (const table in map) {
