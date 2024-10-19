@@ -17,7 +17,7 @@ const ORDERED_ANNOTATION_TAG: rt.collection_annotation_tag[] = [
     'a',                                                        // Link
     '_',                                                        // Underline
     'h',                                                        // Highlight
-// * unsupported below
+    // * unsupported below
     'm',                                                        // Margin comment
     'sa',                                                       // Suggested annotation
     'sua',                                                      // Suggested un-annotation
@@ -476,5 +476,3 @@ export const toRichText = function (markdown: string) {
     }
     return richText;
 };
-
-

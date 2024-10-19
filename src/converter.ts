@@ -14,7 +14,6 @@ export const rt$date2string = function (date: rt.date) {
     }
 }
 
-
 export const markdown2richtext = function (markdown: string) {
     return toRichText(markdown);
 }

@@ -56,11 +56,11 @@ export default class Session {
         this.cookie['token_v2'] = token;
         // request some api to get user_id
         const data = await this.request('POST', 'getUserAnalyticsSettings');
-        const userID = data?.user_id as rt.literal_uuid;
-        if (!userID) {
+        const userId = data?.user_id as rt.literal_uuid;
+        if (!userId) {
             throw new ArgumentError('authorize_from_token', 'token', token, 'Invalid token');
         }
-        return userID;
+        return userId;
     }
 
     public async authorizeFromLogin(email: string, password: string) {
@@ -71,14 +71,14 @@ export default class Session {
         if (loginOptions.mustReverify) {
             throw new UnsupportedError('authorize_from_login', 'mustReverify');
         }
-        let userID: rt.literal_uuid;
+        let userId: rt.literal_uuid;
         if (loginOptions.passwordSignIn) {
             const loginData = await this.request('POST', 'loginWithEmail', {
                 email,
                 password,
                 loginOptionsToken: loginOptions.loginOptionsToken,
             });
-            userID = loginData.userId as rt.literal_uuid;
+            userId = loginData.userId as rt.literal_uuid;
         }
         else {
             const temporaryState = await this.request('POST', 'sendTemporaryPassword', {
@@ -94,11 +94,11 @@ export default class Session {
                 password,
                 state: temporaryState.csrfState,
             });
-            userID = loginData.userId as rt.literal_uuid;
+            userId = loginData.userId as rt.literal_uuid;
         }
-        if (!userID) {
+        if (!userId) {
             throw new UnsupportedError('authorize_from_login', 'unknown error during login');
         }
-        return userID;
+        return userId;
     }
 }

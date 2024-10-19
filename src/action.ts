@@ -2,7 +2,6 @@ import type * as rt from './record-types.js';
 import type Transation from './transaction.js';
 
 export default class Action {
-
     private _transaction: Transation;
 
     public constructor(transaction: Transation) {

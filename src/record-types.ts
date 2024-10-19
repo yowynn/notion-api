@@ -205,7 +205,6 @@ export type collection_date_type = date['type'];
 /** Annotation tag collection */
 export type collection_annotation_tag = annotation[0];
 
-
 /** Template variable type collection */
 export type collection_template_variable_type =
     | 'now'                                                     // Time when duplicated
@@ -794,7 +793,6 @@ export type block_collection_view_page = record_block & {
         social_media_image_preview_url?: literal_url;           // Social media image preview URL, auto-generated
     };
 };
-
 
 /**
  * Block: database view / linked database view

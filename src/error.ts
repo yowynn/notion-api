@@ -33,3 +33,10 @@ export class ReadonlyModificationError extends Error {
         this.name = 'ReadonlyModificationError';
     }
 }
+
+export class DuplicateKeyError extends Error {
+    constructor(where: string, key: string) {
+        super(`Duplicate key at ${where}: ${key}`);
+        this.name = 'DuplicateKeyError';
+    }
+}

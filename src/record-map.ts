@@ -4,12 +4,9 @@ import config from './config.js';
 import log from './log.js';
 import { UnsupportedError } from './error.js';
 
-
-
 export default class RecordMap {
     private _client: Client;
     private _map: rt.record_map;
-
 
     public constructor(client: Client) {
         this._client = client;
@@ -63,6 +60,9 @@ export default class RecordMap {
         }
         const mapVersion = map.__version__ as number;
         for (const table in map) {
+            if (table === '__version__') {
+                continue;
+            }
             const records = map[table];
             const tableMap = this._map[table as rt.collection_record_type];
             if (tableMap) {
@@ -78,10 +78,9 @@ export default class RecordMap {
                 }
             }
             else {
-                console.error('UnsupportedError: RecordMap.set_record', table);
-                return;
+                console.error('UnsupportedError: RecordMap.merge', table);
+                continue;
             }
-
         }
     }
 }

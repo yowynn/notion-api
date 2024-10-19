@@ -2,9 +2,9 @@ import type * as rt from './record-types.js';
 import type Client from './client.js';
 import type { transaction, transaction_operation } from './session-api.js'
 import { newUuid } from './util.js';
+import log from './log.js';
 
 export default class Transation {
-
     private _client: Client;
     private _inTransaction: boolean;
     private _isSilent: boolean;
@@ -86,7 +86,7 @@ export default class Transation {
 
     private async updateEditedInfo(operations: transaction_operation[]) {
         const lastEditedInfo = {
-            last_edited_by_id: this._client.userID,
+            last_edited_by_id: this._client.userId,
             last_edited_by_table: 'notion_user',
             last_edited_time: Date.now(),
         }

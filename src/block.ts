@@ -2,8 +2,8 @@ import type * as rt from './record-types.js';
 import Record, { as_record, record_accessor, readonly_record_accessor } from './record.js';
 import { markdown2richtext, richtext2markdown } from './converter.js';
 
-@as_record
-export default class block extends Record {
+@as_record('block')
+export default class Block extends Record {
     public get table() {
         return 'block' as rt.collection_record_type;
     }
@@ -18,21 +18,24 @@ export default class block extends Record {
     public accessor title!: string;
 
     @readonly_record_accessor('content', (x) => (x as any[] ?? []).length)
-    public accessor child_count!: number;
+    public accessor childCount!: number;
 
-    public async get_parent<T = Record>() {
-        var current_record = this.record as rt.record_block
-        var parent_record = await this.record_map.get(current_record.parent_table, current_record.parent_id);
-        return Record.new_record(this._client, parent_record, current_record.parent_table) as T;
+    public async getParent<T = Record>() {
+        var record = this.record as rt.record_block
+        var parentRecord = await this.recordMap.get(record.parent_table, record.parent_id);
+        return Record.create(this._client, parentRecord, record.parent_table) as T;
     }
 
-    public async get_child<T = block>(index: number) {
-        var current_record = this.record as any
-        var child_id = current_record.content?.[index];
-        if (!child_id) {
+    public async getChild<T = Block>(index: number) {
+        var record = this.record as any
+        var childId = record.content?.[index];
+        if (!childId) {
             return undefined as unknown as T;
         }
-        var child_record = await this.record_map.get('block', child_id);
-        return Record.new_record(this._client, child_record, 'block') as T;
+        var childRecord = await this.recordMap.get('block', childId);
+        return Record.create(this._client, childRecord, 'block') as T;
     }
 }
+
+@as_record('block', 'text')
+export class TextBlock extends Block { }
