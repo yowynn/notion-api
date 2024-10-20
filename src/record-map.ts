@@ -27,7 +27,7 @@ export default class RecordMap {
         };
     }
 
-    public async get(pointer: rt.reference_pointer, update: boolean = false, loadPage: boolean = false) {
+    public async get(pointer: rt.record_pointer, update: boolean = false, loadPage: boolean = false) {
         let record = this.getLocal(pointer);
         if (!record || update) {
             if (pointer.table === 'block' && loadPage) {
@@ -43,13 +43,13 @@ export default class RecordMap {
         return record;
     }
 
-    public async getList(pointerList: rt.reference_pointer[]) {
+    public async getList(pointerList: rt.record_pointer[]) {
         const data = await this._client.sessionApi.syncRecords(pointerList);
         this.merge(data?.recordMap);
         return pointerList.map(pointer => this.getLocal(pointer));
     }
 
-    public getLocal(pointer: rt.reference_pointer) {
+    public getLocal(pointer: rt.record_pointer) {
         const tableMap = this._map[pointer.table];
         if (!tableMap) {
             throw new UnsupportedError('RecordMap.getLocal', pointer.table);
@@ -57,7 +57,7 @@ export default class RecordMap {
         return tableMap[pointer.id];
     }
 
-    public setLocal(pointer: rt.reference_pointer, record: rt.record) {
+    public setLocal(pointer: rt.record_pointer, record: rt.record) {
         const tableMap = this._map[pointer.table];
         if (!tableMap) {
             throw new UnsupportedError('RecordMap.setLocal', pointer.table);

@@ -393,8 +393,8 @@ export type rich_text = Array<[
     Array<annotation>?,                                         // Annotations
 ]>;
 
-/** Reference pointer, pointer to a record with record type */
-export type reference_pointer = {
+/** Reference record pointer, pointer to a record with record type */
+export type record_pointer = {
     id: literal_uuid;                                           // Refer: record
     table: collection_record_type;                              // Record type
     spaceId?: literal_uuid;                                     // Refer: space, the space where the record is located
@@ -431,7 +431,7 @@ export type record_core = {
 /** Record: block */
 export type record_block = record_core & {
     format?: {                                                  // Format of block:
-        copied_from_pointer?: reference_pointer;                // Refer: block, the block that this block is duplicated from
+        copied_from_pointer?: record_pointer;                // Refer: block, the block that this block is duplicated from
     };
     created_time: literal_timestamp;                            // Created time
     last_edited_time: literal_timestamp;                        // Last edited time
@@ -649,7 +649,7 @@ export type block_transclusion_container = record_block & {
 export type block_transclusion_reference = record_block & {
     type: 'transclusion_reference';
     format: {                                                   // Format of block:
-        transclusion_reference_pointer: reference_pointer;      // Refer: block, the block to be referenced
+        transclusion_reference_pointer: record_pointer;      // Refer: block, the block to be referenced
     };
 };
 
@@ -703,7 +703,7 @@ export type block_divider = record_block & {
 export type block_alias = record_block & {
     type: 'alias';
     format: {                                                   // Format of block:
-        alias_pointer: reference_pointer;                       // Refer: block, the block to be linked
+        alias_pointer: record_pointer;                       // Refer: block, the block to be linked
     };
 };
 
@@ -789,7 +789,7 @@ export type block_collection_view_page = record_block & {
         block_locked?: boolean;                                 // Page locked or not
         app_config_uri?: literal_url;                           // like "notion://wiki_block" (TODO: what is this?) // * case 2
         block_locked_by?: literal_uuid;                         // Refer: notion_user, the user who locked the page
-        collection_pointer: reference_pointer;                  // Refer: collection, the same as `collection_id`
+        collection_pointer: record_pointer;                  // Refer: collection, the same as `collection_id`
         social_media_image_preview_url?: literal_url;           // Social media image preview URL, auto-generated
     };
 };
@@ -814,7 +814,7 @@ export type block_collection_view = record_block & {
         block_locked?: boolean;                                 // Page locked or not
         block_locked_by?: literal_uuid;                         // Refer: notion_user, the user who locked the page
         page_cover_position?: literal_normalization_value;      // Link view page cover position // * case 2
-        collection_pointer: reference_pointer;                  // Refer: collection, only for original database
+        collection_pointer: record_pointer;                  // Refer: collection, only for original database
     };
 };
 

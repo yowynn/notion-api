@@ -30,7 +30,7 @@ export default class Transation {
         this._isSilent = false;
     }
 
-    public opSet(pointer: rt.reference_pointer, path: string[], args: any) {
+    public opSet(pointer: rt.record_pointer, path: string[], args: any) {
         const operation = {
             command: 'set',
             pointer,
@@ -40,7 +40,7 @@ export default class Transation {
         this.addOperation(operation);
     }
 
-    public opUpdate(pointer: rt.reference_pointer, path: string[], args: any) {
+    public opUpdate(pointer: rt.record_pointer, path: string[], args: any) {
         const operation = {
             command: 'update',
             pointer,
@@ -50,7 +50,7 @@ export default class Transation {
         this.addOperation(operation);
     }
 
-    public opListRemove(pointer: rt.reference_pointer, path: string[], args: { id: any }) {
+    public opListRemove(pointer: rt.record_pointer, path: string[], args: { id: any }) {
         const operation = {
             command: 'listRemove',
             pointer,
@@ -60,7 +60,7 @@ export default class Transation {
         this.addOperation(operation);
     }
 
-    public opListBefore(pointer: rt.reference_pointer, path: string[], args: { before?: any, id: any }) {
+    public opListBefore(pointer: rt.record_pointer, path: string[], args: { before?: any, id: any }) {
         const operation = {
             command: 'listBefore',
             pointer,
@@ -70,7 +70,7 @@ export default class Transation {
         this.addOperation(operation);
     }
 
-    public opListAfter(pointer: rt.reference_pointer, path: string[], args: { after?: any, id: any }) {
+    public opListAfter(pointer: rt.record_pointer, path: string[], args: { after?: any, id: any }) {
         const operation = {
             command: 'listAfter',
             pointer,
@@ -107,7 +107,7 @@ export default class Transation {
         this._transactions = [];
         await this._client.sessionApi.submitTransactions(transactions);
         if (refreshRecords) {
-            const pointers: rt.reference_pointer[] = transactions.map(transaction => transaction.operations.map(operation => operation.pointer)).flat();
+            const pointers: rt.record_pointer[] = transactions.map(transaction => transaction.operations.map(operation => operation.pointer)).flat();
             const uniquePointers = pointers.filter((pointer, index) => pointers.indexOf(pointer) === index);
             const data = await this._client.sessionApi.syncRecords(uniquePointers);
             this._client.recordMap.merge(data?.recordMap);
@@ -120,7 +120,7 @@ export default class Transation {
             last_edited_by_table: 'notion_user',
             last_edited_time: Date.now(),
         }
-        const editedPointerList: rt.reference_pointer[] = [];
+        const editedPointerList: rt.record_pointer[] = [];
         for (let operation of operations) {
             if (operation.command === 'set' || operation.command === 'update') {
                 editedPointerList.push(operation.pointer);
@@ -137,7 +137,7 @@ export default class Transation {
         });
     }
 
-    private async getParentPage(pointer: rt.reference_pointer) {
+    private async getParentPage(pointer: rt.record_pointer) {
         var record = await this._client.recordMap.get(pointer) as rt.block;
         const newPointer = Object.assign({}, pointer);
         while (record.type !== 'page' && record.type !== 'collection_view_page' && record.type !== 'collection_view' && record.parent_table === 'block') {

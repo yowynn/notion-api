@@ -19,12 +19,12 @@ export default class Action {
         this._client = client;
     }
 
-    public async setRecordProperty(pointer: rt.reference_pointer, path: string[], args: any) {
+    public async setRecordProperty(pointer: rt.record_pointer, path: string[], args: any) {
         this._transaction.opSet(pointer, path, args);
         await this._transaction.submit(true);
     }
 
-    public async deleteRecord(pointer: rt.reference_pointer) {
+    public async deleteRecord(pointer: rt.record_pointer) {
         this._transaction.opUpdate(pointer, [], { alive: false });
         const record = await this._recordMap.get(pointer) as rt.block;
         if (record.parent_id && record.parent_table) {
@@ -39,7 +39,7 @@ export default class Action {
                 const pointer = {
                     table,
                     id: newUuid(),
-                } as rt.reference_pointer;
+                } as rt.record_pointer;
                 const time = Date.now();
                 const record = {
                     id: pointer.id,
@@ -65,7 +65,7 @@ export default class Action {
         }
     }
 
-    public async setRecordParent(pointer: rt.reference_pointer, parentPointer: rt.reference_pointer, index: number = -1, anchorId?: rt.literal_uuid) {
+    public async setRecordParent(pointer: rt.record_pointer, parentPointer: rt.record_pointer, index: number = -1, anchorId?: rt.literal_uuid) {
         const record = await this._recordMap.get(pointer) as rt.block;
         if (record.parent_id && record.parent_table) {
             this._transaction.opListRemove({ table: record.parent_table, id: record.parent_id, spaceId: record.space_id }, ['content'], { id: pointer.id });

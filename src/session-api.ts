@@ -10,7 +10,7 @@ export type transaction = {
 };
 
 export type transaction_operation = {
-    pointer: rt.reference_pointer;
+    pointer: rt.record_pointer;
     path: string[];
     command: string;
     args: any;
@@ -28,7 +28,7 @@ export default class SessionApi {
      *
      * return record type: `any`
      */
-    public async syncRecords(pointerList: rt.reference_pointer[]) {
+    public async syncRecords(pointerList: rt.record_pointer[]) {
         const endpoint = 'syncRecordValues';
         // * also: const endpoint = 'syncRecordValuesMain';
         // * also: const endpoint = 'syncRecordValuesSpace';
@@ -46,7 +46,7 @@ export default class SessionApi {
      *
      * return record type: `any`
      */
-    public async syncRecord(pointer: rt.reference_pointer) {
+    public async syncRecord(pointer: rt.record_pointer) {
         return this.syncRecords([pointer]);
     }
 

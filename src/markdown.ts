@@ -53,7 +53,7 @@ const MARKDOWN_ESCAPE_REGEX = new RegExp(`[${MARKDOWN_ESCAPE_CHARLIST.join('').r
 
 const EMPTY = [] as any[];
 
-export const fromRichText = function (richText: rt.rich_text, useHtmlTags: boolean = true, reference: rt.reference_pointer[] = []) {
+export const fromRichText = function (richText: rt.rich_text, useHtmlTags: boolean = true, reference: rt.record_pointer[] = []) {
     let markdown = '';
     let boldAlt = false;
     for (const item of richText) {
