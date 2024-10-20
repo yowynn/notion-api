@@ -17,7 +17,6 @@ var block = await client.getBlock(id);
 // }
 // client.endTransaction();
 client.beginTransaction();
-const b1 = await client.createBlock('text', 'child', block);
-b1.title = 'child:1111112';
-
+// const r = await client.recordMap.get({ table: 'collection' as any, id }, true);
+// log.info(r);
 client.endTransaction();

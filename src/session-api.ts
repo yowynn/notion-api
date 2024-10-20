@@ -1,16 +1,16 @@
-import type * as rt from './record-types.js';
+import type * as rt from './record-types';
 import type Session from './session.js';
 import { newUuid } from './util.js';
 
 export type transaction = {
-    id: rt.literal_uuid;
-    spaceId?: rt.literal_uuid;
+    id: rt.string_uuid;
+    spaceId?: rt.string_uuid;
     debug?: any;
     operations: transaction_operation[];
 };
 
 export type transaction_operation = {
-    pointer: rt.record_pointer;
+    pointer: rt.pointer_to_record;
     path: string[];
     command: string;
     args: any;
@@ -28,7 +28,7 @@ export default class SessionApi {
      *
      * return record type: `any`
      */
-    public async syncRecords(pointerList: rt.record_pointer[]) {
+    public async syncRecords(pointerList: rt.pointer_to_record[]) {
         const endpoint = 'syncRecordValues';
         // * also: const endpoint = 'syncRecordValuesMain';
         // * also: const endpoint = 'syncRecordValuesSpace';
@@ -46,7 +46,7 @@ export default class SessionApi {
      *
      * return record type: `any`
      */
-    public async syncRecord(pointer: rt.record_pointer) {
+    public async syncRecord(pointer: rt.pointer_to_record) {
         return this.syncRecords([pointer]);
     }
 
@@ -55,7 +55,7 @@ export default class SessionApi {
      *
      * return record type: `block`, `discussion`, `collection`, `comment`, `collection_view`, `team`, ...
      */
-    public async loadPages(ids: rt.literal_uuid[], limit: number = 100) {
+    public async loadPages(ids: rt.string_uuid[], limit: number = 100) {
         const endpoint = 'loadCachedPageChunks';
         const payload = {
             requests: ids.map(id => ({
@@ -78,7 +78,7 @@ export default class SessionApi {
      *
      * @param cached load cached data, default is `false`
      */
-    public async loadPage(id: rt.literal_uuid, limit: number = 100, cached: boolean = false) {
+    public async loadPage(id: rt.string_uuid, limit: number = 100, cached: boolean = false) {
         if (cached) {
             const endpoint = 'loadCachedPageChunk';
             const payload = {

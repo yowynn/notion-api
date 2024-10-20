@@ -1,4 +1,4 @@
-import type * as rt from './record-types.js';
+import type * as rt from './record-types';
 import type Client from './client.js';
 import config from './config.js';
 import log from './log.js';
@@ -6,28 +6,28 @@ import { UnsupportedError } from './error.js';
 
 export default class RecordMap {
     private _client: Client;
-    private _map: rt.record_map;
+    private _map: rt.map_of_record;
 
     public constructor(client: Client) {
         this._client = client;
         this._map = {
-            block: {} as Record<rt.literal_uuid, rt.block>,
-            space: {} as Record<rt.literal_uuid, rt.record>,
-            team: {} as Record<rt.literal_uuid, rt.record>,
-            collection_view: {} as Record<rt.literal_uuid, rt.record>,
-            collection: {} as Record<rt.literal_uuid, rt.record>,
-            discussion: {} as Record<rt.literal_uuid, rt.record>,
-            comment: {} as Record<rt.literal_uuid, rt.record>,
-            notion_user: {} as Record<rt.literal_uuid, rt.record>,
-            user_root: {} as Record<rt.literal_uuid, rt.record>,
-            user_settings: {} as Record<rt.literal_uuid, rt.record>,
-            bot: {} as Record<rt.literal_uuid, rt.record>,
-            space_view: {} as Record<rt.literal_uuid, rt.record>,
-            space_user: {} as Record<rt.literal_uuid, rt.record>,
+            block: {} as Record<rt.string_uuid, rt.block>,
+            space: {} as Record<rt.string_uuid, rt.record>,
+            team: {} as Record<rt.string_uuid, rt.record>,
+            collection_view: {} as Record<rt.string_uuid, rt.record>,
+            collection: {} as Record<rt.string_uuid, rt.record>,
+            discussion: {} as Record<rt.string_uuid, rt.record>,
+            comment: {} as Record<rt.string_uuid, rt.record>,
+            notion_user: {} as Record<rt.string_uuid, rt.record>,
+            user_root: {} as Record<rt.string_uuid, rt.record>,
+            user_settings: {} as Record<rt.string_uuid, rt.record>,
+            bot: {} as Record<rt.string_uuid, rt.record>,
+            space_view: {} as Record<rt.string_uuid, rt.record>,
+            space_user: {} as Record<rt.string_uuid, rt.record>,
         };
     }
 
-    public async get(pointer: rt.record_pointer, update: boolean = false, loadPage: boolean = false) {
+    public async get(pointer: rt.pointer_to_record, update: boolean = false, loadPage: boolean = false) {
         let record = this.getLocal(pointer);
         if (!record || update) {
             if (pointer.table === 'block' && loadPage) {
@@ -43,13 +43,13 @@ export default class RecordMap {
         return record;
     }
 
-    public async getList(pointerList: rt.record_pointer[]) {
+    public async getList(pointerList: rt.pointer_to_record[]) {
         const data = await this._client.sessionApi.syncRecords(pointerList);
         this.merge(data?.recordMap);
         return pointerList.map(pointer => this.getLocal(pointer));
     }
 
-    public getLocal(pointer: rt.record_pointer) {
+    public getLocal(pointer: rt.pointer_to_record) {
         const tableMap = this._map[pointer.table];
         if (!tableMap) {
             throw new UnsupportedError('RecordMap.getLocal', pointer.table);
@@ -57,7 +57,7 @@ export default class RecordMap {
         return tableMap[pointer.id];
     }
 
-    public setLocal(pointer: rt.record_pointer, record: rt.record) {
+    public setLocal(pointer: rt.pointer_to_record, record: rt.record) {
         const tableMap = this._map[pointer.table];
         if (!tableMap) {
             throw new UnsupportedError('RecordMap.setLocal', pointer.table);
@@ -78,7 +78,7 @@ export default class RecordMap {
                 continue;
             }
             const records = map[table];
-            const tableMap = this._map[table as rt.collection_record_type];
+            const tableMap = this._map[table as rt.type_of_record];
             if (tableMap) {
                 for (const id in records) {
                     let record: rt.record;

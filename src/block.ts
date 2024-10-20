@@ -1,31 +1,31 @@
-import type * as rt from './record-types.js';
+import type * as rt from './record-types';
 import Record, { as_record, record_accessor, readonly_record_accessor } from './record.js';
 import { markdown2richtext, richtext2markdown } from './converter.js';
 
 @as_record('block')
 export default class Block extends Record {
     public get table() {
-        return 'block' as rt.collection_record_type;
+        return 'block' as rt.type_of_record;
     }
 
     @readonly_record_accessor('alive')
     public accessor inTrash!: boolean;
 
     @record_accessor('type')
-    public accessor type!: rt.collection_block_type;
+    public accessor type!: rt.type_of_block;
 
     @record_accessor('properties.title', richtext2markdown, markdown2richtext)
     public accessor title!: string;
 
     @record_accessor('format.block_color')
-    public accessor blockColor!: rt.option_highlight_color;
+    public accessor blockColor!: rt.option_color;
 
 
     @readonly_record_accessor('content', (x) => (x as any[] ?? []).length)
     public accessor childCount!: number;
 
     public async getParent<T = Record>() {
-        var record = this.record as rt.record_block
+        var record = this.record as rt.i_parented;
         var parentRecord = await this.recordMap.get({ table: record.parent_table, id: record.parent_id, spaceId: record.space_id });
         return Record.wrap(this._client, parentRecord, record.parent_table) as T;
     }
@@ -42,7 +42,7 @@ export default class Block extends Record {
 
     public async getChildren<T = Block>() {
         var record = this.record as any
-        var content: rt.literal_uuid[] = record.content ?? [];
+        var content: rt.string_uuid[] = record.content ?? [];
         var children = await this.recordMap.getList(content.map(id => ({ table: 'block', id })));
         return children.map(child => Record.wrap(this._client, child, 'block') as T);
     }

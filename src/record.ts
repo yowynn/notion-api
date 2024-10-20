@@ -1,4 +1,4 @@
-import type * as rt from './record-types.js';
+import type * as rt from './record-types';
 import type Client from './client.js';
 import { date2timestamp, timestamp2date } from './converter.js';
 import { DuplicateKeyError, ReadonlyModificationError, UnsupportedError } from './error.js';
@@ -8,7 +8,7 @@ const recordTypeMap: { [key: string]: new (client: any, record: any) => Record; 
 
 @as_record()
 export default class Record {
-    static wrap(client: Client, record: rt.record, table: rt.collection_record_type = 'block') {
+    static wrap(client: Client, record: rt.record, table: rt.type_of_record = 'block') {
         const type = (record as any).type;
         let key = table;
         if (type) {
@@ -27,7 +27,7 @@ export default class Record {
         return this._client.recordMap;
     }
 
-    public get table(): rt.collection_record_type | null {
+    public get table(): rt.type_of_record | null {
         return null;
     }
 
@@ -78,7 +78,7 @@ export default class Record {
         while (this._taskCount > 0) {
             await new Promise(resolve => setTimeout(resolve, 10));
         }
-        this._record = await this.recordMap.get({ table: this.table as rt.collection_record_type, id: this.id }) ?? this._record;
+        this._record = await this.recordMap.get({ table: this.table as rt.type_of_record, id: this.id }) ?? this._record;
     }
 }
 
@@ -111,7 +111,7 @@ export function readonly_record_accessor(path?: string, getter = (x: any) => x) 
     return record_accessor(path, getter, null);
 }
 
-export function as_record(table: rt.collection_record_type | 'record' = 'record', type: string = '') {
+export function as_record(table: rt.type_of_record | 'record' = 'record', type: string = '') {
     const addToRecordTypeMap = (ctor: new (client: any, record: any) => Record) => {
         let key = table as string;
         if (type) {

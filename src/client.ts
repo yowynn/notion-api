@@ -1,4 +1,4 @@
-import type * as rt from './record-types.js';
+import type * as rt from './record-types';
 import type Block from './block.js';
 import Record from './record.js';
 import config from './config.js';
@@ -27,7 +27,7 @@ export default class Client {
         return client;
     }
 
-    private _userId!: rt.literal_uuid;
+    private _userId!: rt.string_uuid;
     public readonly version: string;
     public readonly session: Session;
     public readonly sessionApi: SessionApi;
@@ -35,7 +35,7 @@ export default class Client {
     public readonly transaction: Transation;
     public readonly action: Action;
 
-    public get userId(): rt.literal_uuid {
+    public get userId(): rt.string_uuid {
         return this._userId;
     }
 
@@ -65,7 +65,7 @@ export default class Client {
         return block;
     }
 
-    public async createBlock(type: rt.collection_block_type, where: 'before' | 'after' | 'child', anchorBlock: Block) {
+    public async createBlock(type: rt.type_of_block, where: 'before' | 'after' | 'child', anchorBlock: Block) {
         const ancherRecord = anchorBlock.record as rt.block;
         const pointer = await this.action.createRecordPlaceholder('block', type);
         switch (where) {

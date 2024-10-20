@@ -1,10 +1,10 @@
-import type * as rt from './record-types.js';
+import type * as rt from './record-types';
 import config from './config.js';
 import log from './log.js';
 import { rt$date2string } from './converter.js';
 import { ArgumentError, UnsupportedError } from './error.js';
 
-const ORDERED_ANNOTATION_TAG: rt.collection_annotation_tag[] = [
+const ORDERED_ANNOTATION_TAG: rt.mark_of_annotation[] = [
     'p',                                                        // Page mention
     'u',                                                        // User mention
     'd',                                                        // Date mention
@@ -53,7 +53,7 @@ const MARKDOWN_ESCAPE_REGEX = new RegExp(`[${MARKDOWN_ESCAPE_CHARLIST.join('').r
 
 const EMPTY = [] as any[];
 
-export const fromRichText = function (richText: rt.rich_text, useHtmlTags: boolean = true, reference: rt.record_pointer[] = []) {
+export const fromRichText = function (richText: rt.rich_text, useHtmlTags: boolean = true, reference: rt.pointer_to_record[] = []) {
     let markdown = '';
     let boldAlt = false;
     for (const item of richText) {
@@ -430,11 +430,11 @@ export const toRichText = function (markdown: string) {
                             const backgroundColor = styles['background-color'];
                             let count = 0;
                             if (color) {
-                                annotations.push(['h', color as rt.option_highlight_color]);
+                                annotations.push(['h', color as rt.option_color]);
                                 count++;
                             }
                             if (backgroundColor) {
-                                annotations.push(['h', `${backgroundColor}_background` as rt.option_highlight_color]);
+                                annotations.push(['h', `${backgroundColor}_background` as rt.option_color]);
                                 count++;
                             }
                         }
@@ -444,9 +444,9 @@ export const toRichText = function (markdown: string) {
                     case 'notion': {
                         pushText();
                         const date = tagInfo.attributes.date;
-                        const user = tagInfo.attributes.notion_user as rt.literal_uuid;
-                        const block = tagInfo.attributes.block as rt.literal_uuid;
-                        const tv = tagInfo.attributes.template_variable as rt.collection_template_variable_type;
+                        const user = tagInfo.attributes.notion_user as rt.string_uuid;
+                        const block = tagInfo.attributes.block as rt.string_uuid;
+                        const tv = tagInfo.attributes.template_variable as rt.option_template_variable;
                         if (date) {
                             annotations.push(['d', JSON.parse(Buffer.from(date, 'base64').toString())]);
                         }

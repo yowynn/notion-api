@@ -1,4 +1,4 @@
-import type * as rt from './record-types.js';
+import type * as rt from './record-types';
 import { fromRichText, toRichText } from './markdown.js';
 
 export const rt$date2string = function (date: rt.date) {
