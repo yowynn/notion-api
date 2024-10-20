@@ -18,9 +18,6 @@ var block = await client.getBlock(id);
 // client.endTransaction();
 client.beginTransaction();
 const b1 = await client.createBlock('text', 'child', block);
-b1.title = 'child:1111111';
-const b2 = await client.createBlock('sub_sub_header', 'before', block);
-b2.title = 'before:2222222';
-const b3 = await client.createBlock('bulleted_list', 'after', block);
-b3.title = 'after:3333333';
+b1.title = 'child:1111112';
+
 client.endTransaction();

@@ -76,9 +76,11 @@ export default class Action {
         });
         if (anchorId) {
             if (index === -1) {
+                // before the anchor
                 this._transaction.opListBefore(parentPointer, ['content'], { id: pointer.id, before: anchorId });
             }
             else if (index === 1) {
+                // after the anchor
                 this._transaction.opListAfter(parentPointer, ['content'], { id: pointer.id, after: anchorId });
             }
             else {
@@ -87,9 +89,14 @@ export default class Action {
         }
         else {
             if (index === -1) {
+                // at the tail of the list
                 this._transaction.opListAfter(parentPointer, ['content'], { id: pointer.id });
             }
-            else if (index >= 0) {
+            else if (index === 0) {
+                // at the head of the list
+                this._transaction.opListBefore(parentPointer, ['content'], { id: pointer.id });
+            }
+            else if (index > 0) {
                 const parent = await this._recordMap.get(parentPointer) as any;
                 anchorId = parent.content?.[index];
                 this._transaction.opListBefore(parentPointer, ['content'], { id: pointer.id, before: anchorId });
