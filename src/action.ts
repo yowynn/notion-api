@@ -1,7 +1,9 @@
 import type * as rt from './record-types';
 import type Client from './client.js';
 import type Transation from './transaction.js';
+import { getBlockTemplate, getCollectionTemplate, getCollectionViewTemplate, getParentPointer, getPointer } from './record-util.js';
 import { newUuid } from './util.js';
+import { get } from 'http';
 
 export default class Action {
 
@@ -19,56 +21,36 @@ export default class Action {
         this._client = client;
     }
 
+    public async done(refreshRecords: boolean = false) {
+        await this._transaction.submit(refreshRecords);
+    }
+
     public async setRecordProperty(pointer: rt.pointer_to_record, path: string[], args: any) {
         this._transaction.opSet(pointer, path, args);
-        await this._transaction.submit(true);
     }
 
     public async deleteRecord(pointer: rt.pointer_to_record) {
         this._transaction.opUpdate(pointer, [], { alive: false });
         const record = await this._recordMap.get(pointer) as rt.block;
-        if (record.parent_id && record.parent_table) {
-            this._transaction.opListRemove({ table: record.parent_table, id: record.parent_id, spaceId: record.space_id }, ['content'], { id: pointer.id });
-        }
-        await this._transaction.submit(true);
-    }
-
-    public async createRecordPlaceholder(table: rt.type_of_record, type: rt.type_of_block) {
-        switch (table) {
-            case 'block': {
-                const pointer = {
-                    table,
-                    id: newUuid(),
-                } as rt.pointer_to_record;
-                const time = Date.now();
-                const record = {
-                    id: pointer.id,
-                    type,
-                    alive: true,
-                    space_id: undefined,
-                    properties: {},
-                    created_time: time,
-                    last_edited_time: time,
-                    last_edited_by_id: this._client.userId,
-                    last_edited_by_table: 'notion_user',
-                    created_by_id: this._client.userId,
-                    created_by_table: 'notion_user',
-                    format: {},
-                };
-                this._recordMap.setLocal(pointer, record as any as rt.record);
-                this._transaction.opSet(pointer, [], record);
-                // await this._transaction.submit(true);
-                return pointer;
-            }
-            default:
-                throw new Error(`Unsupported table: ${table}`);
+        const parentPointer = getParentPointer(record);
+        if (parentPointer) {
+            this._transaction.opListRemove(parentPointer, ['content'], { id: pointer.id });
         }
     }
 
-    public async setRecordParent(pointer: rt.pointer_to_record, parentPointer: rt.pointer_to_record, index: number = -1, anchorId?: rt.string_uuid) {
+    private async createBlockPlaceholder(type: rt.type_of_block) {
+        const record = getBlockTemplate(type, this._client.userId);
+        const pointer = getPointer(record, 'block')!;
+        this._recordMap.setLocal(pointer, record);
+        this._transaction.opSet(pointer, [], record);
+        return pointer;
+    }
+
+    public async setBlockParent(pointer: rt.pointer_to_record, parentPointer: rt.pointer_to_record, index: number = -1, anchorId?: rt.string_uuid) {
         const record = await this._recordMap.get(pointer) as rt.block;
-        if (record.parent_id && record.parent_table) {
-            this._transaction.opListRemove({ table: record.parent_table, id: record.parent_id, spaceId: record.space_id }, ['content'], { id: pointer.id });
+        const oldParentPointer = getParentPointer(record);
+        if (oldParentPointer) {
+            this._transaction.opListRemove(oldParentPointer, ['content'], { id: pointer.id });
         }
         this._transaction.opUpdate(pointer, [], {
             parent_id: parentPointer.id,
@@ -107,6 +89,82 @@ export default class Action {
                 this._transaction.opListAfter(parentPointer, ['content'], { id: pointer.id, after: anchorId });
             }
         }
-        await this._transaction.submit(true);
+    }
+
+    public async createBlock(type: rt.type_of_block, where: 'before' | 'after' | 'child', anchor: rt.pointer_to_record) {
+        const pointer = await this.createBlockPlaceholder(type);
+        switch (where) {
+            case 'before': {
+                const parentPointer = getParentPointer(await this._recordMap.get(anchor) as rt.block)!;
+                await this.setBlockParent(pointer, parentPointer, -1, anchor.id);
+                break;
+            }
+            case 'after': {
+                const parentPointer = getParentPointer(await this._recordMap.get(anchor) as rt.block)!;
+                await this.setBlockParent(pointer, parentPointer, 1, anchor.id);
+                break;
+            }
+            case 'child': {
+                await this.setBlockParent(pointer, anchor);
+                break;
+            }
+        }
+        return pointer;
+    }
+
+    private async createCollectionViewPlaceholder(type: rt.type_of_collection_view) {
+        const record = getCollectionViewTemplate(type, this._client.userId);
+        const pointer = getPointer(record, 'collection_view')!;
+        this._recordMap.setLocal(pointer, record);
+        this._transaction.opSet(pointer, [], record);
+        return pointer;
+    }
+
+    public async setCollectionViewParent(pointer: rt.pointer_to_record, parentPointer: rt.pointer_to_record) {
+        const record = await this._recordMap.get(pointer) as rt.collection_view;
+        const oldParentPointer = getParentPointer(record);
+        if (oldParentPointer) {
+            this._transaction.opListRemove(oldParentPointer, ['view_ids'], { id: pointer.id });
+        }
+        this._transaction.opUpdate(pointer, [], {
+            parent_id: parentPointer.id,
+            parent_table: parentPointer.table,
+        });
+        this._transaction.opListAfter(parentPointer, ['view_ids'], { id: pointer.id });
+    }
+
+    public async createCollectionView(type: rt.type_of_collection_view, parent: rt.pointer_to_record) {
+        const pointer = await this.createCollectionViewPlaceholder(type);
+        await this.setCollectionViewParent(pointer, parent);
+        return pointer;
+    }
+
+    private async createCollectionPlaceholder() {
+        const record = getCollectionTemplate();
+        const pointer = getPointer(record, 'collection')!;
+        this._recordMap.setLocal(pointer, record);
+        this._transaction.opSet(pointer, [], record);
+        return pointer;
+    }
+
+    public async setCollectionParent(pointer: rt.pointer_to_record, parentPointer: rt.pointer_to_record) {
+        const record = await this._recordMap.get(pointer) as rt.collection;
+        const oldParentPointer = getParentPointer(record);
+        if (oldParentPointer) {
+            this._transaction.opUpdate(oldParentPointer, [], { collection_id: null });
+            this._transaction.opUpdate(oldParentPointer, [ 'format' ], { collection_pointer: null });
+        }
+        this._transaction.opUpdate(pointer, [], {
+            parent_id: parentPointer.id,
+            parent_table: parentPointer.table,
+        });
+        this._transaction.opUpdate(parentPointer, [], { collection_id: pointer.id });
+        this._transaction.opUpdate(parentPointer, [ 'format' ], { collection_pointer: pointer });
+    }
+
+    public async createCollection(parent: rt.pointer_to_record) {
+        const pointer = await this.createCollectionPlaceholder();
+        await this.setCollectionParent(pointer, parent);
+        return pointer;
     }
 }

@@ -5,3 +5,6 @@ export * from './color.js';
 export * from './annotation.js';
 export * from './interface.js';
 export * from './block.js';
+export * from './schema.js';
+export * from './collection.js';
+export * from './collection-view.js';

@@ -16,7 +16,12 @@ var block = await client.getBlock(id);
 //     child.blockColor = 'yellow';
 // }
 // client.endTransaction();
-client.beginTransaction();
+// client.beginTransaction();
 // const r = await client.recordMap.get({ table: 'collection' as any, id }, true);
 // log.info(r);
-client.endTransaction();
+
+const b = await client.createCollection('table', 'child', block, true);
+// log.info('1111')
+await b.refresh(true);
+log.info(b.record);
+// client.endTransaction();

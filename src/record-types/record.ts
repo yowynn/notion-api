@@ -1,5 +1,7 @@
 import {
     block,
+    collection,
+    collection_view,
     string_uuid,
 } from '.';
 
@@ -17,6 +19,8 @@ export type map_of_record = Partial<Record<type_of_record, Record<string_uuid, r
 /** Record */
 export type record =
     | block                                                     // Block
+    | collection_view                                           // Collection view
+    | collection                                                // Collection
     ;
 
 /** Record type collection */

@@ -72,7 +72,7 @@ export type option_measurement_unit =
 
 /** Page font option */
 export type option_page_font =
-    | 'default'                                                 // Default
+    | null                                                      // Default
     | 'serif'                                                   // Serif
     | 'mono'                                                    // Monospace
     ;

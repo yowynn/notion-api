@@ -2,6 +2,7 @@ import type * as rt from './record-types';
 import type Client from './client.js';
 import { date2timestamp, timestamp2date } from './converter.js';
 import { DuplicateKeyError, ReadonlyModificationError, UnsupportedError } from './error.js';
+import { getParentPointer, getPointer } from './record-util.js';
 import log from './log.js';
 
 const recordTypeMap: { [key: string]: new (client: any, record: any) => Record; } = {};
@@ -34,6 +35,15 @@ export default class Record {
     public get record() {
         return this._record;
     }
+
+    public get pointer(): rt.pointer_to_record {
+        return getPointer(this.record, this.table as rt.type_of_record)!;
+    }
+
+    public get parentPointer(): rt.pointer_to_record | null {
+        return getParentPointer(this.record);
+    }
+
     public get id() {
         return this.record.id;
     }
@@ -52,7 +62,7 @@ export default class Record {
     @record_accessor('last_edited_time', timestamp2date, date2timestamp)
     public accessor lastEditedTime!: Date;
 
-    public get(...propertyPath: string[]) {
+    public get(propertyPath: string[]) {
         let record = this.record as any;
         for (let p of propertyPath) {
             record = record?.[p];
@@ -60,7 +70,7 @@ export default class Record {
         return record;
     }
 
-    public async set(value: any, ...propertyPath: string[]) {
+    public async set(propertyPath: string[], value: any) {
         let record = this.record as any;
         for (let p of propertyPath.slice(0, -1)) {
             if (!record[p]) {
@@ -70,7 +80,7 @@ export default class Record {
         }
         record[propertyPath.slice(-1)[0]] = value;
         this._taskCount++;
-        await this._client.action.setRecordProperty({ table: 'block', id: this.id }, propertyPath, value);
+        await this._client.setRecordProperty(this, propertyPath, value);
         this._taskCount--;
     }
 
@@ -89,7 +99,7 @@ export function record_accessor(path?: string, getter: ((x: any) => any) = x => 
             const propertyPath = (path as string).split('.');
             return {
                 get(this: Record) {
-                    const data = this.get(...propertyPath);
+                    const data = this.get(propertyPath);
                     return getter(data);
                 },
                 async set(this: Record, value: any) {
@@ -97,7 +107,7 @@ export function record_accessor(path?: string, getter: ((x: any) => any) = x => 
                         throw new ReadonlyModificationError('record_accessor', path as string);
                     }
                     const data = setter(value);
-                    await this.set(data, ...propertyPath);
+                    await this.set(propertyPath, data);
                 },
             } as any;
         }
