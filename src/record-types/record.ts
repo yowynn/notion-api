@@ -1,8 +1,8 @@
 import {
+    string_uuid,
     block,
     collection,
     collection_view,
-    string_uuid,
 } from '.';
 
 /** Reference record pointer, pointer to a record with record type */

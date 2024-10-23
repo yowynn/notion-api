@@ -1,7 +1,5 @@
 import {
     annotation,
-    pointer_to_record,
-    type_of_record,
 } from '.';
 
 /** Version value, increment after modification */

@@ -1,32 +1,20 @@
 import {
-    i_versioned,
     i_copyable,
     i_creatable,
-    i_editable,
     i_deletable,
     i_parented,
-    i_childed,
-    i_colored,
-    i_titled,
-    i_captioned,
-    rich_text,
-    rich_texted,
-    option_boolean,
-    string_icon,
-    pointer_to_record,
-    string_property_id,
-    option_color,
-    string_url,
-    string_file_size,
-    string_uuid,
+    i_versioned,
     number_normalization,
+    string_icon,
+    string_property_id,
+    string_url,
+    string_uuid,
     page_section_visibility,
-    type_of_record,
+    rich_text,
     schema,
-    schema_title,
 } from '.';
 
-
+/** Collection property visibility */
 export type property_visibility = {
     property: string_property_id;                               // Refer: property
     visibility:
@@ -37,6 +25,7 @@ export type property_visibility = {
     ;
 };
 
+/** Collection page section */
 export type collection_page_section = {
     section: string_property_id;                                // Refer: property
     visibility:
@@ -45,11 +34,13 @@ export type collection_page_section = {
     ;
 };
 
+/** Collection page property */
 export type collection_page_property = {
     visible: boolean;                                           // Visible or not
     property: string_property_id;                               // Refer: property
 };
 
+/** Collection base*/
 type i_collection =
     & i_versioned
     & i_copyable
@@ -58,6 +49,7 @@ type i_collection =
     & i_parented
     ;
 
+/** Collection */
 export type collection =
     & i_collection
     & {

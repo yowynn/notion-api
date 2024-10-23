@@ -1,4 +1,6 @@
-import { i_versioned } from './interface';
+import {
+    i_versioned,
+} from '.';
 
 export type collection_view_table =
     & i_versioned

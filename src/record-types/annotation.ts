@@ -1,8 +1,10 @@
 import {
+    string_property_id,
     string_url,
     string_uuid,
     option_color,
     date,
+    pointer_to_record,
 } from '.';
 
 /** Template variable type collection */
@@ -114,6 +116,16 @@ export type annotation_suggested_removal = [
     string_uuid,                                               // Refer: discussion (suggestion is a child of discussion)
 ];
 
+/** Annotation: formula property pointer (replace text with '‣'), just for formula property */
+export type annotation_formula_property_pointer = [
+    'fpp',
+    {
+        name: string,                                           // Property name
+        property: string_property_id,                           // Refer: property
+        collection: pointer_to_record,                          // Refer: collection
+    }
+];
+
 /** Annotation */
 export type annotation =
     | annotation_bold                                           // Bold
@@ -133,6 +145,7 @@ export type annotation =
     | annotation_suggested_unannotation                         // Suggested un-annotation
     | annotation_suggested_insertion                            // Suggested insertion
     | annotation_suggested_removal                              // Suggested removal
+    | annotation_formula_property_pointer                       // Formula property pointer
     ;
 
 /** Annotation tag collection */

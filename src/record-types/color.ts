@@ -1,6 +1,6 @@
 /** Highlight color foreground option */
 export type option_color_foreground =
-    | 'default'                                                 // Default
+    | 'default'                                                 // Default, sometimes means light gray
     | 'gray'                                                    // Gray
     | 'brown'                                                   // Brown
     | 'orange'                                                  // Orange
@@ -14,7 +14,7 @@ export type option_color_foreground =
 
 /** Highlight color background option */
 export type option_color_background =
-    | 'default_background'                                      // Default background
+    | 'default_background'                                      // Default background, sometimes means light gray background
     | 'gray_background'                                         // Gray background
     | 'brown_background'                                        // Brown background
     | 'orange_background'                                       // Orange background

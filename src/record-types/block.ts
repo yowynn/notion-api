@@ -1,25 +1,25 @@
 import {
-    i_versioned,
-    i_copyable,
-    i_creatable,
-    i_editable,
-    i_deletable,
-    i_parented,
+    i_captioned,
     i_childed,
     i_colored,
+    i_copyable,
+    i_creatable,
+    i_deletable,
+    i_editable,
+    i_parented,
     i_titled,
-    i_captioned,
+    i_versioned,
+    number_normalization,
+    string_file_size,
+    string_icon,
+    string_property_id,
+    string_url,
+    string_uuid,
+    option_boolean,
+    option_color,
+    pointer_to_record,
     rich_text,
     rich_texted,
-    option_boolean,
-    string_icon,
-    pointer_to_record,
-    string_property_id,
-    option_color,
-    string_url,
-    string_file_size,
-    string_uuid,
-    number_normalization,
 } from '.';
 
 
@@ -121,6 +121,7 @@ export type page_section_visibility = {
     margin_comments: option_section_margin_comments;            // Margin comments
 };
 
+/** Block base */
 type i_block =
     & i_versioned
     & i_copyable
