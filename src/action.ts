@@ -1,9 +1,9 @@
 import type * as rt from './record-types';
 import type Client from './client.js';
 import type Transation from './transaction.js';
-import { getBlockTemplate, getCollectionTemplate, getCollectionViewTemplate, getParentPointer, getPointer } from './record-util.js';
-import { newUuid } from './util.js';
-import { get } from 'http';
+import { getBlockTemplate, getCollectionTemplate, getCollectionViewTemplate, getFileSizeString, getParentPointer, getPointer } from './record-util.js';
+import { inferMimeType, newUuid, readFile } from './util.js';
+import log from './log.js';
 
 export default class Action {
 
@@ -166,5 +166,27 @@ export default class Action {
         const pointer = await this.createCollectionPlaceholder();
         await this.setCollectionParent(pointer, parent);
         return pointer;
+    }
+
+    public async updateFile(pointer: rt.pointer_to_record, filePath: string, blob?: Blob) {
+        if (!blob) {
+            const buffer = readFile(filePath);
+            blob = new Blob([buffer]);
+        }
+        const name = filePath.split(/[\\/]/).pop()!;
+        const contentType = inferMimeType(name);
+        const contentLength = blob.size;
+        const data = await this._client.sessionApi.getUploadFileUrl(pointer, { name, contentType, contentLength });
+        const awsSession = this._client.awsSession;
+        data.postHeaders?.forEach((header: any) => awsSession.headers.set(header.name, header.value));
+        await awsSession.awsUploadFile(data.fields, blob);
+        this._transaction.opUpdate(pointer, ['properties'], {
+            size: [[getFileSizeString(contentLength)]],
+            source: [[data.url]],
+            title: [[name]],
+        });
+        this._transaction.opUpdate(pointer, ['format'], {
+            display_source: data.url,
+        });
     }
 }

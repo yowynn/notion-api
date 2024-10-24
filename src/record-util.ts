@@ -67,3 +67,16 @@ export function getCollectionTemplate(): rt.collection {
         space_id: undefined,
     } as any as rt.collection;
 }
+
+export function getFileSizeString(size: number): string {
+    if (size < 1024) {
+        return size + 'B';
+    }
+    if (size < 1024 * 1024) {
+        return (size / 1024).toFixed(2) + 'KB';
+    }
+    if (size < 1024 * 1024 * 1024) {
+        return (size / 1024 / 1024).toFixed(2) + 'MB';
+    }
+    return (size / 1024 / 1024 / 1024).toFixed(2) + 'GB';
+}

@@ -2,6 +2,7 @@ import { config as dotenvConfig } from 'dotenv';
 dotenvConfig();
 
 const config = {
+    AWS_UPLOAD_URL              : 'https://s3.us-west-2.amazonaws.com',
     NOTION_CLIENT_VERSION       : '23.13.0.513',
     NOTION_URL                  : 'https://www.notion.so',
     NOTION_API_URL              : 'https://www.notion.so/api/v3',

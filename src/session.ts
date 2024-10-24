@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import fetch, { Headers } from 'node-fetch';
 
 import type * as rt from './record-types';
 import config from './config.js';
@@ -8,13 +8,12 @@ import { input } from './util.js';
 
 export default class Session {
     private _baseUrl: rt.string_url;
-    private _headers: Record<string, string> = {};
+    private _headers: Headers = new Headers();
     private _cookie: Record<string, string> = {};
 
     public constructor(baseUrl: rt.string_url) {
         this._baseUrl = baseUrl;
-        this.headers['content-type'] = 'application/json';
-        this.headers['user-agent'] = config.NOTION_CLIENT_USER_AGENT;
+        this.headers.set('user-agent', config.NOTION_CLIENT_USER_AGENT);
     }
 
     public get cookie() {
@@ -22,7 +21,7 @@ export default class Session {
     }
 
     public get headers() {
-        this._headers['cookie'] = this.cookieString;
+        this._headers.set('cookie', this.cookieString);
         return this._headers;
     }
 
@@ -30,16 +29,25 @@ export default class Session {
         return Object.entries(this._cookie).map(([name, value]) => `${name}=${value}`).join('; ');
     }
 
-    public async request(method: string, endpoint: string, payload: object = {}): Promise<any> {
-        log.info(`requesting: ${endpoint}`);
-        const response = await fetch(`${this._baseUrl}/${endpoint}`, {
+    public async request(method: string, endpoint: string, payload: any = {}): Promise<any> {
+        const url = `${this._baseUrl}/${endpoint}`
+        log.info(`requesting: ${url}`);
+        let body: any;
+        const payloadType = this.headers.get('content-type');
+        if (payloadType?.includes('application/json')) {
+            body = JSON.stringify(payload);
+        }
+        else {
+            body = payload;
+        }
+        const response = await fetch(url, {
             method,
             headers: this.headers,
-            body: JSON.stringify(payload),
+            body,
         });
         if (!response.ok) {
             const text = await response.text();
-            console.log('error data:', JSON.stringify(payload, null, 4));
+            console.log('error data:', body);
             throw new ResponseError(endpoint, response, text);
         }
         const setCookie = response.headers.get('set-cookie');
@@ -49,10 +57,27 @@ export default class Session {
                 this.cookie[name] = value;
             }
         }
-        return await response.json() as any;
+        const contentType = response.headers.get('content-type');
+        let data;
+        if (contentType) {
+            if (contentType.includes('application/json')) {
+                data = await response.json();
+            } else if (contentType.includes('text/html')) {
+                data = await response.text();
+            } else if (contentType.includes('application/octet-stream')) {
+                data = await response.arrayBuffer();
+            } else if (contentType.includes('multipart/form-data')) {
+                data = await response.formData();
+            } else {
+                data = await response.text();
+            }
+        } else {
+            data = await response.text();
+        }
+        return data;
     }
 
-    public async authorizeFromToken(token: string) {
+    public async notionAuthorizeFromToken(token: string) {
         this.cookie['token_v2'] = token;
         // request some api to get user_id
         const data = await this.request('POST', 'getUserAnalyticsSettings');
@@ -63,7 +88,7 @@ export default class Session {
         return userId;
     }
 
-    public async authorizeFromLogin(email: string, password: string) {
+    public async notionAuthorizeFromLogin(email: string, password: string) {
         const loginOptions = await this.request('POST', 'getLoginOptions', { email });
         if (!loginOptions.hasAccount) {
             throw new ArgumentError('authorize_from_login', 'email', email, 'Account does not exist');
@@ -100,5 +125,16 @@ export default class Session {
             throw new UnsupportedError('authorize_from_login', 'unknown error during login');
         }
         return userId;
+    }
+
+    public async awsUploadFile(fields: Record<string, string>, blob: Blob) {
+        const form = new FormData();
+        for (const [name, value] of Object.entries(fields)) {
+            form.append(name, value);
+        }
+        form.append('file', blob, fields['key'].split('/').pop()!);
+        // this.headers.set('content-type', `multipart/form-data; boundary=${form.getBoundary()}`);
+        const data = await this.request('POST', fields.bucket, form);
+        return data;
     }
 }

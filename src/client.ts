@@ -14,7 +14,7 @@ import { get } from 'http';
 export default class Client {
     public static async fromToken(token: string): Promise<Client> {
         const client = new Client();
-        const userId = await client.session.authorizeFromToken(token);
+        const userId = await client.session.notionAuthorizeFromToken(token);
         client._userId = userId;
         log.info('Login success:', userId);
         return client;
@@ -22,7 +22,7 @@ export default class Client {
 
     public static async fromLogin(email: string, password: string): Promise<Client> {
         const client = new Client();
-        const userId = await client.session.authorizeFromLogin(email, password);
+        const userId = await client.session.notionAuthorizeFromLogin(email, password);
         client._userId = userId;
         log.info('Login success:', userId);
         return client;
@@ -35,6 +35,7 @@ export default class Client {
     public readonly recordMap: RecordMap;
     public readonly transaction: Transation;
     public readonly action: Action;
+    public readonly awsSession: Session;
 
     public get userId(): rt.string_uuid {
         return this._userId;
@@ -43,12 +44,16 @@ export default class Client {
     private constructor(version: string = config.NOTION_CLIENT_VERSION) {
         this.version = version;
         this.session = new Session(config.NOTION_API_URL);
-        this.session.headers['notion-client-version'] = this.version;
+        this.session.headers.set('content-type', 'application/json');
+        this.session.headers.set('notion-client-version', this.version);
+
         this.sessionApi = new SessionApi(this.session);
 
         this.recordMap = new RecordMap(this);
         this.transaction = new Transation(this);
         this.action = new Action(this);
+
+        this.awsSession = new Session(config.AWS_UPLOAD_URL);
     }
 
     public beginTransaction(isSilent: boolean = false) {
@@ -88,6 +93,16 @@ export default class Client {
         const blockPointer = await this.action.createBlock(blockType, where, anchorBlock.pointer);
         const collectionViewPointer = await this.action.createCollectionView(type, blockPointer);
         const collectionPointer = await this.action.createCollection(blockPointer);
+        await this.action.done(true);
+        const r = await this.recordMap.get(blockPointer);
+        const block = Record.wrap(this, r, 'block') as Block;
+        return block;
+    }
+
+    public async uploadImage(filePath: string, where: 'before' | 'after' | 'child', anchorBlock: Record) {
+        const blockPointer = await this.action.createBlock('image', where, anchorBlock.pointer);
+        await this.action.done(true);
+        const data = await this.action.updateFile(blockPointer, filePath);
         await this.action.done(true);
         const r = await this.recordMap.get(blockPointer);
         const block = Record.wrap(this, r, 'block') as Block;

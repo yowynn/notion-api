@@ -1,5 +1,6 @@
 import * as readline from 'readline';
 import { v4 as uuidv4 } from 'uuid';
+import * as fs from 'fs';
 
 import config from './config.js';
 import { ArgumentError } from './error.js';
@@ -51,4 +52,43 @@ export async function input(prompt: string) {
         });
     });
     return data;
+}
+
+export function readFile(path: string) {
+    return fs.readFileSync(path);
+}
+
+export function inferMimeType(path: string) {
+    const ext = path.split('.').slice(-1)[0];
+    switch (ext) {
+        case 'png':
+            return 'image/png';
+        case 'jpg':
+        case 'jpeg':
+            return 'image/jpeg';
+        case 'gif':
+            return 'image/gif';
+        case 'webp':
+            return 'image/webp';
+        case 'svg':
+            return 'image/svg+xml';
+        case 'pdf':
+            return 'application/pdf';
+        case 'mp4':
+            return 'video/mp4';
+        case 'webm':
+            return 'video/webm';
+        case 'mov':
+            return 'video/quicktime';
+        case 'mp3':
+            return 'audio/mpeg';
+        case 'wav':
+            return 'audio/wav';
+        case 'flac':
+            return 'audio/flac';
+        case 'ogg':
+            return 'audio/ogg';
+        default:
+            return 'application/octet-stream';
+    }
 }

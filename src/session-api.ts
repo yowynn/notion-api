@@ -16,6 +16,12 @@ export type transaction_operation = {
     args: any;
 }
 
+export type upload_file_info = {
+    name: string;
+    contentType: string;
+    contentLength: number;
+}
+
 export default class SessionApi {
     private _session: Session;
 
@@ -148,6 +154,22 @@ export default class SessionApi {
         const endpoint = 'submitTransaction';
         const payload = {
             operations: operations.map(({ pointer: { table, id }, path, command, args }) => ({ table, id, path, command, args })),
+        }
+        return this._session.request('POST', endpoint, payload);
+    }
+
+    /**
+     * API: get upload file url
+     */
+    public async getUploadFileUrl(pointer: rt.pointer_to_record, fileInfo: upload_file_info) {
+        const endpoint = 'getUploadFileUrl';
+        const payload = {
+            bucket: 'secure',
+            name: fileInfo.name,
+            contentType: fileInfo.contentType,
+            record: pointer,
+            supportExtraHeaders: true,
+            contentLength: fileInfo.contentLength,
         }
         return this._session.request('POST', endpoint, payload);
     }
