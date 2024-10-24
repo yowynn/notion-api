@@ -64,12 +64,20 @@ export default class Client {
         await this.transaction.end(refreshRecords);
     }
 
-    public async getBlock<T extends Block = Block>(id: string, loadPageChunk: boolean = true) {
+    public async getBlock<T extends Block = Block>(id: rt.string_uuid, loadPageChunk: boolean = true) {
         id = uuid(id);
         const r = await this.recordMap.get({ table: 'block', id }, true, loadPageChunk);
         const block = Record.wrap(this, r, 'block') as T;
         return block;
     }
+
+    public async getRecord<T extends Record = Record>(table: rt.type_of_record, id: rt.string_uuid) {
+        id = uuid(id);
+        const r = await this.recordMap.get({ table, id }, true);
+        const record = Record.wrap(this, r, table) as T;
+        return record;
+    }
+
     public async setRecordProperty(record: Record, path: string[], args: any) {
         await this.action.setRecordProperty(record.pointer, path, args);
         await this.action.done(true);

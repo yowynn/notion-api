@@ -61,13 +61,14 @@ export type collection =
         icon?: string_icon;                                     // Icon URL
         cover?: string_url;                                     // Cover URL
         format?: {
+            subitem_property?: string_property_id;              // Subitem property if opened subitem support
             property_visibility?: Array<property_visibility>;   // Property visibility
             page_section_visibility?: page_section_visibility;  // Visibilities of page sections
             collection_page_sections?:
-            Array<collection_page_section>;                     // Collection page sections
+            & Array<collection_page_section>;                   // Collection page sections
             collection_cover_position?: number_normalization;   // Collection cover position
             collection_page_properties?:
-            Array<collection_page_property>;                    // Collection page properties:
+            & Array<collection_page_property>;                  // Collection page properties:
             collection_default_template: {
                 template_page_id: string_uuid;                  // Refer: block, default template page //TODO original template page id in template store??
             };

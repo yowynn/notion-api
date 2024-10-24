@@ -16,7 +16,11 @@ export default class Record {
             key = key + '.' + type;
         }
         const ctor = recordTypeMap[key] ?? recordTypeMap[table] ?? recordTypeMap.record;
-        return new ctor(client, record);
+        const obj = new ctor(client, record);
+        if (ctor === Record) {
+            obj.table = table;
+        }
+        return obj;
     }
 
     private _taskCount = 0;
@@ -28,8 +32,13 @@ export default class Record {
         return this._client.recordMap;
     }
 
-    public get table(): rt.type_of_record | null {
-        return null;
+    private _table!: rt.type_of_record;
+
+    public get table(): rt.type_of_record {
+        return this._table;
+    }
+    private set table(value: rt.type_of_record) {
+        this._table = value!;
     }
 
     public get record() {
