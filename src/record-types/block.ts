@@ -478,6 +478,9 @@ export type block_page =
     & i_colored
     & {
         type: 'page';
+        properties?: {
+            [key in string_property_id]: rich_text;             // Page properties
+        }
         format?: {                                              // Format of block:
             site_id?: string_uuid;                              // Refer: site, if published to web
             page_font?: option_page_font;                       // Page font, default is 'default'

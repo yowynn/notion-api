@@ -31,7 +31,7 @@ export type collection_view_table =
             table_wrap: boolean;                                // A switch to wrap all columns or not
             description?: string;                               // Collection view description
             show_page_icon?: boolean;
-            table_properties:                                   // Table properties, in order
+            table_properties:                                   // Table properties, in order //! LAZY UPDATE
             & Array<collection_view_table_property>;
             collection_pointer?: pointer_to_record;             // Collection pointer
             collection_view_icon?: string_icon;                 // Collection view icon
@@ -41,7 +41,7 @@ export type collection_view_table =
             & Array<collection_page_property>;                  // Collection page properties
             hide_linked_collection_name: boolean;               // Hide linked collection name or not
         };
-        page_sort: Array<string_uuid>;                          // Page manual sort order
+        page_sort: Array<string_uuid>;                          // Page manual sort order  //! LAZY UPDATE
     };
 
 

@@ -239,7 +239,7 @@ export type schema_number =
     & {
         type: 'number';
         show_as?: number_show_as;                               // Show as
-        number_format: option_number_format;                    // Number format
+        number_format?: option_number_format;                   // Number format
     };
 
 /** Schema: select */

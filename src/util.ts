@@ -28,6 +28,20 @@ export function newUuid() {
     return uuidv4();
 }
 
+// random string of 4 characters
+export function newPropertyId(): string {
+    const asciiVisibleMin = 33;
+    const asciiVisibleMax = 126;
+    const asciiVisibleRange = asciiVisibleMax - asciiVisibleMin;
+    return String.fromCharCode(
+        asciiVisibleMin + Math.floor(Math.random() * asciiVisibleRange),
+        asciiVisibleMin + Math.floor(Math.random() * asciiVisibleRange),
+        asciiVisibleMin + Math.floor(Math.random() * asciiVisibleRange),
+        asciiVisibleMin + Math.floor(Math.random() * asciiVisibleRange),
+    );
+
+}
+
 export function stringify(...args: any[]) {
     const newArgs = args.map((item) => {
         switch (typeof item) {

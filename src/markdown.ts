@@ -1,7 +1,7 @@
 import type * as rt from './record-types';
 import config from './config.js';
 import log from './log.js';
-import { rt$date2string } from './converter.js';
+import { rt$date2text } from './converter.js';
 import { ArgumentError, UnsupportedError } from './error.js';
 
 const ORDERED_ANNOTATION_TAG: rt.mark_of_annotation[] = [
@@ -53,7 +53,7 @@ const MARKDOWN_ESCAPE_REGEX = new RegExp(`[${MARKDOWN_ESCAPE_CHARLIST.join('').r
 
 const EMPTY = [] as any[];
 
-export const fromRichText = function (richText: rt.rich_text, useHtmlTags: boolean = true, reference: rt.pointer_to_record[] = []) {
+const fromRichText = function (richText: rt.rich_text, useHtmlTags: boolean = true, reference: rt.pointer_to_record[] = []) {
     let markdown = '';
     let boldAlt = false;
     for (const item of richText) {
@@ -117,7 +117,7 @@ export const fromRichText = function (richText: rt.rich_text, useHtmlTags: boole
                 }
                 case 'd': {
                     const date = annotation[1];
-                    text = rt$date2string(date);
+                    text = rt$date2text(date);
                     if (useHtmlTags) {
                         text = `<notion date="${Buffer.from(JSON.stringify(date)).toString('base64')}">${text}</notion>`;
                     }
@@ -160,7 +160,7 @@ export const fromRichText = function (richText: rt.rich_text, useHtmlTags: boole
     return markdown;
 }
 
-export const toRichText = function (markdown: string) {
+const toRichText = function (markdown: string) {
     const parseHtmlTag = (tag: string) => {
         const match = tag.match(/<(\/?)([a-zA-Z0-9-]+)([^>]*)(\/?)>/);
         if (!match) {
@@ -476,3 +476,8 @@ export const toRichText = function (markdown: string) {
     }
     return richText;
 };
+
+export default {
+    fromRichText,
+    toRichText,
+}

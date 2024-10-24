@@ -24,6 +24,7 @@ export default class Record {
     }
 
     private _taskCount = 0;
+    private _dirty = false;
 
     protected _record: rt.record;
     protected _client: Client;
@@ -91,13 +92,15 @@ export default class Record {
         this._taskCount++;
         await this._client.setRecordProperty(this, propertyPath, value);
         this._taskCount--;
+        this._dirty = true;
     }
 
-    public async refresh(update = false) {
+    public async refresh() {
         while (this._taskCount > 0) {
             await new Promise(resolve => setTimeout(resolve, 10));
         }
-        this._record = await this.recordMap.get({ table: this.table as rt.type_of_record, id: this.id }) ?? this._record;
+        this._record = await this.recordMap.get(this.pointer, this._dirty) ?? this._record;
+        this._dirty = false;
     }
 }
 
