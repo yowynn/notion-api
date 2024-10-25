@@ -56,7 +56,7 @@ const EMPTY = [] as any[];
 const fromRichText = function (richText: rt.rich_text, useHtmlTags: boolean = true, reference: rt.pointer_to_record[] = []) {
     let markdown = '';
     let boldAlt = false;
-    for (const item of richText) {
+    for (const item of richText ?? EMPTY) {
         let styles = '';
         let text = item[0];
         let annotations = item[1] ?? EMPTY as rt.annotation[];

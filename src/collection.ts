@@ -3,6 +3,7 @@ import Record, { as_record, record_accessor, readonly_record_accessor } from './
 import { decodeProperty, dp, ep } from './converter.js';
 import Client from './client.js';
 import { newPropertyId } from './util.js';
+import log from './log.js';
 
 
 @as_record('collection')
@@ -23,12 +24,17 @@ export default class Collection extends Record {
     @record_accessor('cover')
     public accessor cover!: rt.string_uuid;
 
+    public getSchemaId(name: string) {
+        return this._schemaNameMap[name];
+    }
+
     public getSchemaById(id: rt.string_property_id) {
         return (this.record as rt.collection).schema[id];
     }
 
+
     public getSchemaByName(name: string) {
-        const id = this._schemaNameMap[name];
+        const id = this.getSchemaId(name);
         return this.getSchemaById(id);
     }
 
@@ -38,7 +44,7 @@ export default class Collection extends Record {
     }
 
     public async setSchemaByName(name: string, schema: rt.schema) {
-        const id = this._schemaNameMap[name];
+        const id = this.getSchemaId(name);
         await this.setSchemaById(id, schema);
     }
 
@@ -51,6 +57,7 @@ export default class Collection extends Record {
 
     public constructor(client: Client, record: rt.record) {
         super(client, record);
+        this.refreshSchemaNameMap();
     }
 
     public async refresh(): Promise<void> {
@@ -63,6 +70,7 @@ export default class Collection extends Record {
         this._schemaNameMap = {};
         const schemas = (this.record as rt.collection).schema;
         for (const key in schemas) {
+            // log.info('schema:', key, schemas[key].name);
             this._schemaNameMap[schemas[key].name] = key;
         }
     }

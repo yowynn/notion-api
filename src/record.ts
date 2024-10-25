@@ -143,7 +143,7 @@ export function as_record(table: rt.type_of_record | 'record' = 'record', type: 
             throw new DuplicateKeyError('addToRecordTypeMap', key);
         }
         recordTypeMap[key] = ctor;
-        console.log('reg record type:', key, ctor)
+        // console.log('reg record type:', key, ctor)
     }
     return addToRecordTypeMap;
 }

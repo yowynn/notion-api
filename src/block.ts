@@ -1,7 +1,8 @@
 import type * as rt from './record-types';
 import Record, { as_record, record_accessor, readonly_record_accessor } from './record.js';
 import { decodeProperty, dp, encodeProperty, ep } from './converter.js';
-import Collection from './collection';
+import Collection from './collection.js';
+import log from './log.js';
 
 @as_record('block')
 export default class Block extends Record {
@@ -224,7 +225,7 @@ export class PageBlock extends Block {
         return decodeProperty(schemaType, value!);
     }
 
-    public async setSchemaProperty(id: rt.string_property_id, value: any) {
+    public async setPropertyById(id: rt.string_property_id, value: any) {
         var record = this.record as rt.block_page;
         let schemaType = 'text' as rt.type_of_schema;
         if (record.parent_table === 'collection') {
@@ -233,6 +234,31 @@ export class PageBlock extends Block {
         }
         await this.set(['properties', id], encodeProperty(schemaType, value));
         await this.refresh();
+    }
+
+    public async getPropertyByName(name: string) {
+        var record = this.record as rt.block_page;
+        let schemaType = 'text' as rt.type_of_schema;
+        if (record.parent_table === 'collection') {
+            var parent = await this.getParent<Collection>();
+            var id = parent.getSchemaId(name);
+            schemaType = parent.getSchemaById(id)?.type ?? 'text';
+            var value = this.get(['properties', id]);
+            return decodeProperty(schemaType, value!);
+        }
+        return undefined;
+    }
+
+    public async setPropertyByName(name: string, value: any) {
+        var record = this.record as rt.block_page;
+        let schemaType = 'text' as rt.type_of_schema;
+        if (record.parent_table === 'collection') {
+            var parent = await this.getParent<Collection>();
+            var id = parent.getSchemaId(name);
+            schemaType = parent.getSchemaById(id)?.type ?? 'text';
+            await this.set(['properties', id], encodeProperty(schemaType, value));
+            await this.refresh();
+        }
     }
 }
 
