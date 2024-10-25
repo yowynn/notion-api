@@ -214,50 +214,46 @@ export class PageBlock extends Block {
     @record_accessor('format.page_small_text')
     public accessor isSmallText!: boolean;
 
-    public async getPropertyById(id: rt.string_property_id) {
+    public async getProperty(id_name: rt.string_property_id | string) {
         var record = this.record as rt.block_page;
-        let schemaType = 'text' as rt.type_of_schema;
         if (record.parent_table === 'collection') {
-            var parent = await this.getParent<Collection>();
-            schemaType = parent.getSchemaById(id)?.type ?? 'text';
-        }
-        var value = this.get(['properties', id]);
-        return decodeProperty(schemaType, value!);
-    }
-
-    public async setPropertyById(id: rt.string_property_id, value: any) {
-        var record = this.record as rt.block_page;
-        let schemaType = 'text' as rt.type_of_schema;
-        if (record.parent_table === 'collection') {
-            var parent = await this.getParent<Collection>();
-            schemaType = parent.getSchemaById(id)?.type ?? 'text';
-        }
-        await this.set(['properties', id], encodeProperty(schemaType, value));
-        await this.refresh();
-    }
-
-    public async getPropertyByName(name: string) {
-        var record = this.record as rt.block_page;
-        let schemaType = 'text' as rt.type_of_schema;
-        if (record.parent_table === 'collection') {
-            var parent = await this.getParent<Collection>();
-            var id = parent.getSchemaId(name);
-            schemaType = parent.getSchemaById(id)?.type ?? 'text';
+            const parent = await this.getParent<Collection>();
+            const schemaType = parent.getSchema(id_name)?.type ?? 'text';
+            const id = parent.getSchemaId(id_name);
             var value = this.get(['properties', id]);
             return decodeProperty(schemaType, value!);
         }
-        return undefined;
     }
 
-    public async setPropertyByName(name: string, value: any) {
+    public async setProperty(id_name: rt.string_property_id | string, value: any) {
         var record = this.record as rt.block_page;
-        let schemaType = 'text' as rt.type_of_schema;
         if (record.parent_table === 'collection') {
-            var parent = await this.getParent<Collection>();
-            var id = parent.getSchemaId(name);
-            schemaType = parent.getSchemaById(id)?.type ?? 'text';
+            const parent = await this.getParent<Collection>();
+            const schemaType = parent.getSchema(id_name)?.type ?? 'text';
+            const id = parent.getSchemaId(id_name);
             await this.set(['properties', id], encodeProperty(schemaType, value));
-            await this.refresh();
+            if (schemaType === 'select' || schemaType === 'status') {
+                parent.createSchemaOptions(id_name, value);
+            }
+            else if (schemaType === 'multi_select') {
+                parent.createSchemaOptions(id_name, ...value);
+            }
+        }
+    }
+
+    public async appendFileUpload(id_name: rt.string_property_id | string, filePath: string) {
+        var record = this.record as rt.block_page;
+        if (record.parent_table === 'collection') {
+            const parent = await this.getParent<Collection>();
+            const schema = parent.getSchema(id_name);
+            if (schema?.type !== 'file') {
+                throw new Error('Property is not a file type');
+            }
+            const id = parent.getSchemaId(id_name);
+            this.markDirty();
+            const url = await this._client.action.updateFile(this.pointer as rt.pointer_to_block, filePath, undefined, id);
+            await this._client.action.done(true);
+            return url;
         }
     }
 }

@@ -80,6 +80,26 @@ export default class Transation {
         this.addOperation(operation);
     }
 
+    public opSetParent(pointer: rt.pointer_to_record, path: string[], args: { parentId: rt.string_uuid, parentTable: rt.type_of_record }) {
+        const operation = {
+            command: 'setParent',
+            pointer,
+            path,
+            args,
+        }
+        this.addOperation(operation);
+    }
+
+    public opKeyedObjectListAfter(pointer: rt.pointer_to_record, path: string[], args: { value: any }) {
+        const operation = {
+            command: 'keyedObjectListAfter',
+            pointer,
+            path,
+            args,
+        }
+        this.addOperation(operation);
+    }
+
     public async submit(refreshRecords: boolean = false) {
         if (!this._isSilent) {
             await this.updateEditedInfo(this._operations);

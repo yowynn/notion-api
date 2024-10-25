@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "Unofficial TypeScript Notion API.",
   "type": "module",
-  "main": "dist/app.js",
+  "main": "dist/src/index.js",
   "author": {
     "name": "Wynne"
   },
@@ -14,9 +14,10 @@
   "scripts": {
     "build": "tsc --build",
     "clean": "tsc --build --clean",
-    "start": "npm run build && node ."
+    "start": "npm run build && node ./dist/app.js"
   },
   "dependencies": {
+    "csv-parser": "^3.0.0",
     "dotenv": "^16.4.5",
     "node-fetch": "^3.3.2",
     "uuid": "^10.0.0"

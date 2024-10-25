@@ -29,6 +29,16 @@ export default class Action {
         this._transaction.opSet(pointer, path, args);
     }
 
+    public async updateRecordProperty(pointer: rt.pointer_to_record, path: string[], args: any) {
+        this._transaction.opUpdate(pointer, path, args);
+    }
+
+    public async appendSchemaOptions(pointer: rt.pointer_to_collection, propertyId: rt.string_property_id, options: rt.select_option[]) {
+        for (const option of options) {
+            this._transaction.opKeyedObjectListAfter(pointer, ['schema', propertyId, 'options'], { value: option });
+        }
+    }
+
     public async deleteRecord(pointer: rt.pointer_to_record) {
         this._transaction.opUpdate(pointer, [], { alive: false });
         const record = await this._recordMap.get(pointer) as rt.block;
@@ -40,55 +50,79 @@ export default class Action {
 
     private async createBlockPlaceholder(type: rt.type_of_block) {
         const record = getBlockTemplate(type, this._client.userId);
-        const pointer = getPointer(record, 'block')!;
+        const pointer = getPointer(record, 'block')! as rt.pointer_to_block;
         this._recordMap.setLocal(pointer, record);
         this._transaction.opSet(pointer, [], record);
         return pointer;
     }
 
-    public async setBlockParent(pointer: rt.pointer_to_record, parentPointer: rt.pointer_to_record, index: number = -1, anchorId?: rt.string_uuid) {
+    public async setBlockParent(pointer: rt.pointer_to_block, parentPointer: rt.pointer_to_record, index: number = -1, anchorId?: rt.string_uuid) {
         const record = await this._recordMap.get(pointer) as rt.block;
         const oldParentPointer = getParentPointer(record);
         if (oldParentPointer) {
-            this._transaction.opListRemove(oldParentPointer, ['content'], { id: pointer.id });
+            switch (oldParentPointer.table) {
+                case 'block': {
+                    this._transaction.opListRemove(oldParentPointer, ['content'], { id: pointer.id });
+                    break;
+                }
+                case 'collection': {
+                    // nothing to do
+                    break;
+                }
+                default: {
+                    throw new Error(`Unsupported parent table: ${oldParentPointer.table}`);
+                }
+            }
+        }
+        switch (parentPointer.table) {
+            case 'block': {
+                if (anchorId) {
+                    if (index === -1) {
+                        // before the anchor
+                        this._transaction.opListBefore(parentPointer, ['content'], { id: pointer.id, before: anchorId });
+                    }
+                    else if (index === 1) {
+                        // after the anchor
+                        this._transaction.opListAfter(parentPointer, ['content'], { id: pointer.id, after: anchorId });
+                    }
+                    else {
+                        throw new Error(`Unsupported index: ${index}`);
+                    }
+                }
+                else {
+                    if (index === -1) {
+                        // at the tail of the list
+                        this._transaction.opListAfter(parentPointer, ['content'], { id: pointer.id });
+                    }
+                    else if (index === 0) {
+                        // at the head of the list
+                        this._transaction.opListBefore(parentPointer, ['content'], { id: pointer.id });
+                    }
+                    else if (index > 0) {
+                        const parent = await this._recordMap.get(parentPointer) as any;
+                        anchorId = parent.content?.[index];
+                        this._transaction.opListBefore(parentPointer, ['content'], { id: pointer.id, before: anchorId });
+                    }
+                    else {
+                        const parent = await this._recordMap.get(parentPointer) as any;
+                        anchorId = parent.content ? parent.content[parent.content.length + index] : undefined;
+                        this._transaction.opListAfter(parentPointer, ['content'], { id: pointer.id, after: anchorId });
+                    }
+                }
+                break;
+            }
+            case 'collection': {
+                this._transaction.opSetParent(pointer, [], { parentId: parentPointer.id, parentTable: parentPointer.table });
+                break;
+            }
+            default: {
+                throw new Error(`Unsupported parent table: ${parentPointer.table}`);
+            }
         }
         this._transaction.opUpdate(pointer, [], {
             parent_id: parentPointer.id,
             parent_table: parentPointer.table,
         });
-        if (anchorId) {
-            if (index === -1) {
-                // before the anchor
-                this._transaction.opListBefore(parentPointer, ['content'], { id: pointer.id, before: anchorId });
-            }
-            else if (index === 1) {
-                // after the anchor
-                this._transaction.opListAfter(parentPointer, ['content'], { id: pointer.id, after: anchorId });
-            }
-            else {
-                throw new Error(`Unsupported index: ${index}`);
-            }
-        }
-        else {
-            if (index === -1) {
-                // at the tail of the list
-                this._transaction.opListAfter(parentPointer, ['content'], { id: pointer.id });
-            }
-            else if (index === 0) {
-                // at the head of the list
-                this._transaction.opListBefore(parentPointer, ['content'], { id: pointer.id });
-            }
-            else if (index > 0) {
-                const parent = await this._recordMap.get(parentPointer) as any;
-                anchorId = parent.content?.[index];
-                this._transaction.opListBefore(parentPointer, ['content'], { id: pointer.id, before: anchorId });
-            }
-            else {
-                const parent = await this._recordMap.get(parentPointer) as any;
-                anchorId = parent.content ? parent.content[parent.content.length + index] : undefined;
-                this._transaction.opListAfter(parentPointer, ['content'], { id: pointer.id, after: anchorId });
-            }
-        }
     }
 
     public async createBlock(type: rt.type_of_block, where: 'before' | 'after' | 'child', anchor: rt.pointer_to_record) {
@@ -114,13 +148,13 @@ export default class Action {
 
     private async createCollectionViewPlaceholder(type: rt.type_of_collection_view) {
         const record = getCollectionViewTemplate(type, this._client.userId);
-        const pointer = getPointer(record, 'collection_view')!;
+        const pointer = getPointer(record, 'collection_view')! as rt.pointer_to_collection_view;
         this._recordMap.setLocal(pointer, record);
         this._transaction.opSet(pointer, [], record);
         return pointer;
     }
 
-    public async setCollectionViewParent(pointer: rt.pointer_to_record, parentPointer: rt.pointer_to_record) {
+    public async setCollectionViewParent(pointer: rt.pointer_to_collection_view, parentPointer: rt.pointer_to_block) {
         const record = await this._recordMap.get(pointer) as rt.collection_view;
         const oldParentPointer = getParentPointer(record);
         if (oldParentPointer) {
@@ -133,21 +167,21 @@ export default class Action {
         this._transaction.opListAfter(parentPointer, ['view_ids'], { id: pointer.id });
     }
 
-    public async createCollectionView(type: rt.type_of_collection_view, parent: rt.pointer_to_record) {
+    public async createCollectionView(type: rt.type_of_collection_view, parentPointer: rt.pointer_to_block) {
         const pointer = await this.createCollectionViewPlaceholder(type);
-        await this.setCollectionViewParent(pointer, parent);
+        await this.setCollectionViewParent(pointer, parentPointer);
         return pointer;
     }
 
     private async createCollectionPlaceholder() {
         const record = getCollectionTemplate();
-        const pointer = getPointer(record, 'collection')!;
+        const pointer = getPointer(record, 'collection')! as rt.pointer_to_collection;
         this._recordMap.setLocal(pointer, record);
         this._transaction.opSet(pointer, [], record);
         return pointer;
     }
 
-    public async setCollectionParent(pointer: rt.pointer_to_record, parentPointer: rt.pointer_to_record) {
+    public async setCollectionParent(pointer: rt.pointer_to_collection, parentPointer: rt.pointer_to_block) {
         const record = await this._recordMap.get(pointer) as rt.collection;
         const oldParentPointer = getParentPointer(record);
         if (oldParentPointer) {
@@ -162,15 +196,15 @@ export default class Action {
         this._transaction.opUpdate(parentPointer, [ 'format' ], { collection_pointer: pointer });
     }
 
-    public async createCollection(parent: rt.pointer_to_record) {
+    public async createCollection(parentPointer: rt.pointer_to_block) {
         const pointer = await this.createCollectionPlaceholder();
-        await this.setCollectionParent(pointer, parent);
+        await this.setCollectionParent(pointer, parentPointer);
         return pointer;
     }
 
-    public async updateFile(pointer: rt.pointer_to_record, filePath: string, blob?: Blob) {
+    public async updateFile(pointer: rt.pointer_to_block, filePath: string, blob?: Blob, propertyId?: rt.string_property_id) {
         if (!blob) {
-            const buffer = readFile(filePath);
+            const buffer = await readFile(filePath);
             blob = new Blob([buffer]);
         }
         const name = filePath.split(/[\\/]/).pop()!;
@@ -180,13 +214,19 @@ export default class Action {
         const awsSession = this._client.awsSession;
         data.postHeaders?.forEach((header: any) => awsSession.headers.set(header.name, header.value));
         await awsSession.awsUploadFile(data.fields, blob);
-        this._transaction.opUpdate(pointer, ['properties'], {
-            size: [[getFileSizeString(contentLength)]],
-            source: [[data.url]],
-            title: [[name]],
-        });
-        this._transaction.opUpdate(pointer, ['format'], {
-            display_source: data.url,
-        });
+        if (propertyId) {
+            this._transaction.opSet(pointer, ['properties', propertyId], [[name, [['a', data.url]]]] as [string, [rt.annotation_link]][]);
+        }
+        else {
+            this._transaction.opUpdate(pointer, ['properties'], {
+                size: [[getFileSizeString(contentLength)]],
+                source: [[data.url]],
+                title: [[name]],
+            });
+            this._transaction.opUpdate(pointer, ['format'], {
+                display_source: data.url,
+            });
+        }
+        return data.url as rt.string_url;
     }
 }

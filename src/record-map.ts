@@ -49,6 +49,21 @@ export default class RecordMap {
         return pointerList.map(pointer => this.getLocal(pointer));
     }
 
+    public markDirty(pointer: rt.pointer_to_record) {
+        const record = this.getLocal(pointer);
+        if (record) {
+            (record as any).__dirty__ = true;
+        }
+    }
+
+    public isDirty(pointer: rt.pointer_to_record) {
+        const record = this.getLocal(pointer);
+        if (record) {
+            return (record as any).__dirty__;
+        }
+        return false;
+    }
+
     public getLocal(pointer: rt.pointer_to_record) {
         const tableMap = this._map[pointer.table];
         if (!tableMap) {

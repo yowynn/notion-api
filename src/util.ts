@@ -1,6 +1,7 @@
 import * as readline from 'readline';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
+import csv from 'csv-parser';
 
 import config from './config.js';
 import { ArgumentError } from './error.js';
@@ -68,9 +69,21 @@ export async function input(prompt: string) {
     return data;
 }
 
-export function readFile(path: string) {
-    return fs.readFileSync(path);
+export async function readFile(path: string) {
+    return fs.promises.readFile(path);
 }
+
+export async function readCsv(filePath: string) {
+    return new Promise<any[]>((resolve, reject) => {
+        const results: any[] = [];
+        fs.createReadStream(filePath)
+            .pipe(csv())
+            .on('data', (data: any) => results.push(data))
+            .on('end', () => resolve(results))
+            .on('error', (err: any) => reject(err));
+    });
+}
+
 
 export function inferMimeType(path: string) {
     const ext = path.split('.').slice(-1)[0];

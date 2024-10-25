@@ -50,3 +50,5 @@ export type collection_view =
     ;
 
 export type type_of_collection_view = collection_view['type'];
+
+export type pointer_to_collection_view = pointer_to_record & { table: 'collection_view' };

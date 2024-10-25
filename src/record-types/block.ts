@@ -689,3 +689,5 @@ export type block =
 
 /** Block type collection */
 export type type_of_block = block['type'];
+
+export type pointer_to_block = pointer_to_record & { type: 'block' };

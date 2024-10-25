@@ -5,14 +5,6 @@ import {
     collection_view,
 } from '.';
 
-/** Reference record pointer, pointer to a record with record type */
-export type pointer_to_record = {
-    id: string_uuid;                                           // Refer: record
-    table: type_of_record;                              // Record type
-    spaceId?: string_uuid;                                     // Refer: space, the space where the record is located
-};
-
-
 /** Record map */
 export type map_of_record = Partial<Record<type_of_record, Record<string_uuid, record>>>;
 
@@ -39,3 +31,10 @@ export type type_of_record =
     | 'space_view'                                              // Space view
     | 'space_user'                                              // Space/user relation, witch id is '<space_id>|<user_id>'
     ;
+
+/** Reference record pointer, pointer to a record with record type */
+export type pointer_to_record = {
+    id: string_uuid;                                            // Refer: record
+    table: type_of_record;                                      // Record type
+    spaceId?: string_uuid;                                      // Refer: space, the space where the record is located
+};

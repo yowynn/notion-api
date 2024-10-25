@@ -10,6 +10,7 @@ import Transation from './transaction.js';
 import Action from './action.js';
 import { uuid } from './util.js';
 import { get } from 'http';
+import { CollectionViewBlock, CollectionViewPageBlock } from './block.js';
 
 export default class Client {
     public static async fromToken(token: string): Promise<Client> {
@@ -96,7 +97,7 @@ export default class Client {
         return block;
     }
 
-    public async createCollection(type: rt.type_of_collection_view, where: 'before' | 'after' | 'child', anchorBlock: Block, inline: boolean = false) {
+    public async createCollectionBlock(type: rt.type_of_collection_view, where: 'before' | 'after' | 'child', anchorBlock: Block, inline: boolean = false) {
         const blockType: rt.type_of_block = inline ? 'collection_view' : 'collection_view_page';
         const blockPointer = await this.action.createBlock(blockType, where, anchorBlock.pointer);
         const collectionViewPointer = await this.action.createCollectionView(type, blockPointer);
@@ -104,10 +105,10 @@ export default class Client {
         await this.action.done(true);
         const r = await this.recordMap.get(blockPointer);
         const block = Record.wrap(this, r, 'block') as Block;
-        return block;
+        return inline ? block as CollectionViewBlock : block as CollectionViewPageBlock;
     }
 
-    public async uploadImage(filePath: string, where: 'before' | 'after' | 'child', anchorBlock: Record) {
+    public async createImageBlockUploaded(filePath: string, where: 'before' | 'after' | 'child', anchorBlock: Record) {
         const blockPointer = await this.action.createBlock('image', where, anchorBlock.pointer);
         await this.action.done(true);
         const data = await this.action.updateFile(blockPointer, filePath);

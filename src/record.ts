@@ -24,9 +24,6 @@ export default class Record {
     }
 
     private _taskCount = 0;
-    private _dirty = false;
-
-    protected _record: rt.record;
     protected _client: Client;
 
     protected get recordMap() {
@@ -34,6 +31,7 @@ export default class Record {
     }
 
     private _table!: rt.type_of_record;
+    private _id!: rt.string_uuid;
 
     public get table(): rt.type_of_record {
         return this._table;
@@ -43,11 +41,11 @@ export default class Record {
     }
 
     public get record() {
-        return this._record;
+        return this.recordMap.getLocal(this.pointer);
     }
 
     public get pointer(): rt.pointer_to_record {
-        return getPointer(this.record, this.table as rt.type_of_record)!;
+        return { table: this.table, id: this.id };
     }
 
     public get parentPointer(): rt.pointer_to_record | null {
@@ -55,12 +53,12 @@ export default class Record {
     }
 
     public get id() {
-        return this.record.id;
+        return this._id;
     }
 
     public constructor(client: Client, record: rt.record) {
         this._client = client;
-        this._record = record;
+        this._id = record.id;
     }
 
     @readonly_record_accessor('version')
@@ -81,26 +79,28 @@ export default class Record {
     }
 
     public async set(propertyPath: string[], value: any) {
-        let record = this.record as any;
-        for (let p of propertyPath.slice(0, -1)) {
-            if (!record[p]) {
-                record[p] = {};
-            }
-            record = record[p];
-        }
-        record[propertyPath.slice(-1)[0]] = value;
         this._taskCount++;
+        this.markDirty();
         await this._client.setRecordProperty(this, propertyPath, value);
         this._taskCount--;
-        this._dirty = true;
     }
 
-    public async refresh() {
+    public markDirty() {
+        this.recordMap.markDirty(this.pointer);
+    }
+
+    public get isDirty() {
+        return this.recordMap.isDirty(this.pointer);
+    }
+
+    public async idle() {
         while (this._taskCount > 0) {
             await new Promise(resolve => setTimeout(resolve, 10));
         }
-        this._record = await this.recordMap.get(this.pointer, this._dirty) ?? this._record;
-        this._dirty = false;
+    }
+
+    public async refresh() {
+        await this.recordMap.get(this.pointer, this.isDirty);
     }
 }
 

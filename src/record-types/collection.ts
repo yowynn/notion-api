@@ -12,6 +12,7 @@ import {
     page_section_visibility,
     rich_text,
     schema,
+    pointer_to_record,
 } from '.';
 
 /** Collection property visibility */
@@ -79,3 +80,5 @@ export type collection =
             [key: string_property_id]: schema;                  // Deleted schema map
         };
     };
+
+export type pointer_to_collection = pointer_to_record & { table: 'collection' };

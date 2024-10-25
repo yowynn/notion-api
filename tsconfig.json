@@ -5,10 +5,13 @@
     "lib": [ "ES2022", "DOM" ],
     "outDir": "dist",
     "strict": true,
+    "declaration": true,
     "sourceMap": true,
-    "moduleResolution": "Node"
+    "moduleResolution": "Node",
+    "allowSyntheticDefaultImports": true,
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist"
   ]
 }

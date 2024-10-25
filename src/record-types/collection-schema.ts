@@ -125,7 +125,7 @@ export type number_show_as =
 /** Select option */
 export type select_option = {
     id: string_property_id;                                     // Select option id
-    color: option_color_foreground;                             // Color
+    color?: option_color_foreground;                            // Color
     value: string;                                              // Name
     description?: string;                                       // Description
     collectionIds?: Array<string_uuid>;                         // Collection ids (What is this?)
@@ -239,7 +239,7 @@ export type schema_number =
     & {
         type: 'number';
         show_as?: number_show_as;                               // Show as
-        number_format?: option_number_format;                   // Number format
+        number_format: option_number_format;                    // Number format
     };
 
 /** Schema: select */
