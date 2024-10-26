@@ -161,13 +161,14 @@ export default class SessionApi {
     /**
      * API: get upload file url
      */
-    public async getUploadFileUrl(pointer: rt.pointer_to_record, fileInfo: upload_file_info) {
+    public async getUploadFileUrl(fileInfo: upload_file_info, relatedPointer?: rt.pointer_to_record) {
+        const bucket = relatedPointer ? 'secure' : 'public';
         const endpoint = 'getUploadFileUrl';
         const payload = {
-            bucket: 'secure',
+            bucket,
             name: fileInfo.name,
             contentType: fileInfo.contentType,
-            record: pointer,
+            record: relatedPointer,
             supportExtraHeaders: true,
             contentLength: fileInfo.contentLength,
         }

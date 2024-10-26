@@ -24,6 +24,7 @@ export default class RecordMap {
             bot: {} as Record<rt.string_uuid, rt.record>,
             space_view: {} as Record<rt.string_uuid, rt.record>,
             space_user: {} as Record<rt.string_uuid, rt.record>,
+            custom_emoji: {} as Record<rt.string_uuid, rt.record>,
         };
     }
 

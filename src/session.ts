@@ -30,7 +30,7 @@ export default class Session {
     }
 
     public async request(method: string, endpoint: string, payload: any = {}): Promise<any> {
-        const url = `${this._baseUrl}/${endpoint}`
+        const url = endpoint.startsWith('http') ? endpoint : `${this._baseUrl}/${endpoint}`;
         log.info(`requesting: ${url}`);
         let body: any;
         const payloadType = this.headers.get('content-type');
@@ -127,14 +127,22 @@ export default class Session {
         return userId;
     }
 
-    public async awsUploadFile(fields: Record<string, string>, blob: Blob) {
-        const form = new FormData();
-        for (const [name, value] of Object.entries(fields)) {
-            form.append(name, value);
+    public async awsUploadFile(awsUploadEntry: any, blob: Blob) {
+        const type = awsUploadEntry.type as string;
+        if (type === 'POST') {
+            awsUploadEntry.postHeaders?.forEach((header: any) => this.headers.set(header.name, header.value));
+            const fields = awsUploadEntry.fields as Record<string, string>;
+            const form = new FormData();
+            for (const [name, value] of Object.entries(fields)) {
+                form.append(name, value);
+            }
+            form.append('file', blob, fields['key'].split('/').pop()!);
+            // this.headers.set('content-type', `multipart/form-data; boundary=${form.getBoundary()}`);
+            await this.request('POST', awsUploadEntry.signedUploadPostUrl, form);
         }
-        form.append('file', blob, fields['key'].split('/').pop()!);
-        // this.headers.set('content-type', `multipart/form-data; boundary=${form.getBoundary()}`);
-        const data = await this.request('POST', fields.bucket, form);
-        return data;
+        else if (type === 'PUT') {
+            awsUploadEntry.putHeaders?.forEach((header: any) => this.headers.set(header.name, header.value));
+            await this.request('PUT', awsUploadEntry.signedPutUrl, blob);
+        }
     }
 }

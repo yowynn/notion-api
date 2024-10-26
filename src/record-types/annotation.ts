@@ -126,6 +126,13 @@ export type annotation_formula_property_pointer = [
     }
 ];
 
+/** Annotation: custom emoji (replace text with '‣') */
+export type annotation_custom_emoji = [
+    'ce',
+    string_uuid,                                                // Refer: custom_emoji
+    string_uuid?,                                               // Refer: space
+];
+
 /** Annotation */
 export type annotation =
     | annotation_bold                                           // Bold
@@ -146,6 +153,7 @@ export type annotation =
     | annotation_suggested_insertion                            // Suggested insertion
     | annotation_suggested_removal                              // Suggested removal
     | annotation_formula_property_pointer                       // Formula property pointer
+    | annotation_custom_emoji                                   // Custom emoji
     ;
 
 /** Annotation tag collection */

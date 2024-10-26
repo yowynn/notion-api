@@ -9,3 +9,4 @@ export * from './interface.js';
 export * from './permission.js';
 export * from './record.js';
 export * from './collection-schema.js';
+export * from './custom_emoji.js';

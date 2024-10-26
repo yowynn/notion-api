@@ -1,7 +1,7 @@
 import type * as rt from './record-types';
 import type Client from './client.js';
 import type Transation from './transaction.js';
-import { getBlockTemplate, getCollectionTemplate, getCollectionViewTemplate, getFileSizeString, getParentPointer, getPointer } from './record-util.js';
+import { getBlockTemplate, getCollectionTemplate, getCollectionViewTemplate, getCustomEmojiTemplate, getFileSizeString, getParentPointer, getPointer } from './record-util.js';
 import { inferMimeType, newUuid, readFile } from './util.js';
 import log from './log.js';
 
@@ -49,7 +49,7 @@ export default class Action {
     }
 
     private async createBlockPlaceholder(type: rt.type_of_block) {
-        const record = getBlockTemplate(type, this._client.userId);
+        const record = getBlockTemplate(this._client, type);
         const pointer = getPointer(record, 'block')! as rt.pointer_to_block;
         this._recordMap.setLocal(pointer, record);
         this._transaction.opSet(pointer, [], record);
@@ -147,7 +147,7 @@ export default class Action {
     }
 
     private async createCollectionViewPlaceholder(type: rt.type_of_collection_view) {
-        const record = getCollectionViewTemplate(type, this._client.userId);
+        const record = getCollectionViewTemplate(this._client, type);
         const pointer = getPointer(record, 'collection_view')! as rt.pointer_to_collection_view;
         this._recordMap.setLocal(pointer, record);
         this._transaction.opSet(pointer, [], record);
@@ -174,7 +174,7 @@ export default class Action {
     }
 
     private async createCollectionPlaceholder() {
-        const record = getCollectionTemplate();
+        const record = getCollectionTemplate(this._client);
         const pointer = getPointer(record, 'collection')! as rt.pointer_to_collection;
         this._recordMap.setLocal(pointer, record);
         this._transaction.opSet(pointer, [], record);
@@ -202,6 +202,14 @@ export default class Action {
         return pointer;
     }
 
+    public async createCustomEmoji(name: string, url: rt.string_url) {
+        const record = getCustomEmojiTemplate(this._client, name, url);
+        const pointer = getPointer(record, 'custom_emoji')! as rt.pointer_to_custom_emoji;
+        this._recordMap.setLocal(pointer, record);
+        this._transaction.opSet(pointer, [], record);
+        return pointer;
+    }
+
     public async updateFile(pointer: rt.pointer_to_block, filePath: string, blob?: Blob, propertyId?: rt.string_property_id) {
         if (!blob) {
             const buffer = await readFile(filePath);
@@ -210,10 +218,9 @@ export default class Action {
         const name = filePath.split(/[\\/]/).pop()!;
         const contentType = inferMimeType(name);
         const contentLength = blob.size;
-        const data = await this._client.sessionApi.getUploadFileUrl(pointer, { name, contentType, contentLength });
+        const data = await this._client.sessionApi.getUploadFileUrl({ name, contentType, contentLength }, pointer);
         const awsSession = this._client.awsSession;
-        data.postHeaders?.forEach((header: any) => awsSession.headers.set(header.name, header.value));
-        await awsSession.awsUploadFile(data.fields, blob);
+        await awsSession.awsUploadFile(data, blob);
         if (propertyId) {
             this._transaction.opSet(pointer, ['properties', propertyId], [[name, [['a', data.url]]]] as [string, [rt.annotation_link]][]);
         }
@@ -229,4 +236,19 @@ export default class Action {
         }
         return data.url as rt.string_url;
     }
+
+    public async updateFilePublic(filePath: string, blob?: Blob) {
+        if (!blob) {
+            const buffer = await readFile(filePath);
+            blob = new Blob([buffer]);
+        }
+        const name = filePath.split(/[\\/]/).pop()!;
+        const contentType = inferMimeType(name);
+        const contentLength = blob.size;
+        const data = await this._client.sessionApi.getUploadFileUrl({ name, contentType, contentLength });
+        const awsSession = this._client.awsSession;
+        await awsSession.awsUploadFile(data, blob);
+        return data.url as rt.string_url;
+    }
+
 }

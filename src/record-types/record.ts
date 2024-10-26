@@ -3,6 +3,7 @@ import {
     block,
     collection,
     collection_view,
+    custom_emoji,
 } from '.';
 
 /** Record map */
@@ -13,6 +14,7 @@ export type record =
     | block                                                     // Block
     | collection_view                                           // Collection view
     | collection                                                // Collection
+    | custom_emoji                                              // Custom emoji
     ;
 
 /** Record type collection */
@@ -21,6 +23,8 @@ export type type_of_record =
     | 'collection_view'                                         // Collection view
     | 'collection'                                              // Collection
     | 'discussion'                                              // Discussion
+    | 'custom_emoji'                                            // Custom emoji
+    // unsupported types:
     | 'comment'                                                 // Comment
     | 'team'                                                    // Team
     | 'space'                                                   // Space

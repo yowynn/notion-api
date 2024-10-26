@@ -27,6 +27,7 @@ export interface i_creatable {
     created_time: number_timestamp;                             // Created time
     created_by_table: type_of_record;                           // Created by record type
     created_by_id: string_uuid;                                 // Refer: record, created by whom
+    space_id?: string_uuid;                                     // Refer: space, the space where the block is located
 }
 
 /** With edited information */
@@ -34,6 +35,7 @@ export interface i_editable {
     last_edited_time: number_timestamp;                         // Last edited time
     last_edited_by_table: type_of_record;                       // Last edited by record type
     last_edited_by_id: string_uuid;                             // Refer: record, last edited by whom
+    space_id?: string_uuid;                                     // Refer: space, the space where the block is located
 }
 
 /** With deleted information */
@@ -42,6 +44,7 @@ export interface i_deletable {
     moved_to_trash_time?: number_timestamp;                     // Moved to trash time
     moved_to_trash_table?: type_of_record;                      // Moved to trash by record type
     moved_to_trash_id?: string_uuid;                            // Refer: record, moved to trash by whom
+    space_id?: string_uuid;                                     // Refer: space, the space where the block is located
 }
 
 /** With parent information */

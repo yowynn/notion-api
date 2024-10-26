@@ -30,6 +30,7 @@ export default class Client {
     }
 
     private _userId!: rt.string_uuid;
+    private _spaceId!: rt.string_uuid;
     public readonly version: string;
     public readonly session: Session;
     public readonly sessionApi: SessionApi;
@@ -40,6 +41,10 @@ export default class Client {
 
     public get userId(): rt.string_uuid {
         return this._userId;
+    }
+
+    public get spaceId(): rt.string_uuid {
+        return this._spaceId;
     }
 
     private constructor(version: string = config.NOTION_CLIENT_VERSION) {
@@ -55,6 +60,10 @@ export default class Client {
         this.action = new Action(this);
 
         this.awsSession = new Session(config.AWS_UPLOAD_URL);
+    }
+
+    public selectSpace(id: rt.string_uuid) {
+        this._spaceId = id;
     }
 
     public beginTransaction(isSilent: boolean = false) {
@@ -111,10 +120,22 @@ export default class Client {
     public async createImageBlockUploaded(filePath: string, where: 'before' | 'after' | 'child', anchorBlock: Record) {
         const blockPointer = await this.action.createBlock('image', where, anchorBlock.pointer);
         await this.action.done(true);
-        const data = await this.action.updateFile(blockPointer, filePath);
+        const url = await this.action.updateFile(blockPointer, filePath);
         await this.action.done(true);
         const r = await this.recordMap.get(blockPointer);
         const block = Record.wrap(this, r, 'block') as Block;
         return block;
+    }
+
+    public async createCustomEmojiUploaded(filePath: string, name?: string) {
+        if (!name) {
+            name = filePath.split(/[\\/]/).pop()!;
+        }
+        const url = await this.action.updateFilePublic(filePath);
+        const emojiPointer = await this.action.createCustomEmoji(name, url);
+        await this.action.done(true);
+        const r = await this.recordMap.get(emojiPointer);
+        const emoji = Record.wrap(this, r, 'custom_emoji') as Record;
+        return emoji;
     }
 }
