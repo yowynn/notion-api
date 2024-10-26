@@ -25,21 +25,21 @@ export default class Action {
         await this._transaction.submit(refreshRecords);
     }
 
-    public async setRecordProperty(pointer: rt.pointer_to_record, path: string[], args: any) {
+    public async setRecordProperty(pointer: rt.pointer, path: string[], args: any) {
         this._transaction.opSet(pointer, path, args);
     }
 
-    public async updateRecordProperty(pointer: rt.pointer_to_record, path: string[], args: any) {
+    public async updateRecordProperty(pointer: rt.pointer, path: string[], args: any) {
         this._transaction.opUpdate(pointer, path, args);
     }
 
-    public async appendSchemaOptions(pointer: rt.pointer_to_collection, propertyId: rt.string_property_id, options: rt.select_option[]) {
+    public async appendSchemaOptions(pointer: rt.pointered<'collection'>, propertyId: rt.string_property_id, options: rt.select_option[]) {
         for (const option of options) {
             this._transaction.opKeyedObjectListAfter(pointer, ['schema', propertyId, 'options'], { value: option });
         }
     }
 
-    public async deleteRecord(pointer: rt.pointer_to_record) {
+    public async deleteRecord(pointer: rt.pointer) {
         this._transaction.opUpdate(pointer, [], { alive: false });
         const record = await this._recordMap.get(pointer) as rt.block;
         const parentPointer = getParentPointer(record);
@@ -50,13 +50,13 @@ export default class Action {
 
     private async createBlockPlaceholder(type: rt.type_of_block) {
         const record = getBlockTemplate(this._client, type);
-        const pointer = getPointer(record, 'block')! as rt.pointer_to_block;
+        const pointer = getPointer(record, 'block')! as rt.pointered<'block'>;
         this._recordMap.setLocal(pointer, record);
         this._transaction.opSet(pointer, [], record);
         return pointer;
     }
 
-    public async setBlockParent(pointer: rt.pointer_to_block, parentPointer: rt.pointer_to_record, index: number = -1, anchorId?: rt.string_uuid) {
+    public async setBlockParent(pointer: rt.pointered<'block'>, parentPointer: rt.pointer, index: number = -1, anchorId?: rt.string_uuid) {
         const record = await this._recordMap.get(pointer) as rt.block;
         const oldParentPointer = getParentPointer(record);
         if (oldParentPointer) {
@@ -125,7 +125,7 @@ export default class Action {
         });
     }
 
-    public async createBlock(type: rt.type_of_block, where: 'before' | 'after' | 'child', anchor: rt.pointer_to_record) {
+    public async createBlock(type: rt.type_of_block, where: 'before' | 'after' | 'child', anchor: rt.pointer) {
         const pointer = await this.createBlockPlaceholder(type);
         switch (where) {
             case 'before': {
@@ -148,13 +148,13 @@ export default class Action {
 
     private async createCollectionViewPlaceholder(type: rt.type_of_collection_view) {
         const record = getCollectionViewTemplate(this._client, type);
-        const pointer = getPointer(record, 'collection_view')! as rt.pointer_to_collection_view;
+        const pointer = getPointer(record, 'collection_view')! as rt.pointered<'collection_view'>;
         this._recordMap.setLocal(pointer, record);
         this._transaction.opSet(pointer, [], record);
         return pointer;
     }
 
-    public async setCollectionViewParent(pointer: rt.pointer_to_collection_view, parentPointer: rt.pointer_to_block) {
+    public async setCollectionViewParent(pointer: rt.pointered<'collection_view'>, parentPointer: rt.pointered<'block'>) {
         const record = await this._recordMap.get(pointer) as rt.collection_view;
         const oldParentPointer = getParentPointer(record);
         if (oldParentPointer) {
@@ -167,7 +167,7 @@ export default class Action {
         this._transaction.opListAfter(parentPointer, ['view_ids'], { id: pointer.id });
     }
 
-    public async createCollectionView(type: rt.type_of_collection_view, parentPointer: rt.pointer_to_block) {
+    public async createCollectionView(type: rt.type_of_collection_view, parentPointer: rt.pointered<'block'>) {
         const pointer = await this.createCollectionViewPlaceholder(type);
         await this.setCollectionViewParent(pointer, parentPointer);
         return pointer;
@@ -175,13 +175,13 @@ export default class Action {
 
     private async createCollectionPlaceholder() {
         const record = getCollectionTemplate(this._client);
-        const pointer = getPointer(record, 'collection')! as rt.pointer_to_collection;
+        const pointer = getPointer(record, 'collection')! as rt.pointered<'collection'>;
         this._recordMap.setLocal(pointer, record);
         this._transaction.opSet(pointer, [], record);
         return pointer;
     }
 
-    public async setCollectionParent(pointer: rt.pointer_to_collection, parentPointer: rt.pointer_to_block) {
+    public async setCollectionParent(pointer: rt.pointered<'collection'>, parentPointer: rt.pointered<'block'>) {
         const record = await this._recordMap.get(pointer) as rt.collection;
         const oldParentPointer = getParentPointer(record);
         if (oldParentPointer) {
@@ -196,7 +196,7 @@ export default class Action {
         this._transaction.opUpdate(parentPointer, [ 'format' ], { collection_pointer: pointer });
     }
 
-    public async createCollection(parentPointer: rt.pointer_to_block) {
+    public async createCollection(parentPointer: rt.pointered<'block'>) {
         const pointer = await this.createCollectionPlaceholder();
         await this.setCollectionParent(pointer, parentPointer);
         return pointer;
@@ -204,13 +204,13 @@ export default class Action {
 
     public async createCustomEmoji(name: string, url: rt.string_url) {
         const record = getCustomEmojiTemplate(this._client, name, url);
-        const pointer = getPointer(record, 'custom_emoji')! as rt.pointer_to_custom_emoji;
+        const pointer = getPointer(record, 'custom_emoji')! as rt.pointered<'custom_emoji'>;
         this._recordMap.setLocal(pointer, record);
         this._transaction.opSet(pointer, [], record);
         return pointer;
     }
 
-    public async updateFile(pointer: rt.pointer_to_block, filePath: string, blob?: Blob, propertyId?: rt.string_property_id) {
+    public async updateFile(pointer: rt.pointered<'block'>, filePath: string, blob?: Blob, propertyId?: rt.string_property_id) {
         if (!blob) {
             const buffer = await readFile(filePath);
             blob = new Blob([buffer]);

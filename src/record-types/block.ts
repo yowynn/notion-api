@@ -17,7 +17,7 @@ import {
     string_uuid,
     option_boolean,
     option_color,
-    pointer_to_record,
+    pointer,
     rich_text,
     rich_texted,
 } from '.';
@@ -358,7 +358,7 @@ export type block_transclusion_reference =
     & {
         type: 'transclusion_reference';
         format: {
-            transclusion_reference_pointer: pointer_to_record;  // Refer to the block to be referenced
+            transclusion_reference_pointer: pointer;            // Refer to the block to be referenced
         };
     };
 
@@ -422,7 +422,7 @@ export type block_alias =
     & {
         type: 'alias';
         format: {
-            alias_pointer: pointer_to_record;                   // Refer to the block to be linked
+            alias_pointer: pointer;                             // Refer to the block to be linked
         };
     };
 
@@ -518,7 +518,7 @@ type block_collection_view_page_database =
             site_id?: string_uuid;                              // Refer: site, if published to web
             block_locked?: boolean;                             // Page locked or not
             block_locked_by?: string_uuid;                      // Refer: notion_user, the user who locked the page
-            collection_pointer: pointer_to_record;              // Refer to the 'collection' record
+            collection_pointer: pointer;                        // Refer to the 'collection' record
             social_media_image_preview_url?: string_url;        // Social media image preview URL, auto-generated
         };
     };
@@ -560,7 +560,7 @@ type block_collection_view_database =
     & {
         collection_id: string_uuid;                             // Refer: collection, only for original database
         format: {
-            collection_pointer: pointer_to_record;              // Refer to the 'collection' record, only for original database
+            collection_pointer: pointer;                        // Refer to the 'collection' record, only for original database
         };
     };
 type block_collection_view_linked_database =
@@ -689,5 +689,3 @@ export type block =
 
 /** Block type collection */
 export type type_of_block = block['type'];
-
-export type pointer_to_block = pointer_to_record & { type: 'block' };

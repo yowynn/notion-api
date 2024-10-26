@@ -5,7 +5,7 @@ import {
     option_color_foreground,
     option_date_format,
     option_time_format,
-    pointer_to_record,
+    pointer,
     rich_text,
 } from '.';
 
@@ -350,7 +350,7 @@ export type schema_relation =
             enabled: boolean;                                   // Enabled
         }
         collection_id: string_uuid;                             // Collection id
-        collection_pointer: pointer_to_record;                  // Collection pointer
+        collection_pointer: pointer;                            // Collection pointer
     };
 
 /** Schema: rollup */

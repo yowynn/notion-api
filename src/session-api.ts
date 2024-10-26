@@ -10,7 +10,7 @@ export type transaction = {
 };
 
 export type transaction_operation = {
-    pointer: rt.pointer_to_record;
+    pointer: rt.pointer;
     path: string[];
     command: string;
     args: any;
@@ -34,7 +34,7 @@ export default class SessionApi {
      *
      * return record type: `any`
      */
-    public async syncRecords(pointerList: rt.pointer_to_record[]) {
+    public async syncRecords(pointerList: rt.pointer[]) {
         const endpoint = 'syncRecordValues';
         // * also: const endpoint = 'syncRecordValuesMain';
         // * also: const endpoint = 'syncRecordValuesSpace';
@@ -52,7 +52,7 @@ export default class SessionApi {
      *
      * return record type: `any`
      */
-    public async syncRecord(pointer: rt.pointer_to_record) {
+    public async syncRecord(pointer: rt.pointer) {
         return this.syncRecords([pointer]);
     }
 
@@ -161,7 +161,7 @@ export default class SessionApi {
     /**
      * API: get upload file url
      */
-    public async getUploadFileUrl(fileInfo: upload_file_info, relatedPointer?: rt.pointer_to_record) {
+    public async getUploadFileUrl(fileInfo: upload_file_info, relatedPointer?: rt.pointer) {
         const bucket = relatedPointer ? 'secure' : 'public';
         const endpoint = 'getUploadFileUrl';
         const payload = {

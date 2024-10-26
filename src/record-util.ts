@@ -3,7 +3,7 @@ import type * as rt from './record-types';
 import { newUuid } from './util.js';
 import Client from './client';
 
-export function getPointer(record: rt.record, table: rt.type_of_record = 'block'): rt.pointer_to_record | null {
+export function getPointer(record: rt.record, table: rt.type_of_record = 'block'): rt.pointer | null {
     const recordAny = record as any;
     if (recordAny && recordAny.id) {
         return { table, id: recordAny.id, spaceId: recordAny.space_id };
@@ -11,7 +11,7 @@ export function getPointer(record: rt.record, table: rt.type_of_record = 'block'
     return null;
 }
 
-export function getParentPointer(record: rt.record): rt.pointer_to_record | null {
+export function getParentPointer(record: rt.record): rt.pointer | null {
     const recordAny = record as any;
     if (recordAny && recordAny.parent_id && recordAny.parent_table) {
         return { table: recordAny.parent_table, id: recordAny.parent_id, spaceId: recordAny.space_id };

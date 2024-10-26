@@ -3,21 +3,21 @@ import {
     number_version,
     string_uuid,
     option_color,
-    pointer_to_record,
+    pointer,
     rich_text,
     type_of_record,
 } from '.';
 
 /** With id and version */
 export interface i_versioned {
-    id: string_uuid;                                           // UUID
-    version: number_version;                                   // Version
+    id: string_uuid;                                            // UUID
+    version: number_version;                                    // Version
 }
 
 /** With copied from information */
 export interface i_copyable {
     format?: {
-        copied_from_pointer: pointer_to_record;                 // Refer to the record that this record is duplicated from
+        copied_from_pointer: pointer;                           // Refer to the record that this record is duplicated from
     };
     copied_from?: string_uuid;                                  // the same as `format.copied_from_pointer.id`
 }

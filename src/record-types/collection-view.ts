@@ -4,7 +4,7 @@ import {
     i_editable,
     i_parented,
     i_versioned,
-    pointer_to_record,
+    pointer,
     string_icon,
     string_property_id,
     string_uuid,
@@ -33,7 +33,7 @@ export type collection_view_table =
             show_page_icon?: boolean;
             table_properties:                                   // Table properties, in order //! LAZY UPDATE
             & Array<collection_view_table_property>;
-            collection_pointer?: pointer_to_record;             // Collection pointer
+            collection_pointer?: pointer;                       // Collection pointer
             collection_view_icon?: string_icon;                 // Collection view icon
             hide_table_vertical_lines?: boolean;                // Hide table vertical lines or not
             table_frozen_column_index?: number;                 // Frozen column index, -1 means no frozen column
@@ -50,5 +50,3 @@ export type collection_view =
     ;
 
 export type type_of_collection_view = collection_view['type'];
-
-export type pointer_to_collection_view = pointer_to_record & { table: 'collection_view' };

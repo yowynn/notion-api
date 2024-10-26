@@ -12,7 +12,7 @@ import {
     page_section_visibility,
     rich_text,
     schema,
-    pointer_to_record,
+    pointer as pointer,
 } from '.';
 
 /** Collection property visibility */
@@ -62,6 +62,7 @@ export type collection =
         icon?: string_icon;                                     // Icon URL
         cover?: string_url;                                     // Cover URL
         format?: {
+            layout_pointer?: pointer;                           // Refer: layout
             subitem_property?: string_property_id;              // Subitem property if opened subitem support
             property_visibility?: Array<property_visibility>;   // Property visibility
             page_section_visibility?: page_section_visibility;  // Visibilities of page sections
@@ -80,5 +81,3 @@ export type collection =
             [key: string_property_id]: schema;                  // Deleted schema map
         };
     };
-
-export type pointer_to_collection = pointer_to_record & { table: 'collection' };

@@ -129,7 +129,7 @@ export class TransclusionContainerBlock extends Block { }
 @as_record('block', 'transclusion_reference')
 export class TransclusionReferenceBlock extends Block {
     @record_accessor('format.transclusion_reference_pointer')
-    public accessor referencePointer!: rt.pointer_to_record;
+    public accessor referencePointer!: rt.pointer;
 
     public async getOriginBlock() {
         var record = this.record as rt.block_transclusion_reference;
@@ -172,7 +172,7 @@ export class DividerBlock extends Block { }
 @as_record('block', 'alias')
 export class AliasBlock extends Block {
     @record_accessor('format.alias_pointer')
-    public accessor referencePointer!: rt.pointer_to_record;
+    public accessor referencePointer!: rt.pointer;
 
     public async getOriginBlock() {
         var record = this.record as rt.block_alias;
@@ -251,7 +251,7 @@ export class PageBlock extends Block {
             }
             const id = parent.getSchemaId(id_name);
             this.markDirty();
-            const url = await this._client.action.updateFile(this.pointer as rt.pointer_to_block, filePath, undefined, id);
+            const url = await this._client.action.updateFile(this.pointer as rt.pointered<'block'>, filePath, undefined, id);
             await this._client.action.done(true);
             return url;
         }

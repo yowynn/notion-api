@@ -33,17 +33,17 @@ export type option_time_unit =
 
 /** Reminder (0 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, 1 hour, 2 hours, 1 day, 2 days, 1 week before) */
 export type reminder = {
-    time: string_time;                                         // Time of reminder which over days, always '09:00'
+    time?: string_time;                                         // Time of reminder which over days, always '09:00'
     unit: option_time_unit;                                     // Time unit
     value: number;                                              // Time value
-    defaultTimeZone: option_time_zone;                          // Time zone of `time`
+    defaultTimeZone?: option_time_zone;                         // Time zone of `time`
 };
 
 /** Date: date */
 export type date_date = {
     type: 'date';
     reminder?: reminder;                                        // Reminder (1 day, 2 days, 1 week before)
-    start_date: string_date;                                   // Date
+    start_date: string_date;                                    // Date
     date_format: option_date_format;                            // Date format
 };
 
@@ -52,8 +52,8 @@ export type date_datetime = {
     type: 'datetime';
     reminder?: reminder;                                        // Reminder (0 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, 1 hour, 2 hours, 1 day, 2 days before)
     time_zone: option_time_zone;                                // Time zone
-    start_date: string_date;                                   // Date
-    start_time: string_time;                                   // Time
+    start_date: string_date;                                    // Date
+    start_time: string_time;                                    // Time
     date_format: option_date_format;                            // Date format
     time_format: option_time_format;                            // Time format
 };
@@ -62,8 +62,8 @@ export type date_datetime = {
 export type date_daterange = {
     type: 'daterange';
     reminder?: reminder;                                        // Reminder (1 day, 2 days, 1 week before)
-    start_date: string_date;                                   // Start date
-    end_date: string_date;                                     // End date
+    start_date: string_date;                                    // Start date
+    end_date: string_date;                                      // End date
     date_format: option_date_format;                            // Date format
 };
 
@@ -72,10 +72,10 @@ export type date_datetimerange = {
     type: 'datetimerange';
     reminder?: reminder;                                        // Reminder (0 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, 1 hour, 2 hours, 1 day, 2 days before)
     time_zone: option_time_zone;                                // Time zone
-    start_date: string_date;                                   // Start date
-    start_time: string_time;                                   // Start time
-    end_date: string_date;                                     // End date
-    end_time: string_time;                                     // End time
+    start_date: string_date;                                    // Start date
+    start_time: string_time;                                    // Start time
+    end_date: string_date;                                      // End date
+    end_time: string_time;                                      // End time
     date_format: option_date_format;                            // Date format
     time_format: option_time_format;                            // Time format
 };

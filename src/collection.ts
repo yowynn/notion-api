@@ -77,7 +77,7 @@ export default class Collection extends Record {
         }
         if (addedOptions) {
             this.markDirty();
-            await this._client.action.appendSchemaOptions(this.pointer as rt.pointer_to_collection, this.getSchemaId(id_name), addedOptions);
+            await this._client.action.appendSchemaOptions(this.pointer as rt.pointered<'collection'>, this.getSchemaId(id_name), addedOptions);
             await this._client.action.done(true);
         }
     }

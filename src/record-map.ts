@@ -25,10 +25,11 @@ export default class RecordMap {
             space_view: {} as Record<rt.string_uuid, rt.record>,
             space_user: {} as Record<rt.string_uuid, rt.record>,
             custom_emoji: {} as Record<rt.string_uuid, rt.record>,
+            layout: {} as Record<rt.string_uuid, rt.record>,
         };
     }
 
-    public async get(pointer: rt.pointer_to_record, update: boolean = false, loadPage: boolean = false) {
+    public async get(pointer: rt.pointer, update: boolean = false, loadPage: boolean = false) {
         let record = this.getLocal(pointer);
         if (!record || update) {
             if (pointer.table === 'block' && loadPage) {
@@ -44,20 +45,20 @@ export default class RecordMap {
         return record;
     }
 
-    public async getList(pointerList: rt.pointer_to_record[]) {
+    public async getList(pointerList: rt.pointer[]) {
         const data = await this._client.sessionApi.syncRecords(pointerList);
         this.merge(data?.recordMap);
         return pointerList.map(pointer => this.getLocal(pointer));
     }
 
-    public markDirty(pointer: rt.pointer_to_record) {
+    public markDirty(pointer: rt.pointer) {
         const record = this.getLocal(pointer);
         if (record) {
             (record as any).__dirty__ = true;
         }
     }
 
-    public isDirty(pointer: rt.pointer_to_record) {
+    public isDirty(pointer: rt.pointer) {
         const record = this.getLocal(pointer);
         if (record) {
             return (record as any).__dirty__;
@@ -65,7 +66,7 @@ export default class RecordMap {
         return false;
     }
 
-    public getLocal(pointer: rt.pointer_to_record) {
+    public getLocal(pointer: rt.pointer) {
         const tableMap = this._map[pointer.table];
         if (!tableMap) {
             throw new UnsupportedError('RecordMap.getLocal', pointer.table);
@@ -73,7 +74,7 @@ export default class RecordMap {
         return tableMap[pointer.id];
     }
 
-    public setLocal(pointer: rt.pointer_to_record, record: rt.record) {
+    public setLocal(pointer: rt.pointer, record: rt.record) {
         const tableMap = this._map[pointer.table];
         if (!tableMap) {
             throw new UnsupportedError('RecordMap.setLocal', pointer.table);

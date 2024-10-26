@@ -34,11 +34,14 @@ export type type_of_record =
     | 'user_settings'                                           // User settings
     | 'space_view'                                              // Space view
     | 'space_user'                                              // Space/user relation, witch id is '<space_id>|<user_id>'
+    | 'layout'                                                  // Collection page section layout @see: https://www.notion.so/zh-cn/releases/2024-10-24
     ;
 
 /** Reference record pointer, pointer to a record with record type */
-export type pointer_to_record = {
+export type pointer = {
     id: string_uuid;                                            // Refer: record
     table: type_of_record;                                      // Record type
     spaceId?: string_uuid;                                      // Refer: space, the space where the record is located
 };
+
+export type pointered<T extends type_of_record> = pointer & { table: T };
