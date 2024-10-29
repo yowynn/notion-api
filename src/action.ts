@@ -21,7 +21,7 @@ export default class Action {
         this._client = client;
     }
 
-    public async done(refreshRecords: boolean = false) {
+    public async done(refreshRecords: boolean = true) {
         await this._transaction.submit(refreshRecords);
     }
 

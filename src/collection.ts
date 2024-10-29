@@ -75,10 +75,11 @@ export default class Collection extends Record {
                 }
             }
         }
-        if (addedOptions) {
+        if (addedOptions && addedOptions.length > 0) {
             this.markDirty();
             await this._client.action.appendSchemaOptions(this.pointer as rt.pointered<'collection'>, this.getSchemaId(id_name), addedOptions);
             await this._client.action.done(true);
+            this.refreshSchemaNameMap();
         }
     }
 

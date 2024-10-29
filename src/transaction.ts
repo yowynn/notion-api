@@ -24,7 +24,7 @@ export default class Transation {
         this._isSilent = isSilent;
     }
 
-    public async end(refreshRecords: boolean = false) {
+    public async end(refreshRecords: boolean = true) {
         await this.submitAll(refreshRecords);
         this._inTransaction = false;
         this._isSilent = false;
@@ -100,7 +100,7 @@ export default class Transation {
         this.addOperation(operation);
     }
 
-    public async submit(refreshRecords: boolean = false) {
+    public async submit(refreshRecords: boolean = true) {
         if (!this._isSilent) {
             await this.updateEditedInfo(this._operations);
         }
@@ -119,7 +119,7 @@ export default class Transation {
         this._operations.push(operation);
     }
 
-    private async submitAll(refreshRecords: boolean = false) {
+    private async submitAll(refreshRecords: boolean = true) {
         if (this._transactions.length === 0) {
             return;
         }

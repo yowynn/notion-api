@@ -70,7 +70,7 @@ export default class Client {
         this.transaction.begin(isSilent);
     }
 
-    public async endTransaction(refreshRecords: boolean = false) {
+    public async endTransaction(refreshRecords: boolean = true) {
         await this.transaction.end(refreshRecords);
     }
 
