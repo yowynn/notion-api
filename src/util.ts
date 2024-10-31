@@ -1,3 +1,4 @@
+import type * as rt from './record-types';
 import * as readline from 'readline';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
@@ -6,13 +7,35 @@ import csv from 'csv-parser';
 import config from './config.js';
 import { ArgumentError } from './error.js';
 
-export function uuid(idOrUrl: string) {
+export function uuid(idOrUrl: rt.string_uuid | rt.string_url, table: rt.type_of_record | 'page' = 'block') {
     let re = idOrUrl;
     if (/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(re)) {    // most common case
         return re;
     }
     if (re.startsWith(config.NOTION_URL)) {
-        re = re.split('#').slice(-1)[0].split('/').slice(-1)[0].split('&p=').slice(-1)[0].split('?')[0].split('-').slice(-1)[0];
+        // https://www.notion.so/yowynn/11f6b80204ff8079942affd53125f620?pvs=4#1306b80204ff8074b4f3c7a29bf248f8
+        // https://www.notion.so/yowynn/1306b80204ff80ab9d46c162091e3752?v=1306b80204ff81fda9cb000c838bc26c&pvs=4
+        // https://www.notion.so/yowynn/PARA-Dashboard-12d6b80204ff80cba08de44cf82f2b8d?pvs=4
+        switch (table) {
+            case 'block': {
+                re = re.split('#').slice(-1)[0].split('/').slice(-1)[0].split('?')[0].split('-').slice(-1)[0];
+                break;
+            }
+            case 'page': {
+                re = re.split('/').slice(-1)[0].split('?')[0].split('-').slice(-1)[0];
+                break;
+            }
+            case 'collection_view': {
+                re = re.match(/v=([a-fA-F0-9]{32})/i)?.[1] ?? '';
+                if (!re) {
+                    throw new ArgumentError('uuid', 'idOrUrl', idOrUrl);
+                }
+                break;
+            }
+            default: {
+                throw new ArgumentError('uuid', 'table', table);
+            }
+        }
     }
     if (/^[a-f0-9]{32}$/i.test(re)) {
         return re.toLowerCase().replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5');

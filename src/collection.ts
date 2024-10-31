@@ -24,6 +24,12 @@ export default class Collection extends Record {
     @record_accessor('cover')
     public accessor cover!: rt.string_uuid;
 
+    public async getParent<T = Record>() {
+        var record = this.record as rt.i_parented;
+        var parentRecord = await this.recordMap.get(this.parentPointer!);
+        return Record.wrap(this._client, parentRecord, record.parent_table) as T;
+    }
+
     public getSchemaId(id_name: rt.string_property_id | string) {
         const name = this.getSchema(id_name).name;
         return this._schemaNameMap[name];

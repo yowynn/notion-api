@@ -1,4 +1,5 @@
 import type * as rt from './record-types';
+import type Client from './client.js';
 import type Session from './session.js';
 import { newUuid } from './util.js';
 
@@ -23,9 +24,11 @@ export type upload_file_info = {
 }
 
 export default class SessionApi {
+    private _client: Client;
     private _session: Session;
 
-    public constructor(session: Session) {
+    public constructor(client: Client, session: Session) {
+        this._client = client;
         this._session = session;
     }
 
@@ -172,6 +175,37 @@ export default class SessionApi {
             supportExtraHeaders: true,
             contentLength: fileInfo.contentLength,
         }
+        return this._session.request('POST', endpoint, payload);
+    }
+
+    /**
+     * API: query a collection
+     */
+    public async queryCollection(collectionPointer: rt.pointered<'collection'>, collectionViewPointer: rt.pointered<'collection_view'>, limit: number = 50, query: string = '') {
+        const endpoint = 'queryCollection?src=initial_load';
+        const payload = {
+            source: {
+                type: collectionPointer.table,
+                id: collectionPointer.id,
+                spaceId: collectionPointer.spaceId,
+            },
+            collectionView: {
+                id: collectionViewPointer.id,
+                spaceId: collectionViewPointer.spaceId,
+            },
+            loader: {
+                reducers: {
+                    collection_group_results: {
+                        type: 'results',
+                        limit: limit,
+                    },
+                },
+                sort: [],
+                searchQuery: query,
+                userId: this._client.userId,
+                userTimeZone: this._client.timeZone,
+            },
+        };
         return this._session.request('POST', endpoint, payload);
     }
 }

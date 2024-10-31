@@ -3,6 +3,7 @@ import Record, { as_record, record_accessor, readonly_record_accessor } from './
 import { decodeProperty, dp, encodeProperty, ep } from './converter.js';
 import Collection from './collection.js';
 import log from './log.js';
+import CollectionView from './collection-view';
 
 @as_record('block')
 export default class Block extends Record {
@@ -260,20 +261,46 @@ export class PageBlock extends Block {
 
 @as_record('block', 'collection_view_page')
 export class CollectionViewPageBlock extends Block {
+    @readonly_record_accessor('format.collection_pointer')
+    public accessor collectionPointer!: rt.pointered<'collection'>;
+
     async getCollection() {
         var record = this.record as rt.block_collection_view_page;
         var collectionPointer = record.format.collection_pointer;
         var collectionRecord = await this.recordMap.get(collectionPointer);
         return Record.wrap(this._client, collectionRecord, 'collection') as Collection;
     }
+
+    @readonly_record_accessor('view_ids', (x) => (x as any[] ?? []).length)
+    public accessor collectionViewCount!: number;
+
+    public async getCollectionView(index: number) {
+        var record = this.record as rt.block_collection_view_page;
+        var collectionViewId = record.view_ids[index];
+        var collectionViewRecord = await this.recordMap.get({ table: 'collection_view', id: collectionViewId });
+        return Record.wrap(this._client, collectionViewRecord, 'collection_view') as CollectionView;
+    }
+
 }
 
 @as_record('block', 'collection_view')
 export class CollectionViewBlock extends Block {
+    @readonly_record_accessor('format.collection_pointer')
+    public accessor collectionPointer!: rt.pointered<'collection'>;
     async getCollection() {
         var record = this.record as rt.block_collection_view;
         var collectionPointer = (record as any).format.collection_pointer;
         var collectionRecord = await this.recordMap.get(collectionPointer);
         return Record.wrap(this._client, collectionRecord, 'collection') as Collection;
+    }
+
+    @readonly_record_accessor('view_ids', (x) => (x as any[] ?? []).length)
+    public accessor collectionViewCount!: number;
+
+    public async getCollectionView(index: number) {
+        var record = this.record as rt.block_collection_view_page;
+        var collectionViewId = record.view_ids[index];
+        var collectionViewRecord = await this.recordMap.get({ table: 'collection_view', id: collectionViewId });
+        return Record.wrap(this._client, collectionViewRecord, 'collection_view') as CollectionView;
     }
 }

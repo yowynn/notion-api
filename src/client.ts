@@ -11,6 +11,8 @@ import Action from './action.js';
 import { uuid } from './util.js';
 import { get } from 'http';
 import { CollectionViewBlock, CollectionViewPageBlock } from './block.js';
+import CollectionView from './collection-view';
+import Collection from './collection';
 
 export default class Client {
     public static async fromToken(token: string): Promise<Client> {
@@ -31,6 +33,7 @@ export default class Client {
 
     private _userId!: rt.string_uuid;
     private _spaceId!: rt.string_uuid;
+    private _timezone!: rt.option_time_zone;
     public readonly version: string;
     public readonly session: Session;
     public readonly sessionApi: SessionApi;
@@ -47,13 +50,18 @@ export default class Client {
         return this._spaceId;
     }
 
+    public get timeZone(): rt.option_time_zone {
+        return this._timezone;
+    }
+
     private constructor(version: string = config.NOTION_CLIENT_VERSION) {
         this.version = version;
+        this.setTimezone(config.NOTION_DEFAULT_TIMEZONE as rt.option_time_zone);
         this.session = new Session(config.NOTION_API_URL);
         this.session.headers.set('content-type', 'application/json');
         this.session.headers.set('notion-client-version', this.version);
 
-        this.sessionApi = new SessionApi(this.session);
+        this.sessionApi = new SessionApi(this, this.session);
 
         this.recordMap = new RecordMap(this);
         this.transaction = new Transation(this);
@@ -64,6 +72,10 @@ export default class Client {
 
     public selectSpace(id: rt.string_uuid) {
         this._spaceId = id;
+    }
+
+    public setTimezone(timezone: rt.option_time_zone) {
+        this._timezone = timezone;
     }
 
     public beginTransaction(isSilent: boolean = false) {
@@ -137,5 +149,33 @@ export default class Client {
         const r = await this.recordMap.get(emojiPointer);
         const emoji = Record.wrap(this, r, 'custom_emoji') as Record;
         return emoji;
+    }
+
+    public async queryCollection(record: Record, limit: number = 50, query: string = '') {
+        let collectionViewPointer: rt.pointered<'collection_view'>;
+        let collectionPointer: rt.pointered<'collection'>;
+        switch (record.table) {
+            case 'collection_view': {
+                collectionViewPointer = record.pointer as rt.pointered<'collection_view'>;
+                collectionPointer = (record as CollectionView).collectionPointer;
+                break;
+            }
+            case 'collection': {
+                collectionPointer = record.pointer as rt.pointered<'collection'>;
+                const block = await (record as Collection).getParent<CollectionViewBlock>();
+                const collectionView = await block.getCollectionView(0)!;
+                collectionViewPointer = collectionView.pointer as rt.pointered<'collection_view'>;
+                break;
+            }
+            case 'block': {
+                const collectionView = await (record as Block).getParent<CollectionViewBlock>();
+                collectionViewPointer = collectionView.pointer as rt.pointered<'collection_view'>;
+                collectionPointer = (record as CollectionViewBlock).collectionPointer;
+            }
+            default:
+                throw new Error(`Invalid record type: ${record.table}`);
+        }
+        const data = this.sessionApi.queryCollection(collectionPointer, collectionViewPointer, limit, query);
+        return data;
     }
 }
