@@ -4,6 +4,7 @@ import { decodeProperty, dp, ep } from './converter.js';
 import Client from './client.js';
 import { newPropertyId, newUuid } from './util.js';
 import log from './log.js';
+import Block from './block.js';
 
 
 @as_record('collection')
@@ -24,7 +25,7 @@ export default class Collection extends Record {
     @record_accessor('cover')
     public accessor cover!: rt.string_uuid;
 
-    public async getParent<T = Record>() {
+    public async getParent<T = Block>() {
         var record = this.record as rt.i_parented;
         var parentRecord = await this.recordMap.get(this.parentPointer!);
         return Record.wrap(this._client, parentRecord, record.parent_table) as T;

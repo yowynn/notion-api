@@ -196,9 +196,15 @@ export default class Action {
         this._transaction.opUpdate(parentPointer, [ 'format' ], { collection_pointer: pointer });
     }
 
-    public async createCollection(parentPointer: rt.pointered<'block'>) {
+    public async createCollection(parentPointer: rt.pointered<'block'>, linkedViewPointer: rt.pointered<'collection_view'>) {
         const pointer = await this.createCollectionPlaceholder();
         await this.setCollectionParent(pointer, parentPointer);
+        if (linkedViewPointer) {
+            this._transaction.opUpdate(linkedViewPointer, [ 'format' ], { collection_pointer: pointer });
+        }
+        else {
+            log.warn('linkedViewPointer is not provided');
+        }
         return pointer;
     }
 

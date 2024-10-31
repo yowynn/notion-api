@@ -47,7 +47,7 @@ export default class Session {
         });
         if (!response.ok) {
             const text = await response.text();
-            console.log('error data:', body);
+            log.info('error data:', payload)
             throw new ResponseError(endpoint, response, text);
         }
         const setCookie = response.headers.get('set-cookie');

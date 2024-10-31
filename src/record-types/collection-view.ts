@@ -33,7 +33,7 @@ export type collection_view_table =
             show_page_icon?: boolean;
             table_properties:                                   // Table properties, in order //! LAZY UPDATE
             & Array<collection_view_table_property>;
-            collection_pointer?: pointer;                       // Collection pointer
+            collection_pointer?: pointer;                       // Collection pointer, that may be not present, if it is the view in origin block (where the collection is created)
             collection_view_icon?: string_icon;                 // Collection view icon
             hide_table_vertical_lines?: boolean;                // Hide table vertical lines or not
             table_frozen_column_index?: number;                 // Frozen column index, -1 means no frozen column

@@ -181,17 +181,24 @@ export default class SessionApi {
     /**
      * API: query a collection
      */
-    public async queryCollection(collectionPointer: rt.pointered<'collection'>, collectionViewPointer: rt.pointered<'collection_view'>, limit: number = 50, query: string = '') {
-        const endpoint = 'queryCollection?src=initial_load';
+    public async queryCollection(collectionPointer: rt.pointered<'collection'>, collectionViewPointer: rt.pointered<'collection_view'>, limit: number = 50, query: string = '', sort?: any, filter?: any) {
+        let endpoint = 'queryCollection?src=initial_load';
+        if (filter) {
+            endpoint = 'queryCollection?src=add_filter';        // todo: filter is not tested
+        }
+        const spaceId = collectionPointer.spaceId ?? collectionViewPointer.spaceId ?? this._client.spaceId;
+        if (!spaceId) {
+            throw new Error('spaceId is required');
+        }
         const payload = {
             source: {
                 type: collectionPointer.table,
                 id: collectionPointer.id,
-                spaceId: collectionPointer.spaceId,
+                spaceId: spaceId,
             },
             collectionView: {
                 id: collectionViewPointer.id,
-                spaceId: collectionViewPointer.spaceId,
+                spaceId: spaceId,
             },
             loader: {
                 reducers: {
@@ -200,7 +207,8 @@ export default class SessionApi {
                         limit: limit,
                     },
                 },
-                sort: [],
+                filter: filter,
+                sort: sort ?? [],
                 searchQuery: query,
                 userId: this._client.userId,
                 userTimeZone: this._client.timeZone,

@@ -51,6 +51,20 @@ export default class RecordMap {
         return pointerList.map(pointer => this.getLocal(pointer));
     }
 
+    public async getQueryed(collectionPointer: rt.pointered<'collection'>, collectionViewPointer: rt.pointered<'collection_view'>, limit: number = 50, query: string = '') {
+        log.info('RecordMap.getQueryed', collectionPointer, collectionViewPointer, limit, query);
+        const collectionView = await this.get(collectionViewPointer);
+        const sort = (collectionView as any).query2?.sort;
+        const data = await this._client.sessionApi.queryCollection(collectionPointer, collectionViewPointer, limit, query, sort);
+        this.merge(data?.recordMap);
+        if (config.DEBUG_MODE) {
+            log.writeFile('test/data-demos/queryCollection.json', data);
+        }
+        return data.allBlockIds ?? data.result?.reducerResults?.collection_group_results?.blockIds ?? [];
+    }
+
+
+
     public markDirty(pointer: rt.pointer) {
         const record = this.getLocal(pointer);
         if (record) {

@@ -118,15 +118,15 @@ export default class Client {
         return block;
     }
 
-    public async createCollectionBlock(type: rt.type_of_collection_view, where: 'before' | 'after' | 'child', anchorBlock: Block, inline: boolean = false) {
+    public async createCollection(type: rt.type_of_collection_view, where: 'before' | 'after' | 'child', anchorBlock: Block, inline: boolean = false) {
         const blockType: rt.type_of_block = inline ? 'collection_view' : 'collection_view_page';
         const blockPointer = await this.action.createBlock(blockType, where, anchorBlock.pointer);
         const collectionViewPointer = await this.action.createCollectionView(type, blockPointer);
-        const collectionPointer = await this.action.createCollection(blockPointer);
+        const collectionPointer = await this.action.createCollection(blockPointer, collectionViewPointer);
         await this.action.done(true);
-        const r = await this.recordMap.get(blockPointer);
-        const block = Record.wrap(this, r, 'block') as Block;
-        return inline ? block as CollectionViewBlock : block as CollectionViewPageBlock;
+        const r = await this.recordMap.get(collectionPointer);
+        const collection = Record.wrap(this, r, 'collection') as Collection;
+        return collection;
     }
 
     public async createImageBlockUploaded(filePath: string, where: 'before' | 'after' | 'child', anchorBlock: Record) {
@@ -157,7 +157,7 @@ export default class Client {
         switch (record.table) {
             case 'collection_view': {
                 collectionViewPointer = record.pointer as rt.pointered<'collection_view'>;
-                collectionPointer = (record as CollectionView).collectionPointer;
+                collectionPointer = (record as CollectionView).collectionPointer ?? (await (record as CollectionView).getCollection()).pointer;
                 break;
             }
             case 'collection': {
@@ -168,14 +168,14 @@ export default class Client {
                 break;
             }
             case 'block': {
-                const collectionView = await (record as Block).getParent<CollectionViewBlock>();
+                const collectionView = await (record as CollectionViewBlock).getCollectionView(0)!;
                 collectionViewPointer = collectionView.pointer as rt.pointered<'collection_view'>;
-                collectionPointer = (record as CollectionViewBlock).collectionPointer;
+                collectionPointer = collectionView.collectionPointer ?? (await collectionView.getCollection()).pointer;
             }
             default:
                 throw new Error(`Invalid record type: ${record.table}`);
         }
-        const data = this.sessionApi.queryCollection(collectionPointer, collectionViewPointer, limit, query);
-        return data;
+        const ids = this.recordMap.getQueryed(collectionPointer, collectionViewPointer, limit, query);
+        return ids;
     }
 }

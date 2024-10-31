@@ -41,11 +41,11 @@ export default class Record {
     }
 
     public get record() {
-        return this.recordMap.getLocal(this.pointer);
+        return this.recordMap.getLocal({ table: this.table, id: this.id });
     }
 
     public get pointer(): rt.pointer {
-        return { table: this.table, id: this.id };
+        return getPointer(this.record, this.table)!;
     }
 
     public get parentPointer(): rt.pointer | null {

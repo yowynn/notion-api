@@ -265,10 +265,12 @@ export class CollectionViewPageBlock extends Block {
     public accessor collectionPointer!: rt.pointered<'collection'>;
 
     async getCollection() {
-        var record = this.record as rt.block_collection_view_page;
-        var collectionPointer = record.format.collection_pointer;
-        var collectionRecord = await this.recordMap.get(collectionPointer);
-        return Record.wrap(this._client, collectionRecord, 'collection') as Collection;
+        var collectionPointer = this.collectionPointer;
+        if (collectionPointer) {
+            var collectionRecord = await this.recordMap.get(collectionPointer);
+            return Record.wrap(this._client, collectionRecord, 'collection') as Collection;
+        }
+        return undefined as unknown as Collection;
     }
 
     @readonly_record_accessor('view_ids', (x) => (x as any[] ?? []).length)
@@ -288,10 +290,12 @@ export class CollectionViewBlock extends Block {
     @readonly_record_accessor('format.collection_pointer')
     public accessor collectionPointer!: rt.pointered<'collection'>;
     async getCollection() {
-        var record = this.record as rt.block_collection_view;
-        var collectionPointer = (record as any).format.collection_pointer;
-        var collectionRecord = await this.recordMap.get(collectionPointer);
-        return Record.wrap(this._client, collectionRecord, 'collection') as Collection;
+        var collectionPointer = this.collectionPointer;
+        if (collectionPointer) {
+            var collectionRecord = await this.recordMap.get(collectionPointer);
+            return Record.wrap(this._client, collectionRecord, 'collection') as Collection;
+        }
+        return undefined as unknown as Collection;
     }
 
     @readonly_record_accessor('view_ids', (x) => (x as any[] ?? []).length)
