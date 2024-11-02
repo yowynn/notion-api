@@ -58,7 +58,8 @@ export default class Action {
     private async createBlockPlaceholder(type: rt.type_of_block) {
         const record = getBlockTemplate(this._client, type);
         const pointer = getPointer(record, 'block')! as rt.pointered<'block'>;
-        this._recordMap.setLocal(pointer, record);
+        const deepCopy = JSON.parse(JSON.stringify(record));
+        this._recordMap.setLocal(pointer, deepCopy);
         this._transaction.opSet(pointer, [], record);
         return pointer;
     }
@@ -158,7 +159,8 @@ export default class Action {
     private async createCollectionViewPlaceholder(type: rt.type_of_collection_view) {
         const record = getCollectionViewTemplate(this._client, type);
         const pointer = getPointer(record, 'collection_view')! as rt.pointered<'collection_view'>;
-        this._recordMap.setLocal(pointer, record);
+        const deepCopy = JSON.parse(JSON.stringify(record));
+        this._recordMap.setLocal(pointer, deepCopy);
         this._transaction.opSet(pointer, [], record);
         return pointer;
     }
@@ -185,7 +187,8 @@ export default class Action {
     private async createCollectionPlaceholder() {
         const record = getCollectionTemplate(this._client);
         const pointer = getPointer(record, 'collection')! as rt.pointered<'collection'>;
-        this._recordMap.setLocal(pointer, record);
+        const deepCopy = JSON.parse(JSON.stringify(record));
+        this._recordMap.setLocal(pointer, deepCopy);
         this._transaction.opSet(pointer, [], record);
         return pointer;
     }

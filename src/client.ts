@@ -34,11 +34,12 @@ export default class Client {
     private _userId!: rt.string_uuid;
     private _spaceId!: rt.string_uuid;
     private _timezone!: rt.option_time_zone;
+    public readonly _transactions: { [key: string]: Transation; } = {};
+    public _transactionKey: string = 'default';
     public readonly version: string;
     public readonly session: Session;
     public readonly sessionApi: SessionApi;
     public readonly recordMap: RecordMap;
-    public readonly transaction: Transation;
     public readonly action: Action;
     public readonly awsSession: Session;
 
@@ -54,6 +55,10 @@ export default class Client {
         return this._timezone;
     }
 
+    public get transaction(): Transation {
+        return this._transactions[this._transactionKey];
+    }
+
     private constructor(version: string = config.NOTION_CLIENT_VERSION) {
         this.version = version;
         this.setTimezone(config.NOTION_DEFAULT_TIMEZONE as rt.option_time_zone);
@@ -64,7 +69,7 @@ export default class Client {
         this.sessionApi = new SessionApi(this, this.session);
 
         this.recordMap = new RecordMap(this);
-        this.transaction = new Transation(this);
+        this._transactions[this._transactionKey] = new Transation(this);
         this.action = new Action(this);
 
         this.awsSession = new Session(config.AWS_UPLOAD_URL);
@@ -78,12 +83,24 @@ export default class Client {
         this._timezone = timezone;
     }
 
-    public beginTransaction(isSilent: boolean = false) {
+    public beginTransaction(key: string | number = 'default', isSilent: boolean = false) {
+        this._transactionKey = key.toString();
+        if (!this._transactions[this._transactionKey]) {
+            this._transactions[this._transactionKey] = new Transation(this);
+        }
         this.transaction.begin(isSilent);
     }
 
-    public async endTransaction(refreshRecords: boolean = true) {
-        await this.transaction.end(refreshRecords);
+    public async endTransaction(key: string | number = 'default', refreshRecords: boolean = true) {
+        const strKey = key.toString();
+        const transaction = this._transactions[strKey];
+        if (!transaction) {
+            throw new Error(`Transaction ${strKey} not found`);
+        }
+        await transaction.end(refreshRecords);
+        if (strKey === this._transactionKey) {
+            this._transactionKey = 'default';
+        }
     }
 
     public async getBlock<T extends Block = Block>(id: rt.string_uuid, loadPageChunk: boolean = true) {
