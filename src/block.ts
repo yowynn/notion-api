@@ -226,13 +226,13 @@ export class PageBlock extends Block {
         }
     }
 
-    public async setProperty(id_name: rt.string_property_id | string, value: any) {
+    public async setProperty(id_name: rt.string_property_id | string, value: any, simple: boolean = false) {
         var record = this.record as rt.block_page;
         if (record.parent_table === 'collection') {
             const parent = await this.getParent<Collection>();
             const schemaType = parent.getSchema(id_name)?.type ?? 'text';
             const id = parent.getSchemaId(id_name);
-            await this.set(['properties', id], encodeProperty(schemaType, value));
+            await this.set(['properties', id], encodeProperty(schemaType, value, simple));
             if (schemaType === 'select' || schemaType === 'status') {
                 parent.createSchemaOptions(id_name, value);
             }

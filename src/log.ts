@@ -11,7 +11,7 @@ function warn(...args: any[]) {
 }
 
 function error(...args: any[]) {
-    console.trace(stringify(...args));
+    console.trace(...args);
 }
 
 function writeFile(path: string, data: any) {

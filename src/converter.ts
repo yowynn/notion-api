@@ -108,7 +108,7 @@ export const decodeProperty = function (type: rt.type_of_schema, value: rt.rich_
     }
 }
 
-export const encodeProperty = function (type: rt.type_of_schema, value: any): rt.rich_text | null {
+export const encodeProperty = function (type: rt.type_of_schema, value: any, simple: boolean = false): rt.rich_text | null {
     if (value === null) {
         return null;
     }
@@ -118,17 +118,17 @@ export const encodeProperty = function (type: rt.type_of_schema, value: any): rt
         case 'unknown':
             return [[value]];
         case 'title':
-            return md.toRichText(value);
+            return simple ? md.plainTextToRichText(value) : md.toRichText(value);
         case 'text':
-            return md.toRichText(value);
+            return simple ? md.plainTextToRichText(value) : md.toRichText(value);
         case 'number':
-            return [[value.toString()]];
+            return md.plainTextToRichText(value.toString());
         case 'select':
-            return [[value]];
+            return md.plainTextToRichText(value);
         case 'multi_select':
-            return md.toRichText(value.join(','));
+            return md.plainTextToRichText(value.join(','));
         case 'status':
-            return [[value]];
+            return md.plainTextToRichText(value);;
         case 'date':
             return [['‣', [['d', text2rt$date(value) as rt.date]]]];
         case 'person':
@@ -168,6 +168,6 @@ export const dp = function (type: rt.type_of_schema, simple: boolean = false) {
     return (value: rt.rich_text) => decodeProperty(type, value, simple);
 }
 
-export const ep = function (type: rt.type_of_schema) {
-    return (value: any) => encodeProperty(type, value);
+export const ep = function (type: rt.type_of_schema, simple: boolean = false) {
+    return (value: any) => encodeProperty(type, value, simple);
 }

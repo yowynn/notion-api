@@ -486,7 +486,7 @@ const plainTextFromRichText = function (richText: rt.rich_text) {
 }
 
 const plainTextToRichText = function (text: string) {
-    return [[text]];
+    return [[text]] as rt.rich_text;
 }
 
 export default {
