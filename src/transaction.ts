@@ -101,6 +101,9 @@ export default class Transation {
     }
 
     public async submit(refreshRecords: boolean = true) {
+        if (this._operations.length === 0) {
+            return;
+        }
         if (!this._isSilent) {
             await this.updateEditedInfo(this._operations);
         }
