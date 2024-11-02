@@ -224,6 +224,9 @@ export class PageBlock extends Block {
             var value = this.get(['properties', id]);
             return decodeProperty(schemaType, value!, simple);
         }
+        else {
+            throw new Error('Page block is not in a collection');
+        }
     }
 
     public async setProperty(id_name: rt.string_property_id | string, value: any, simple: boolean = false) {
@@ -239,6 +242,9 @@ export class PageBlock extends Block {
             else if (schemaType === 'multi_select') {
                 parent.createSchemaOptions(id_name, ...value);
             }
+        }
+        else {
+            throw new Error('Page block is not in a collection');
         }
     }
 

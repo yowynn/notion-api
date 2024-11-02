@@ -126,6 +126,8 @@ export default class Action {
                 throw new Error(`Unsupported parent table: ${parentPointer.table}`);
             }
         }
+        record.parent_id = parentPointer.id;
+        record.parent_table = parentPointer.table;
         this._transaction.opUpdate(pointer, [], {
             parent_id: parentPointer.id,
             parent_table: parentPointer.table,

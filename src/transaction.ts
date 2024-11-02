@@ -123,6 +123,7 @@ export default class Transation {
     }
 
     private async submitAll(refreshRecords: boolean = true) {
+        // log.info('submitting transactions:', this._transactions);
         if (this._transactions.length === 0) {
             return;
         }
