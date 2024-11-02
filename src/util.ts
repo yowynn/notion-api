@@ -14,7 +14,7 @@ export function uuid(idOrUrl: rt.string_uuid | rt.string_url, table: rt.type_of_
     if (/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(re)) {    // most common case
         return re;
     }
-    if (re.startsWith(config.NOTION_URL)) {
+    if (re.startsWith(config.NOTION_URL) || re.startsWith('/')) {
         // https://www.notion.so/yowynn/11f6b80204ff8079942affd53125f620?pvs=4#1306b80204ff8074b4f3c7a29bf248f8
         // https://www.notion.so/yowynn/1306b80204ff80ab9d46c162091e3752?v=1306b80204ff81fda9cb000c838bc26c&pvs=4
         // https://www.notion.so/yowynn/PARA-Dashboard-12d6b80204ff80cba08de44cf82f2b8d?pvs=4
