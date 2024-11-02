@@ -477,7 +477,21 @@ const toRichText = function (markdown: string) {
     return richText;
 };
 
+const plainTextFromRichText = function (richText: rt.rich_text) {
+    let text = '';
+    for (const item of richText ?? EMPTY) {
+        text += item[0];
+    }
+    return text;
+}
+
+const plainTextToRichText = function (text: string) {
+    return [[text]];
+}
+
 export default {
     fromRichText,
     toRichText,
+    plainTextFromRichText,
+    plainTextToRichText,
 }

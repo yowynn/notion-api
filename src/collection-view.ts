@@ -1,6 +1,5 @@
 import type * as rt from './record-types';
 import Record, { as_record, record_accessor, readonly_record_accessor } from './record.js';
-import { decodeProperty, dp, encodeProperty, ep } from './converter.js';
 import Collection from './collection.js';
 import log from './log.js';
 import Block, { CollectionViewBlock } from './block.js';

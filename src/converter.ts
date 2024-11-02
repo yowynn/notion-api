@@ -55,38 +55,38 @@ export function string2date(string: string) {
     return new Date(string);
 }
 
-export const decodeProperty = function (type: rt.type_of_schema, value: rt.rich_text) {
+export const decodeProperty = function (type: rt.type_of_schema, value: rt.rich_text, simple: boolean = false): any {
     switch (type) {
         case 'array':
             throw new Error('Not implemented');
         case 'unknown':
-            return value ? value[0][0] : null;
+            return value ? md.plainTextFromRichText(value) : null;
         case 'title':
-            return md.fromRichText(value);
+            return simple ? md.plainTextFromRichText(value) : md.fromRichText(value);
         case 'text':
-            return md.fromRichText(value);
+            return simple ? md.plainTextFromRichText(value) : md.fromRichText(value);
         case 'number':
-            return value ? Number(value[0][0]) : null;
+            return value ? Number(md.plainTextFromRichText(value)) : null;
         case 'select':
-            return value ? value[0][0] : null;
+            return value ? md.plainTextFromRichText(value) : null;
         case 'multi_select':
-            return value ? md.fromRichText(value).split(',') : [];
+            return value ? md.plainTextFromRichText(value).split(',') : [];
         case 'status':
-            return value ? value[0][0] : null;
+            return value ? md.plainTextFromRichText(value) : null;
         case 'date':
             return value ? rt$date2text((value[0][1] as rt.annotation_date[])[0][1]) : null;
         case 'person':
             return value ? value.filter((_, i) => i % 2 === 0).map(v => (v[1] as rt.annotation_user[])[0][1]) : null;
         case 'file':
-            return value ? value.filter((_, i) => i % 2 === 0) as [string, [rt.annotation_link]][] : null;
+            return value ? value.filter((_, i) => i % 2 === 0).map(v => simple ? v[0] : (v[1] as rt.annotation_link[])[0][1]) : null;
         case 'checkbox':
-            return value ? value[0][0] === 'Yes' : false;
+            return value ? md.plainTextFromRichText(value) === 'Yes' : false;
         case 'url':
-            return value ? value[0][0] : null;
+            return value ? (simple ? value[0][0] : (value[0][1] as rt.annotation_link[])[0][1]) : null;
         case 'email':
-            return value ? value[0][0] : null;
+            return value ? md.plainTextFromRichText(value) : null;
         case 'phone_number':
-            return value ? value[0][0] : null;
+            return value ? md.plainTextFromRichText(value) : null;
         case 'formula':
             throw new Error('Not implemented');
         case 'relation':
@@ -102,7 +102,7 @@ export const decodeProperty = function (type: rt.type_of_schema, value: rt.rich_
         case 'last_edited_by':
             throw new Error('Not implemented');
         case 'auto_increment_id':
-            return value ? value[0][0] : null;
+            return value ? md.plainTextFromRichText(value) : null;
         case 'button':
             throw new Error('Not implemented');
     }
@@ -134,7 +134,7 @@ export const encodeProperty = function (type: rt.type_of_schema, value: any): rt
         case 'person':
             return ((value as rt.string_uuid[]).flatMap(v => [['‣', [['u', v]]], [',']]) as rt.rich_text).slice(0, -1);
         case 'file':
-            return ((value as [string, [rt.annotation_link]][]).flatMap(v => [v, [',']]) as rt.rich_text).slice(0, -1);
+            return ((value as rt.string_url[]).flatMap(v => [[v.split('/').slice(-1)[0], [['a', v]]], [',']]) as rt.rich_text).slice(0, -1);
         case 'checkbox':
             return [[value ? 'Yes' : 'No']];
         case 'url':
@@ -164,8 +164,8 @@ export const encodeProperty = function (type: rt.type_of_schema, value: any): rt
     }
 }
 
-export const dp = function (type: rt.type_of_schema) {
-    return (value: rt.rich_text) => decodeProperty(type, value);
+export const dp = function (type: rt.type_of_schema, simple: boolean = false) {
+    return (value: rt.rich_text) => decodeProperty(type, value, simple);
 }
 
 export const ep = function (type: rt.type_of_schema) {

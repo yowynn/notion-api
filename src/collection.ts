@@ -1,6 +1,6 @@
 import type * as rt from './record-types';
 import Record, { as_record, record_accessor, readonly_record_accessor } from './record.js';
-import { decodeProperty, dp, ep } from './converter.js';
+import { dp, ep } from './converter.js';
 import Client from './client.js';
 import { newPropertyId, newUuid } from './util.js';
 import log from './log.js';

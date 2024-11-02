@@ -160,10 +160,10 @@ export class TableBlock extends Block {
 
 @as_record('block', 'table_row')
 export class TableRowBlock extends Block {
-    public getPropertyById(id: rt.string_property_id) {
+    public getProperty(id: rt.string_property_id, simple: boolean = false) {
         var record = this.record as rt.block_table_row;
         var property = record.properties[id];
-        return decodeProperty('text', property);
+        return decodeProperty('text', property, simple);
     }
 }
 
@@ -215,14 +215,14 @@ export class PageBlock extends Block {
     @record_accessor('format.page_small_text')
     public accessor isSmallText!: boolean;
 
-    public async getProperty(id_name: rt.string_property_id | string) {
+    public async getProperty(id_name: rt.string_property_id | string, simple: boolean = false) {
         var record = this.record as rt.block_page;
         if (record.parent_table === 'collection') {
             const parent = await this.getParent<Collection>();
             const schemaType = parent.getSchema(id_name)?.type ?? 'text';
             const id = parent.getSchemaId(id_name);
             var value = this.get(['properties', id]);
-            return decodeProperty(schemaType, value!);
+            return decodeProperty(schemaType, value!, simple);
         }
     }
 
