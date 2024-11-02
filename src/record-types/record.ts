@@ -35,6 +35,8 @@ export type type_of_record =
     | 'space_view'                                              // Space view
     | 'space_user'                                              // Space/user relation, witch id is '<space_id>|<user_id>'
     | 'layout'                                                  // Collection page section layout @see: https://www.notion.so/zh-cn/releases/2024-10-24
+    | 'automation'                                              // Automation
+    | 'automation_action'                                       // Automation action
     ;
 
 /** Reference record pointer, pointer to a record with record type */

@@ -3,9 +3,11 @@ import * as readline from 'readline';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import csv from 'csv-parser';
+import { createRequire } from 'module';
 
 import config from './config.js';
 import { ArgumentError } from './error.js';
+import log from './log.js';
 
 export function uuid(idOrUrl: rt.string_uuid | rt.string_url, table: rt.type_of_record | 'page' = 'block') {
     let re = idOrUrl;
@@ -105,6 +107,26 @@ export async function readCsv(filePath: string) {
             .on('end', () => resolve(results))
             .on('error', (err: any) => reject(err));
     });
+}
+
+export function importJson(path: string, callerUrl?: string) {
+    if (!callerUrl) {
+        const root = process.cwd();
+        callerUrl = 'file:///' + root.replace(/\\/g, '/') + '/';
+    }
+    callerUrl = callerUrl ?? process.cwd();
+    const require = createRequire(callerUrl);
+    return require(path);
+}
+
+export function wrapQueryFilter(filter: any[]) {
+    if (filter) {
+        return {
+            operator: 'and',
+            filters: filter.map((item) => item.filter),
+        }
+    }
+    return undefined;
 }
 
 

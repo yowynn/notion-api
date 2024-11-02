@@ -31,7 +31,9 @@ export default class Session {
 
     public async request(method: string, endpoint: string, payload: any = {}): Promise<any> {
         const url = endpoint.startsWith('http') ? endpoint : `${this._baseUrl}/${endpoint}`;
-        log.info(`requesting: ${url}`);
+        if (config.DEBUG_MODE) {
+            log.info(`requesting: ${url}`);
+        }
         let body: any;
         const payloadType = this.headers.get('content-type');
         if (payloadType?.includes('application/json')) {

@@ -44,7 +44,14 @@ export default class Action {
         const record = await this._recordMap.get(pointer) as rt.block;
         const parentPointer = getParentPointer(record);
         if (parentPointer) {
-            this._transaction.opListRemove(parentPointer, ['content'], { id: pointer.id });
+            if (parentPointer.table === 'block') {
+                if (record.type === 'collection_view') {
+                    this._transaction.opListRemove(parentPointer, ['view_ids'], { id: pointer.id });
+                }
+                else {
+                    this._transaction.opListRemove(parentPointer, ['content'], { id: pointer.id });
+                }
+            }
         }
     }
 

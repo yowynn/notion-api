@@ -151,7 +151,7 @@ export default class Client {
         return emoji;
     }
 
-    public async queryCollection(record: Record, limit: number = 50, query: string = '') {
+    public async queryCollection(record: Record, options?: any, returnType: 'all' | 'query' | 'count' = 'query') {
         let collectionViewPointer: rt.pointered<'collection_view'>;
         let collectionPointer: rt.pointered<'collection'>;
         switch (record.table) {
@@ -175,7 +175,7 @@ export default class Client {
             default:
                 throw new Error(`Invalid record type: ${record.table}`);
         }
-        const ids = this.recordMap.getQueryed(collectionPointer, collectionViewPointer, limit, query);
+        const ids = this.recordMap.getQueryedResult(collectionPointer, collectionViewPointer, options, returnType);
         return ids;
     }
 }

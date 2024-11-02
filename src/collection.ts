@@ -90,6 +90,19 @@ export default class Collection extends Record {
         }
     }
 
+    public async clearAll() {
+        const record = this.record as rt.collection;
+        const templateList = record.template_pages ?? [];
+        const allList = await this._client.queryCollection(this, undefined, 'all');
+
+        for (const id of allList) {
+            if (!templateList.includes(id)) {
+                await this._client.action.deleteRecord({ table: 'block', id, spaceId: record.space_id });
+            }
+        }
+        await this._client.action.done(true);
+    }
+
 
     private _schemaNameMap: { [key: string]: rt.string_property_id; } = {};
     private _schemaMap: { [key: string]: rt.schema; } = {};

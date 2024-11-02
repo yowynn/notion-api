@@ -3,6 +3,15 @@ import type Client from './client.js';
 import config from './config.js';
 import log from './log.js';
 import { UnsupportedError } from './error.js';
+import { wrapQueryFilter } from './util.js';
+
+
+type collection_query_options = {
+    limit?: number;
+    query?: string;
+    sort?: any;
+    filter?: any;
+}
 
 export default class RecordMap {
     private _client: Client;
@@ -26,6 +35,8 @@ export default class RecordMap {
             space_user: {} as Record<rt.string_uuid, rt.record>,
             custom_emoji: {} as Record<rt.string_uuid, rt.record>,
             layout: {} as Record<rt.string_uuid, rt.record>,
+            automation: {} as Record<rt.string_uuid, rt.record>,
+            automation_action: {} as Record<rt.string_uuid, rt.record>,
         };
     }
 
@@ -51,16 +62,29 @@ export default class RecordMap {
         return pointerList.map(pointer => this.getLocal(pointer));
     }
 
-    public async getQueryed(collectionPointer: rt.pointered<'collection'>, collectionViewPointer: rt.pointered<'collection_view'>, limit: number = 50, query: string = '') {
-        log.info('RecordMap.getQueryed', collectionPointer, collectionViewPointer, limit, query);
+
+    public async getQueryedResult(collectionPointer: rt.pointered<'collection'>, collectionViewPointer: rt.pointered<'collection_view'>, options?: collection_query_options, returnType: 'all' | 'query' | 'count' = 'query') {
         const collectionView = await this.get(collectionViewPointer);
-        const sort = (collectionView as any).query2?.sort;
-        const data = await this._client.sessionApi.queryCollection(collectionPointer, collectionViewPointer, limit, query, sort);
+        const limit = options?.limit;
+        const query = options?.query;
+        const sort = options?.sort == undefined ? (collectionView as any).query2?.sort : options?.sort;
+        const filter = options?.filter == undefined ? wrapQueryFilter((collectionView as any).format?.property_filters) : options?.filter;
+        const data = await this._client.sessionApi.queryCollection(collectionPointer, collectionViewPointer, limit, query, sort, filter);
         this.merge(data?.recordMap);
         if (config.DEBUG_MODE) {
             log.writeFile('test/data-demos/queryCollection.json', data);
         }
-        return data.allBlockIds ?? data.result?.reducerResults?.collection_group_results?.blockIds ?? [];
+        switch (returnType) {
+            case 'all': {
+                return data.allBlockIds ?? [];
+            }
+            case 'query': {
+                return data.result?.reducerResults?.collection_group_results?.blockIds ?? [];
+            }
+            case 'count': {
+                return data.result?.sizeHint ?? 0;
+            }
+        }
     }
 
 
