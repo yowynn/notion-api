@@ -1,5 +1,8 @@
 import type * as rt from './record-types';
 import type Block from './block.js';
+import type CollectionView from './collection-view';
+import type Collection from './collection';
+import type { CollectionViewBlock } from './block.js';
 import Record from './record.js';
 import config from './config.js';
 import log from './log.js';
@@ -9,10 +12,6 @@ import RecordMap from './record-map.js';
 import Transation from './transaction.js';
 import Action from './action.js';
 import { uuid } from './util.js';
-import { get } from 'http';
-import { CollectionViewBlock, CollectionViewPageBlock } from './block.js';
-import CollectionView from './collection-view';
-import Collection from './collection';
 
 export default class Client {
     public static async fromToken(token: string): Promise<Client> {
@@ -33,6 +32,7 @@ export default class Client {
 
     private _userId!: rt.string_uuid;
     private _spaceId!: rt.string_uuid;
+    private _inferedSpaceId!: rt.string_uuid;
     private _timezone!: rt.option_time_zone;
     public readonly _transactions: { [key: string]: Transation; } = {};
     public _transactionKey: string = 'default';
@@ -48,7 +48,7 @@ export default class Client {
     }
 
     public get spaceId(): rt.string_uuid {
-        return this._spaceId;
+        return this._spaceId ?? this._inferedSpaceId;
     }
 
     public get timeZone(): rt.option_time_zone {
@@ -103,28 +103,19 @@ export default class Client {
         }
     }
 
-    public async getBlock<T extends Block = Block>(id: rt.string_uuid, loadPageChunk: boolean = true) {
+    public async getRecord<T extends Record = Record>(table: rt.type_of_record, id: rt.string_uuid, update: boolean = false) {
         id = uuid(id);
-        const r = await this.recordMap.get({ table: 'block', id }, true, loadPageChunk);
-        const block = Record.wrap(this, r, 'block') as T;
-        return block;
-    }
-
-    public async getRecord<T extends Record = Record>(table: rt.type_of_record, id: rt.string_uuid) {
-        id = uuid(id);
-        const r = await this.recordMap.get({ table, id }, true);
+        const r = await this.recordMap.get({ table, id, spaceId: this.spaceId }, update, true);
+        if (!r) {
+            throw new Error(`Record not found: ${table}, ${id}`);
+        }
+        this._inferedSpaceId = r.space_id ?? this._inferedSpaceId;
         const record = Record.wrap(this, r, table) as T;
         return record;
     }
 
-    public async setRecordProperty(record: Record, path: string[], args: any) {
-        await this.action.setRecordProperty(record.pointer, path, args);
-        await this.action.done(true);
-    }
-
-    public async deleteRecord(record: Record) {
-        await this.action.deleteRecord(record.pointer);
-        await this.action.done(true);
+    public async getBlock<T extends Block = Block>(id: rt.string_uuid, update: boolean = false) {
+        return this.getRecord<T>('block', id, update);
     }
 
     public async createBlock(type: rt.type_of_block, where: 'before' | 'after' | 'child', anchorBlock: Record) {
@@ -149,7 +140,7 @@ export default class Client {
     public async createImageBlockUploaded(filePath: string, where: 'before' | 'after' | 'child', anchorBlock: Record) {
         const blockPointer = await this.action.createBlock('image', where, anchorBlock.pointer);
         await this.action.done(true);
-        const url = await this.action.updateFile(blockPointer, filePath);
+        const url = await this.action.uploadFile(blockPointer, filePath);
         await this.action.done(true);
         const r = await this.recordMap.get(blockPointer);
         const block = Record.wrap(this, r, 'block') as Block;
@@ -160,7 +151,7 @@ export default class Client {
         if (!name) {
             name = filePath.split(/[\\/]/).pop()!;
         }
-        const url = await this.action.updateFilePublic(filePath);
+        const url = await this.action.uploadFilePublic(filePath);
         const emojiPointer = await this.action.createCustomEmoji(name, url);
         await this.action.done(true);
         const r = await this.recordMap.get(emojiPointer);
@@ -174,25 +165,25 @@ export default class Client {
         switch (record.table) {
             case 'collection_view': {
                 collectionViewPointer = record.pointer as rt.pointered<'collection_view'>;
-                collectionPointer = (record as CollectionView).collectionPointer ?? (await (record as CollectionView).getCollection()).pointer;
+                collectionPointer = (await (record as CollectionView).getCollection()).pointer;
                 break;
             }
             case 'collection': {
                 collectionPointer = record.pointer as rt.pointered<'collection'>;
-                const block = await (record as Collection).getParent<CollectionViewBlock>();
-                const collectionView = await block.getCollectionView(0)!;
-                collectionViewPointer = collectionView.pointer as rt.pointered<'collection_view'>;
+                const block = await (record as Collection).getParent();
+                const collectionView = await block.getView(0)!;
+                collectionViewPointer = collectionView.pointer;
                 break;
             }
             case 'block': {
-                const collectionView = await (record as CollectionViewBlock).getCollectionView(0)!;
-                collectionViewPointer = collectionView.pointer as rt.pointered<'collection_view'>;
-                collectionPointer = collectionView.collectionPointer ?? (await collectionView.getCollection()).pointer;
+                const collectionView = await (record as CollectionViewBlock).getView(0)!;
+                collectionViewPointer = collectionView.pointer;
+                collectionPointer = (await collectionView.getCollection()).pointer;
             }
             default:
                 throw new Error(`Invalid record type: ${record.table}`);
         }
-        const ids = this.recordMap.getQueryedResult(collectionPointer, collectionViewPointer, options, returnType);
-        return ids;
+        const result = this.recordMap.getQueryedResult(collectionPointer, collectionViewPointer, options, returnType);
+        return result;
     }
 }

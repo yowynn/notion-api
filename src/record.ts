@@ -1,11 +1,12 @@
 import type * as rt from './record-types';
 import type Client from './client.js';
+import type RecordMap from './record-map.js';
 import { date2timestamp, timestamp2date } from './converter.js';
 import { DuplicateKeyError, ReadonlyModificationError, UnsupportedError } from './error.js';
 import { getParentPointer, getPointer } from './record-util.js';
 import log from './log.js';
 
-const recordTypeMap: { [key: string]: new (client: any, record: any) => Record; } = {};
+const recordTypeMap: { [key: string]: new (client: Client, record: rt.record, table?: rt.type_of_record) => Record; } = {};
 
 @as_record()
 export default class Record {
@@ -16,49 +17,51 @@ export default class Record {
             key = key + '.' + type;
         }
         const ctor = recordTypeMap[key] ?? recordTypeMap[table] ?? recordTypeMap.record;
-        const obj = new ctor(client, record);
-        if (ctor === Record) {
-            obj.table = table;
-        }
+        const obj = new ctor(client, record, table);
         return obj;
     }
 
-    private _taskCount = 0;
     protected _client: Client;
-
-    protected get recordMap() {
-        return this._client.recordMap;
-    }
-
     private _table!: rt.type_of_record;
     private _id!: rt.string_uuid;
+    private _taskCount = 0;
+
+    public get client(): Client {
+        return this._client;
+    }
+
+    public get recordMap(): RecordMap {
+        return this._client.recordMap;
+    }
 
     public get table(): rt.type_of_record {
         return this._table;
     }
-    private set table(value: rt.type_of_record) {
-        this._table = value!;
+
+    public get id(): rt.string_uuid {
+        return this._id;
     }
 
-    public get record() {
+    public get record(): rt.record {
         return this.recordMap.getLocal({ table: this.table, id: this.id });
     }
 
     public get pointer(): rt.pointer {
-        return getPointer(this.record, this.table)!;
+        return getPointer(this.record, this.table)!
     }
 
     public get parentPointer(): rt.pointer | null {
         return getParentPointer(this.record);
     }
 
-    public get id() {
-        return this._id;
+    public get isDirty() {
+        return this.recordMap.isDirty(this.pointer);
     }
 
-    public constructor(client: Client, record: rt.record) {
+    public constructor(client: Client, record: rt.record, table?: rt.type_of_record) {
         this._client = client;
         this._id = record.id;
+        this._table = table!;
     }
 
     @readonly_record_accessor('version')
@@ -78,19 +81,16 @@ export default class Record {
         return record;
     }
 
-    public async set(propertyPath: string[], value: any) {
+    public async set(propertyPath: string[], value: any, isDelta: boolean = false) {
         this._taskCount++;
         this.markDirty();
-        await this._client.setRecordProperty(this, propertyPath, value);
+        await this.client.action.updateField(this.pointer, propertyPath, value, isDelta);
+        await this.client.action.done(true);
         this._taskCount--;
     }
 
     public markDirty() {
         this.recordMap.markDirty(this.pointer);
-    }
-
-    public get isDirty() {
-        return this.recordMap.isDirty(this.pointer);
     }
 
     public async idle() {
@@ -101,6 +101,14 @@ export default class Record {
 
     public async refresh() {
         await this.recordMap.get(this.pointer, this.isDirty);
+    }
+
+    public async delete(permanentlyDelete: boolean = false) {
+        if (permanentlyDelete) {
+            log.warn('permanentlyDelete is not supported yet');
+        }
+        await this.client.action.delete(this.pointer);
+        await this.client.action.done(true);
     }
 }
 

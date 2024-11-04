@@ -100,6 +100,16 @@ export default class Transation {
         this.addOperation(operation);
     }
 
+    public opAddRelationAfter(pointer: rt.pointer, path: string[], args: { id: rt.string_uuid, spaceId?: rt.string_uuid }) {
+        const operation = {
+            command: 'addRelationAfter',
+            pointer,
+            path,
+            args,
+        }
+        this.addOperation(operation);
+    }
+
     public async submit(refreshRecords: boolean = true) {
         if (this._operations.length === 0) {
             return;

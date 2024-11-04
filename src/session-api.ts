@@ -64,10 +64,10 @@ export default class SessionApi {
      *
      * return record type: `block`, `discussion`, `collection`, `comment`, `collection_view`, `team`, ...
      */
-    public async loadPages(ids: rt.string_uuid[], limit: number = 100) {
+    public async loadPages(idList: rt.string_uuid[], limit: number = 100) {
         const endpoint = 'loadCachedPageChunks';
         const payload = {
-            requests: ids.map(id => ({
+            requests: idList.map(id => ({
                 page: {
                     id,
                     spaceId: undefined,
@@ -123,6 +123,20 @@ export default class SessionApi {
         const endpoint = 'loadUserContent';
         return this._session.request('POST', endpoint);
     }
+
+
+    /**
+     * API: delete a list of blocks
+     */
+    public async deleteBlocks(pointerList: rt.pointered<'block'>[], permanentlyDelete: boolean = false) {
+        const endpoint = 'deleteBlocks';
+        const payload = {
+            blocks: pointerList,
+            permanentlyDelete,
+        }
+        return this._session.request('POST', endpoint, payload);
+    }
+
 
     /**
      * API: submit a list of transactions

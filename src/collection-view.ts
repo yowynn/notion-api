@@ -1,13 +1,21 @@
 import type * as rt from './record-types';
+import type Collection from './collection.js';
+import type { CollectionViewBlock, CollectionViewPageBlock } from './block.js';
 import Record, { as_record, record_accessor, readonly_record_accessor } from './record.js';
-import Collection from './collection.js';
 import log from './log.js';
-import Block, { CollectionViewBlock } from './block.js';
 
 @as_record('collection_view')
 export default class CollectionView extends Record {
-    public get table() {
-        return 'collection_view' as rt.type_of_record;
+    public override get table() {
+        return 'collection_view' as 'collection_view';
+    }
+
+    public override get record(): rt.collection_view {
+        return super.record as rt.collection_view;
+    }
+
+    public override get pointer(): rt.pointered<'collection_view'> {
+        return super.pointer as rt.pointered<'collection_view'>;
     }
 
     @record_accessor('type')
@@ -22,27 +30,25 @@ export default class CollectionView extends Record {
     @record_accessor('format.collection_view_icon')
     public accessor icon!: rt.string_icon;
 
-    public async getParent<T = Block>() {
-        var record = this.record as rt.i_parented;
-        var parentRecord = await this.recordMap.get(this.parentPointer!);
-        return Record.wrap(this._client, parentRecord, record.parent_table) as T;
+    public async getParent<T extends CollectionViewBlock | CollectionViewPageBlock = CollectionViewBlock>() {
+        const parentPointer = this.parentPointer;
+        if (!parentPointer) {
+            return undefined as unknown as T;
+        }
+        var parentRecord = await this.recordMap.get(parentPointer);
+        return Record.wrap(this.client, parentRecord, parentPointer.table) as T;
     }
 
     @readonly_record_accessor('format.collection_pointer')
-    public accessor collectionPointer!: rt.pointered<'collection'>;
+    public accessor cachedCollectionPointer!: rt.pointered<'collection'>;
 
     async getCollection() {
-        var collectionPointer = (this.record as any).format.collection_pointer;
+        var collectionPointer = this.cachedCollectionPointer ?? ((await this.getParent()).collectionPointer);
         if (collectionPointer) {
             var collectionRecord = await this.recordMap.get(collectionPointer);
-            return Record.wrap(this._client, collectionRecord, 'collection') as Collection;
+            return Record.wrap(this._client, collectionRecord, collectionPointer.table) as Collection;
         }
-        else {
-            const parent = await this.getParent<CollectionViewBlock>();
-            const collection = await parent.getCollection();
-            return collection;
-        }
-
+        return undefined as unknown as Collection;
     }
 
 }

@@ -2,7 +2,7 @@ import type * as rt from './record-types';
 import type Client from './client.js';
 import type Transation from './transaction.js';
 import { getBlockTemplate, getCollectionTemplate, getCollectionViewTemplate, getCustomEmojiTemplate, getFileSizeString, getParentPointer, getPointer } from './record-util.js';
-import { inferMimeType, newUuid, readFile } from './util.js';
+import { inferMimeType, readFile } from './util.js';
 import log from './log.js';
 
 export default class Action {
@@ -25,21 +25,39 @@ export default class Action {
         await this._transaction.submit(refreshRecords);
     }
 
-    public async setRecordProperty(pointer: rt.pointer, path: string[], args: any) {
-        this._transaction.opSet(pointer, path, args);
+    public async updateField(pointer: rt.pointer, path: string[], args: any, isDelta: boolean = false) {
+        if (isDelta) {
+            this._transaction.opUpdate(pointer, path, args);
+        }
+        else {
+            this._transaction.opSet(pointer, path, args);
+        }
     }
 
-    public async updateRecordProperty(pointer: rt.pointer, path: string[], args: any) {
-        this._transaction.opUpdate(pointer, path, args);
-    }
-
-    public async appendSchemaOptions(pointer: rt.pointered<'collection'>, propertyId: rt.string_property_id, options: rt.select_option[]) {
-        for (const option of options) {
+    public async appendSchemaOptions(pointer: rt.pointered<'collection'>, propertyId: rt.string_property_id, optionList: rt.select_option[]) {
+        for (const option of optionList) {
             this._transaction.opKeyedObjectListAfter(pointer, ['schema', propertyId, 'options'], { value: option });
         }
     }
 
-    public async deleteRecord(pointer: rt.pointer) {
+    public async appendRelations(pointer: rt.pointered<'block'>, propertyId: rt.string_property_id, relatedPointerList: rt.pointered<'block'>[]) {
+        const record = await this._recordMap.get(pointer) as rt.block;
+        if (record.parent_table !== 'collection') {
+            throw new Error('Parent table is not collection');
+        }
+        const collection = await this._recordMap.get({ id: record.parent_id, table: 'collection' }) as rt.collection;
+        const schema = collection.schema[propertyId] as rt.schema_relation;
+        const relatedPropertyId = schema.property;
+        const isBidirectionalLink = relatedPropertyId && relatedPropertyId !== propertyId;
+        for (const relatedPointer of relatedPointerList) {
+            this._transaction.opAddRelationAfter(pointer, ['properties', propertyId], { id: relatedPointer.id, spaceId: relatedPointer.spaceId });
+            if (isBidirectionalLink) {
+                this._transaction.opAddRelationAfter(relatedPointer, ['properties', relatedPropertyId], { id: pointer.id, spaceId: pointer.spaceId });
+            }
+        }
+    }
+
+    public async delete(pointer: rt.pointer) {
         this._transaction.opUpdate(pointer, [], { alive: false });
         const record = await this._recordMap.get(pointer) as rt.block;
         const parentPointer = getParentPointer(record);
@@ -52,16 +70,14 @@ export default class Action {
                     this._transaction.opListRemove(parentPointer, ['content'], { id: pointer.id });
                 }
             }
+            else {
+                throw new Error(`Unsupported parent table: ${parentPointer.table}`);
+            }
         }
     }
 
-    private async createBlockPlaceholder(type: rt.type_of_block) {
-        const record = getBlockTemplate(this._client, type);
-        const pointer = getPointer(record, 'block')! as rt.pointered<'block'>;
-        const deepCopy = JSON.parse(JSON.stringify(record));
-        this._recordMap.setLocal(pointer, deepCopy);
-        this._transaction.opSet(pointer, [], record);
-        return pointer;
+    public async deleteBlocks(pointerList: rt.pointered<'block'>[], permanentlyDelete: boolean = false) {
+        this._client.sessionApi.deleteBlocks(pointerList, permanentlyDelete);
     }
 
     public async setBlockParent(pointer: rt.pointered<'block'>, parentPointer: rt.pointer, index: number = -1, anchorId?: rt.string_uuid) {
@@ -135,36 +151,6 @@ export default class Action {
         });
     }
 
-    public async createBlock(type: rt.type_of_block, where: 'before' | 'after' | 'child', anchor: rt.pointer) {
-        const pointer = await this.createBlockPlaceholder(type);
-        switch (where) {
-            case 'before': {
-                const parentPointer = getParentPointer(await this._recordMap.get(anchor) as rt.block)!;
-                await this.setBlockParent(pointer, parentPointer, -1, anchor.id);
-                break;
-            }
-            case 'after': {
-                const parentPointer = getParentPointer(await this._recordMap.get(anchor) as rt.block)!;
-                await this.setBlockParent(pointer, parentPointer, 1, anchor.id);
-                break;
-            }
-            case 'child': {
-                await this.setBlockParent(pointer, anchor);
-                break;
-            }
-        }
-        return pointer;
-    }
-
-    private async createCollectionViewPlaceholder(type: rt.type_of_collection_view) {
-        const record = getCollectionViewTemplate(this._client, type);
-        const pointer = getPointer(record, 'collection_view')! as rt.pointered<'collection_view'>;
-        const deepCopy = JSON.parse(JSON.stringify(record));
-        this._recordMap.setLocal(pointer, deepCopy);
-        this._transaction.opSet(pointer, [], record);
-        return pointer;
-    }
-
     public async setCollectionViewParent(pointer: rt.pointered<'collection_view'>, parentPointer: rt.pointered<'block'>) {
         const record = await this._recordMap.get(pointer) as rt.collection_view;
         const oldParentPointer = getParentPointer(record);
@@ -176,21 +162,6 @@ export default class Action {
             parent_table: parentPointer.table,
         });
         this._transaction.opListAfter(parentPointer, ['view_ids'], { id: pointer.id });
-    }
-
-    public async createCollectionView(type: rt.type_of_collection_view, parentPointer: rt.pointered<'block'>) {
-        const pointer = await this.createCollectionViewPlaceholder(type);
-        await this.setCollectionViewParent(pointer, parentPointer);
-        return pointer;
-    }
-
-    private async createCollectionPlaceholder() {
-        const record = getCollectionTemplate(this._client);
-        const pointer = getPointer(record, 'collection')! as rt.pointered<'collection'>;
-        const deepCopy = JSON.parse(JSON.stringify(record));
-        this._recordMap.setLocal(pointer, deepCopy);
-        this._transaction.opSet(pointer, [], record);
-        return pointer;
     }
 
     public async setCollectionParent(pointer: rt.pointered<'collection'>, parentPointer: rt.pointered<'block'>) {
@@ -208,14 +179,54 @@ export default class Action {
         this._transaction.opUpdate(parentPointer, [ 'format' ], { collection_pointer: pointer });
     }
 
+    public async linkViewToCollection(pointer: rt.pointered<'collection_view'>, collectionPointer: rt.pointered<'collection'>) {
+        this._transaction.opUpdate(pointer, [ 'format' ], { collection_pointer: collectionPointer });
+    }
+
+    public async createBlock(type: rt.type_of_block, where: 'before' | 'after' | 'child', anchoredPointer: rt.pointer) {
+        const record = getBlockTemplate(this._client, type);
+        const pointer = getPointer(record, 'block')! as rt.pointered<'block'>;
+        const deepCopy = JSON.parse(JSON.stringify(record));
+        this._recordMap.setLocal(pointer, deepCopy);
+        this._transaction.opSet(pointer, [], record);
+        switch (where) {
+            case 'before': {
+                const parentPointer = getParentPointer(await this._recordMap.get(anchoredPointer) as rt.block)!;
+                await this.setBlockParent(pointer, parentPointer, -1, anchoredPointer.id);
+                break;
+            }
+            case 'after': {
+                const parentPointer = getParentPointer(await this._recordMap.get(anchoredPointer) as rt.block)!;
+                await this.setBlockParent(pointer, parentPointer, 1, anchoredPointer.id);
+                break;
+            }
+            case 'child': {
+                await this.setBlockParent(pointer, anchoredPointer);
+                break;
+            }
+        }
+        return pointer;
+    }
+
+    public async createCollectionView(type: rt.type_of_collection_view, parentPointer: rt.pointered<'block'>) {
+        const record = getCollectionViewTemplate(this._client, type);
+        const pointer = getPointer(record, 'collection_view')! as rt.pointered<'collection_view'>;
+        const deepCopy = JSON.parse(JSON.stringify(record));
+        this._recordMap.setLocal(pointer, deepCopy);
+        this._transaction.opSet(pointer, [], record);
+        await this.setCollectionViewParent(pointer, parentPointer);
+        return pointer;
+    }
+
     public async createCollection(parentPointer: rt.pointered<'block'>, linkedViewPointer: rt.pointered<'collection_view'>) {
-        const pointer = await this.createCollectionPlaceholder();
+        const record = getCollectionTemplate(this._client);
+        const pointer = getPointer(record, 'collection')! as rt.pointered<'collection'>;
+        const deepCopy = JSON.parse(JSON.stringify(record));
+        this._recordMap.setLocal(pointer, deepCopy);
+        this._transaction.opSet(pointer, [], record);
         await this.setCollectionParent(pointer, parentPointer);
         if (linkedViewPointer) {
-            this._transaction.opUpdate(linkedViewPointer, [ 'format' ], { collection_pointer: pointer });
-        }
-        else {
-            log.warn('linkedViewPointer is not provided');
+            await this.linkViewToCollection(linkedViewPointer, pointer);
         }
         return pointer;
     }
@@ -223,12 +234,13 @@ export default class Action {
     public async createCustomEmoji(name: string, url: rt.string_url) {
         const record = getCustomEmojiTemplate(this._client, name, url);
         const pointer = getPointer(record, 'custom_emoji')! as rt.pointered<'custom_emoji'>;
-        this._recordMap.setLocal(pointer, record);
+        const deepCopy = JSON.parse(JSON.stringify(record));
+        this._recordMap.setLocal(pointer, deepCopy);
         this._transaction.opSet(pointer, [], record);
         return pointer;
     }
 
-    public async updateFile(pointer: rt.pointered<'block'>, filePath: string, blob?: Blob, propertyId?: rt.string_property_id) {
+    public async uploadFile(pointer: rt.pointered<'block'>, filePath: string, blob?: Blob, propertyId?: rt.string_property_id) {
         if (!blob) {
             const buffer = await readFile(filePath);
             blob = new Blob([buffer]);
@@ -255,7 +267,7 @@ export default class Action {
         return data.url as rt.string_url;
     }
 
-    public async updateFilePublic(filePath: string, blob?: Blob) {
+    public async uploadFilePublic(filePath: string, blob?: Blob) {
         if (!blob) {
             const buffer = await readFile(filePath);
             blob = new Blob([buffer]);

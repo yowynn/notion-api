@@ -57,6 +57,7 @@ export interface i_parented {
 /** With block children information */
 export interface i_childed {
     content?: Array<string_uuid>;                               // Child records
+    space_id?: string_uuid;                                     // Refer: space, the space where the block is located
 }
 
 /** With block color information */

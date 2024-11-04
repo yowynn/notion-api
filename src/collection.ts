@@ -1,17 +1,28 @@
 import type * as rt from './record-types';
+import type { CollectionViewBlock, CollectionViewPageBlock } from './block.js';
 import Record, { as_record, record_accessor, readonly_record_accessor } from './record.js';
-import { dp, ep } from './converter.js';
 import Client from './client.js';
+import { dp, ep } from './converter.js';
 import { newPropertyId, newUuid } from './util.js';
 import log from './log.js';
-import Block from './block.js';
 
 
 @as_record('collection')
 export default class Collection extends Record {
-    public get table() {
-        return 'collection' as rt.type_of_record;
+    public override get table() {
+        return 'collection' as 'collection';
     }
+
+    public override get record(): rt.collection {
+        return super.record as rt.collection;
+    }
+
+    public override get pointer(): rt.pointered<'collection'> {
+        return super.pointer as rt.pointered<'collection'>;
+    }
+
+    private _schemaNameMap: { [key: string]: rt.string_property_id; } = {};
+    private _schemaMap: { [key: string]: rt.schema; } = {};
 
     @record_accessor('name', dp('title'), ep('title'))
     public accessor title!: string;
@@ -25,15 +36,17 @@ export default class Collection extends Record {
     @record_accessor('cover')
     public accessor cover!: rt.string_uuid;
 
-    public async getParent<T = Block>() {
-        var record = this.record as rt.i_parented;
-        var parentRecord = await this.recordMap.get(this.parentPointer!);
-        return Record.wrap(this._client, parentRecord, record.parent_table) as T;
+    public async getParent<T extends CollectionViewBlock | CollectionViewPageBlock = CollectionViewBlock>() {
+        const parentPointer = this.parentPointer;
+        if (!parentPointer) {
+            return undefined as unknown as T;
+        }
+        var parentRecord = await this.recordMap.get(this.parentPointer);
+        return Record.wrap(this.client, parentRecord, parentPointer.table) as T;
     }
 
     public getSchemaId(id_name: rt.string_property_id | string) {
-        const name = this.getSchema(id_name).name;
-        return this._schemaNameMap[name];
+        return this._schemaNameMap[id_name] ?? id_name;
     }
 
     public getSchema(id_name: rt.string_property_id | string) {
@@ -45,20 +58,20 @@ export default class Collection extends Record {
     }
 
     public async setSchema(id_name: rt.string_property_id | string, schema: rt.schema) {
-        this.markDirty();
         const id = this.getSchemaId(id_name);
         await this.set(['schema', id], schema);
     }
 
 
-    public async createSchema(...schemas: (Partial<rt.schema> & { type: rt.type_of_schema, name: string; })[]) {
+    public async createSchemas(...schemas: (Partial<rt.schema> & { type: rt.type_of_schema, name: string; })[]) {
         const args = schemas.reduce((acc, schema) => {
             acc[newPropertyId()] = schema;
             return acc;
         }, {} as any)
         this.markDirty();
-        await this._client.action.updateRecordProperty(this.pointer, ['schema'], args);
+        await this._client.action.updateField(this.pointer, ['schema'], args, true);
         await this._client.action.done(true);
+        this.refreshSchemaNameMap();
     }
 
     public async createSchemaOptions(id_name: rt.string_property_id | string, ...options: (Partial<rt.select_option> & { value: string; } | string)[]) {
@@ -90,22 +103,30 @@ export default class Collection extends Record {
         }
     }
 
-    public async clearAll() {
+    public async clearAll(permanentlyDelete: boolean = false) {
         const record = this.record as rt.collection;
         const templateList = record.template_pages ?? [];
         const allList = await this._client.queryCollection(this, undefined, 'all');
-
+        const pointerList: rt.pointered<'block'>[] = [];
         for (const id of allList) {
             if (!templateList.includes(id)) {
-                await this._client.action.deleteRecord({ table: 'block', id, spaceId: record.space_id });
+                pointerList.push({ table: 'block', id, spaceId: record.space_id });
             }
         }
+        await this.client.action.deleteBlocks(pointerList, permanentlyDelete);
         await this._client.action.done(true);
     }
 
+    public constructor(client: Client, record: rt.record) {
+        super(client, record);
+        this.refreshSchemaNameMap();
+    }
 
-    private _schemaNameMap: { [key: string]: rt.string_property_id; } = {};
-    private _schemaMap: { [key: string]: rt.schema; } = {};
+    public override async refresh(): Promise<void> {
+        await super.refresh();
+        this.refreshSchemaNameMap();
+    }
+
     private refreshSchemaNameMap() {
         this._schemaNameMap = {};
         this._schemaMap = {};
@@ -115,15 +136,5 @@ export default class Collection extends Record {
             this._schemaMap[schemas[key].name] = schemas[key];
             this._schemaMap[key] = schemas[key];
         }
-    }
-
-    public constructor(client: Client, record: rt.record) {
-        super(client, record);
-        this.refreshSchemaNameMap();
-    }
-
-    public async refresh(): Promise<void> {
-        await super.refresh();
-        this.refreshSchemaNameMap();
     }
 }

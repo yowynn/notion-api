@@ -149,15 +149,18 @@ export type block_text =
  * case 2: toggleable heading
  */
 export type block_header = block_header_normal | block_header_toggleable;
-type block_header_normal =
+type block_header_base =
     & i_block
     & i_titled
     & i_colored
     & {
         type: 'header';
     };
+type block_header_normal =
+    & block_header_base
+    ;
 type block_header_toggleable =
-    & block_header_normal
+    & block_header_base
     & i_childed
     & {
         format: {
@@ -173,15 +176,18 @@ type block_header_toggleable =
  * case 2: toggleable heading
  */
 export type block_sub_header = block_sub_header_normal | block_sub_header_toggleable;
-type block_sub_header_normal =
+type block_sub_header_base =
     & i_block
     & i_titled
     & i_colored
     & {
         type: 'sub_header';
     };
+type block_sub_header_normal =
+    & block_sub_header_base
+    ;
 type block_sub_header_toggleable =
-    & block_sub_header_normal
+    & block_sub_header_base
     & i_childed
     & {
         format: {
@@ -197,15 +203,18 @@ type block_sub_header_toggleable =
  * case 2: toggleable heading
  */
 export type block_sub_sub_header = block_sub_sub_header_normal | block_sub_sub_header_toggleable;
-type block_sub_sub_header_normal =
+type block_sub_sub_header_base =
     & i_block
     & i_titled
     & i_colored
     & {
         type: 'sub_sub_header';
     };
+type block_sub_sub_header_normal =
+    & block_sub_sub_header_base
+    ;
 type block_sub_sub_header_toggleable =
-    & block_sub_sub_header_normal
+    & block_sub_sub_header_base
     & i_childed
     & {
         format: {
@@ -270,7 +279,7 @@ export type block_toggle =
  * case 2: mermaid code
  */
 export type block_code = block_code_normal | block_code_mermaid;
-type block_code_normal =
+type block_code_base =
     & i_block
     & i_titled
     & i_captioned
@@ -284,8 +293,11 @@ type block_code_normal =
             code_wrap?: boolean;                                // Code wrap or not
         };
     };
+type block_code_normal =
+    & block_code_base
+    ;
 type block_code_mermaid =
-    & block_code_normal
+    & block_code_base
     & {
         format?: {
             code_preview_format?: option_code_preview_mode;     // Code preview mode
@@ -434,7 +446,7 @@ export type block_alias =
  * case 2: external image
  */
 export type block_image = block_image_uploaded | block_image_external;
-type block_image_external =
+type block_image_base =
     & i_block
     & i_captioned
     & i_colored
@@ -454,8 +466,11 @@ type block_image_external =
             block_page_width?: boolean;                         // Page width mode, width is always page width and height is automatically set
         };
     };
+type block_image_external =
+    & block_image_base
+    ;
 type block_image_uploaded =
-    & block_image_external
+    & block_image_base
     & i_titled                                                  // Image file name (download name, and upload name)
     & {
         properties: {
@@ -470,17 +485,21 @@ type block_image_uploaded =
         };
     };
 
-/** Block: page */
-export type block_page =
+/**
+ * Block: page
+ *
+ * case 1: normal page
+ *
+ * case 2: collection page
+ */
+export type block_page = block_page_normal | block_page_collection;
+type block_page_base =
     & i_block
     & i_titled
     & i_childed
     & i_colored
     & {
         type: 'page';
-        properties?: {
-            [key in string_property_id]: rich_text;             // Page properties
-        }
         format?: {                                              // Format of block:
             site_id?: string_uuid;                              // Refer: site, if published to web
             page_font?: option_page_font;                       // Page font, default is 'default'
@@ -498,32 +517,61 @@ export type block_page =
             };
         };
     };
+type block_page_normal =
+    & block_page_base
+    ;
+type block_page_collection =
+    & block_page_base
+    & {
+        properties?: {
+            [key in string_property_id]: rich_text;             // Page properties
+        }
+        is_template?: boolean;                                  // Is template of collection or not
+    };
 
 /**
- * Block: database page / wiki page
+ * Block: database view page
  *
- * case 1: page of database
+ * case 1: normal database view page
  *
- * case 2: page of wiki
+ * case 2: linked database view page
+ *
+ * case 3: wiki page
  */
-export type block_collection_view_page = block_collection_view_page_database | block_collection_view_page_wiki;
-type block_collection_view_page_database =
+export type block_collection_view_page = block_collection_view_page_normal | block_collection_view_page_linked | block_collection_view_page_wiki;
+type block_collection_view_page_base =
     & i_block
     & i_colored
     & {
         type: 'collection_view_page';
         view_ids: Array<string_uuid>;                           // Refer: collection_view, collection view IDs
-        collection_id: string_uuid;                             // Refer: collection, the original database
         format: {
-            site_id?: string_uuid;                              // Refer: site, if published to web
             block_locked?: boolean;                             // Page locked or not
             block_locked_by?: string_uuid;                      // Refer: notion_user, the user who locked the page
-            collection_pointer: pointer;                        // Refer to the 'collection' record
             social_media_image_preview_url?: string_url;        // Social media image preview URL, auto-generated
         };
     };
+type block_collection_view_page_normal =
+    & block_collection_view_page_base
+    & {
+        collection_id: string_uuid;                             // Refer: collection, the original database
+        format: {
+            site_id?: string_uuid;                              // Refer: site, if published to web
+            collection_pointer: pointer;                        // Refer to the 'collection' record
+        };
+    };
+type block_collection_view_page_linked =
+    & block_collection_view_page_base
+    & i_titled                                                  // Link view page title
+    & {
+        format: {
+            page_icon?: string_icon;                            // Link view page icon
+            page_cover?: string_url;                            // Link view page cover
+            page_cover_position?: number_normalization;         // Link view page cover position
+        };
+    };
 type block_collection_view_page_wiki =
-    & block_collection_view_page_database
+    & block_collection_view_page_normal
     & i_titled                                                  // Home view page title, same to the collection record title
     & i_childed                                                 // Home view content blocks
     & {
@@ -537,13 +585,13 @@ type block_collection_view_page_wiki =
     };
 
 /**
- * Block: database view / linked database view
+ * Block: database view inline
  *
- * case 1: view of database
+ * case 1: normal database view inline
  *
- * case 2: view of linked database
+ * case 2: linked database view inline
  */
-export type block_collection_view = block_collection_view_database | block_collection_view_linked_database;
+export type block_collection_view = block_collection_view_normal | block_collection_view_linked;
 type block_collection_view_base =
     & i_block
     & {
@@ -555,15 +603,16 @@ type block_collection_view_base =
             social_media_image_preview_url?: string_url;        // Social media image preview URL, auto-generated
         };
     };
-type block_collection_view_database =
+type block_collection_view_normal =
     & block_collection_view_base
     & {
         collection_id: string_uuid;                             // Refer: collection, only for original database
         format: {
+            site_id?: string_uuid;                              // Refer: site, if published to web
             collection_pointer: pointer;                        // Refer to the 'collection' record, only for original database
         };
     };
-type block_collection_view_linked_database =
+type block_collection_view_linked =
     & block_collection_view_base
     & i_titled                                                  // Link view page title
     & {
@@ -601,7 +650,7 @@ export type block_bookmark =
  * case 2: external file
  */
 export type block_file = block_file_uploaded | block_file_external;
-type block_file_external =
+type block_file_base =
     & i_block
     & i_titled
     & i_captioned
@@ -614,12 +663,15 @@ type block_file_external =
         };
     };
 type block_file_uploaded =
-    & block_file_external
+    & block_file_base
     & {
         properties: {
             size: rich_texted<string_file_size>;                // File size
         };
     };
+type block_file_external =
+    & block_file_base
+    ;
 
 /**
  * Block: embed
@@ -629,7 +681,7 @@ type block_file_uploaded =
  * case 2: external embed
  */
 export type block_embed = block_embed_uploaded | block_embed_external;
-type block_embed_external =
+type block_embed_base =
     & i_block
     & i_captioned
     & {
@@ -647,7 +699,7 @@ type block_embed_external =
         };
     };
 type block_embed_uploaded =
-    & block_embed_external
+    & block_embed_base
     & i_titled                                                  // Embed file name
     & {
         properties: {
@@ -655,6 +707,9 @@ type block_embed_uploaded =
             title: rich_texted<string>;                         // Embed file name
         };
     };
+type block_embed_external =
+    & block_embed_base
+    ;
 
 /** Block */
 export type block =

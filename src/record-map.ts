@@ -138,10 +138,10 @@ export default class RecordMap {
                 for (const id in records) {
                     let record: rt.record;
                     if (mapVersion === 3) {
-                        record = records[id].value.value as rt.record;
+                        record = records[id]?.value?.value as rt.record;
                     }
                     else {
-                        record = records[id].value as rt.record;
+                        record = records[id]?.value as rt.record;
                     }
                     tableMap[id] = record;
                 }
