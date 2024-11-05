@@ -1,10 +1,11 @@
 import type * as rt from './record-types';
-import type { CollectionViewBlock, CollectionViewPageBlock } from './block.js';
+import type { CollectionViewBlock, CollectionViewPageBlock, PageBlock } from './block.js';
 import Record, { as_record, record_accessor, readonly_record_accessor } from './record.js';
 import Client from './client.js';
 import { dp, ep } from './converter.js';
 import { newPropertyId, newUuid } from './util.js';
 import log from './log.js';
+import CollectionView from './collection-view';
 
 
 @as_record('collection')
@@ -41,8 +42,16 @@ export default class Collection extends Record {
         if (!parentPointer) {
             return undefined as unknown as T;
         }
-        var parentRecord = await this.recordMap.get(this.parentPointer);
-        return Record.wrap(this.client, parentRecord, parentPointer.table) as T;
+        await this.recordMap.get(parentPointer);
+        return Record.wrap(this.client, parentPointer) as T;
+    }
+
+    public async getView<T extends CollectionView = CollectionView>(index: number = 0) {
+        return await (await this.getParent())!.getView(index) as T;
+    }
+
+    public async getViews() {
+        return await (await this.getParent())!.getViews();
     }
 
     public getSchemaId(id_name: rt.string_property_id | string) {
@@ -69,8 +78,8 @@ export default class Collection extends Record {
             return acc;
         }, {} as any)
         this.markDirty();
-        await this._client.action.updateField(this.pointer, ['schema'], args, true);
-        await this._client.action.done(true);
+        await this.client.action.updateField(this.pointer, ['schema'], args, true);
+        await this.client.action.done(true);
         this.refreshSchemaNameMap();
     }
 
@@ -97,24 +106,55 @@ export default class Collection extends Record {
         }
         if (addedOptions && addedOptions.length > 0) {
             this.markDirty();
-            await this._client.action.appendSchemaOptions(this.pointer as rt.pointered<'collection'>, this.getSchemaId(id_name), addedOptions);
-            await this._client.action.done(true);
+            await this.client.action.appendSchemaOptions(this.pointer as rt.pointered<'collection'>, this.getSchemaId(id_name), addedOptions);
+            await this.client.action.done(true);
             this.refreshSchemaNameMap();
         }
     }
 
-    public async clearAll(permanentlyDelete: boolean = false) {
-        const record = this.record as rt.collection;
-        const templateList = record.template_pages ?? [];
-        const allList = await this._client.queryCollection(this, undefined, 'all');
-        const pointerList: rt.pointered<'block'>[] = [];
-        for (const id of allList) {
-            if (!templateList.includes(id)) {
-                pointerList.push({ table: 'block', id, spaceId: record.space_id });
-            }
-        }
+    public async clearAllRecords(permanentlyDelete: boolean = false) {
+        const pointerList = await this.getRecordPointers();
         await this.client.action.deleteBlocks(pointerList, permanentlyDelete);
-        await this._client.action.done(true);
+        await this.client.action.done(true);
+    }
+
+    public async queryRecords(options: rt.collection_query_options = {}) {
+        const record = this.record;
+        const collectionPointer = this.pointer;
+        const collectionViewPointer = (await this.getView(0))!.pointer;
+        const idList = await this.recordMap.getQueryedResult(collectionPointer, collectionViewPointer, options, 'query') as rt.string_uuid[];
+        const blockList = idList.map(id => Record.wrap(this.client, { id, table: 'block', spaceId: record.space_id })) as PageBlock[];
+        return blockList;
+    }
+
+    public async getTemplatePointers() {
+        const record = this.record;
+        const templateList = record.template_pages ?? [];
+        const pointerList: rt.pointered<'block'>[] = templateList.map(id => ({ table: 'block', id, spaceId: record.space_id }));
+        return pointerList;
+    }
+
+    public async getRecordPointers(includeTemplate: boolean = false) {
+        const record = this.record;
+        const collectionPointer = this.pointer;
+        const collectionViewPointer = (await (await this.getParent()).getView(0))!.pointer;
+        let idList = await this.recordMap.getQueryedResult(collectionPointer, collectionViewPointer, { limit: 1 }, 'all') as rt.string_uuid[];
+        if (!includeTemplate) {
+            const templateList = record.template_pages ?? [];
+            idList = idList.filter(id => !templateList.includes(id));
+        }
+        const pointerList: rt.pointered<'block'>[] = idList.map(id => ({ table: 'block', id, spaceId: record.space_id }));
+        return pointerList;
+    }
+
+    public async getRecordCount(includeTemplate: boolean = false) {
+        const collectionPointer = this.pointer;
+        const collectionViewPointer = (await this.getView(0))!.pointer;
+        let count = await this.recordMap.getQueryedResult(collectionPointer, collectionViewPointer, { limit: 1 }, 'count') as number;
+        if (includeTemplate) {
+            count += (this.record.template_pages ?? []).length;
+        }
+        return count;
     }
 
     public constructor(client: Client, record: rt.record) {
@@ -130,7 +170,7 @@ export default class Collection extends Record {
     private refreshSchemaNameMap() {
         this._schemaNameMap = {};
         this._schemaMap = {};
-        const schemas = (this.record as rt.collection).schema;
+        const schemas = this.record.schema;
         for (const key in schemas) {
             this._schemaNameMap[schemas[key].name] = key;
             this._schemaMap[schemas[key].name] = schemas[key];

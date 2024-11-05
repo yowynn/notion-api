@@ -41,6 +41,14 @@ export type collection_page_property = {
     property: string_property_id;                               // Refer: property
 };
 
+/** Collection query options */
+export type collection_query_options = {
+    limit?: number;
+    query?: string;
+    sort?: any;
+    filter?: any;
+}
+
 /** Collection base*/
 type i_collection =
     & i_versioned

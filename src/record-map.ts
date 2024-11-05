@@ -5,14 +5,6 @@ import log from './log.js';
 import { UnsupportedError } from './error.js';
 import { wrapQueryFilter } from './util.js';
 
-
-type collection_query_options = {
-    limit?: number;
-    query?: string;
-    sort?: any;
-    filter?: any;
-}
-
 export default class RecordMap {
     private _client: Client;
     private _map: rt.map_of_record;
@@ -63,7 +55,7 @@ export default class RecordMap {
     }
 
 
-    public async getQueryedResult(collectionPointer: rt.pointered<'collection'>, collectionViewPointer: rt.pointered<'collection_view'>, options?: collection_query_options, returnType: 'all' | 'query' | 'count' = 'query') {
+    public async getQueryedResult(collectionPointer: rt.pointered<'collection'>, collectionViewPointer: rt.pointered<'collection_view'>, options?: rt.collection_query_options, returnType: 'all' | 'query' | 'count' = 'query') {
         const collectionView = await this.get(collectionViewPointer);
         const limit = options?.limit;
         const query = options?.query;

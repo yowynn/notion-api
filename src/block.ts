@@ -46,25 +46,27 @@ export default class Block extends Record {
         if (!parentPointer) {
             return undefined as unknown as T;
         }
-        var parentRecord = await this.recordMap.get(this.parentPointer);
-        return Record.wrap(this.client, parentRecord, parentPointer.table) as T;
+        await this.client.recordMap.get(parentPointer);
+        return Record.wrap(this.client, parentPointer) as T;
     }
 
     public async getChild<T = Block>(index: number = 0) {
-        var record = this.record as rt.i_childed;
-        var id = record.content?.[index];
+        const record = this.record as rt.i_childed;
+        const id = record.content?.[index];
         if (!id) {
             return undefined as unknown as T;
         }
-        var childRecord = await this.recordMap.get({ table: 'block', id, spaceId: record.space_id });
-        return Record.wrap(this.client, childRecord, 'block') as T;
+        const childPointer = { table: 'block', id, spaceId: record.space_id } as rt.pointered<'block'>;
+        await this.client.recordMap.get(childPointer);
+        return Record.wrap(this.client, childPointer) as T;
     }
 
     public async getChildren<T = Block>() {
-        var record = this.record as rt.i_childed;
-        var content: rt.string_uuid[] = record.content ?? [];
-        var children = await this.recordMap.getList(content.map(id => ({ table: 'block', id, spaceId: record.space_id })));
-        return children.map(child => Record.wrap(this.client, child, 'block') as T);
+        const record = this.record as rt.i_childed;
+        const content: rt.string_uuid[] = record.content ?? [];
+        const childPointerList: rt.pointer[] = content.map(id => ({ table: 'block', id, spaceId: record.space_id }));
+        await this.recordMap.getList(childPointerList);
+        return childPointerList.map(pointer => Record.wrap(this.client, pointer) as T);
     }
 }
 
@@ -203,9 +205,9 @@ export class TransclusionReferenceBlock extends Block {
     public accessor referencePointer!: rt.pointered<'block'>;
 
     public async getReference() {
-        var referencePointer = this.referencePointer;
-        var referenceRecord = await this.recordMap.get(referencePointer);
-        return Record.wrap(this.client, referenceRecord, referencePointer.table) as TransclusionContainerBlock;
+        const referencePointer = this.referencePointer;
+        await this.client.recordMap.get(referencePointer);
+        return Record.wrap(this.client, referencePointer) as TransclusionContainerBlock;
     }
 }
 
@@ -258,7 +260,7 @@ export class TableBlock extends Block {
 
     public getSchemaId(id_index: rt.string_property_id | number) {
         if (typeof id_index === 'number') {
-            var record = this.record;
+            const record = this.record;
             return record.format.table_block_column_order[id_index] as rt.string_property_id;
         }
         else {
@@ -286,7 +288,7 @@ export class TableRowBlock extends Block {
     }
     public async getProperty(id_index: rt.string_property_id | number, simple: boolean = false) {
         const id = (await this.getTable()).getSchemaId(id_index);
-        var value = this.get(['properties', id]);
+        const value = this.get(['properties', id]);
         return decodeProperty('text', value!, simple);
     }
 
@@ -313,9 +315,9 @@ export class AliasBlock extends Block {
     public accessor referencePointer!: rt.pointered<'block'>;
 
     public async getReference() {
-        var referencePointer = this.referencePointer;
-        var referenceRecord = await this.recordMap.get(referencePointer);
-        return Record.wrap(this.client, referenceRecord, referencePointer.table) as Block;
+        const referencePointer = this.referencePointer;
+        await this.client.recordMap.get(referencePointer);
+        return Record.wrap(this.client, referencePointer) as Block;
     }
 }
 
@@ -367,7 +369,7 @@ export class PageBlock extends Block {
 
     public async getCollection() {
         if (this.isInCollection) {
-            var collection = await this.getParent<Collection>();
+            const collection = await this.getParent<Collection>();
             return collection;
         }
         return undefined as unknown as Collection;
@@ -378,11 +380,11 @@ export class PageBlock extends Block {
             const collection = await this.getCollection();
             const schemaType = collection.getSchema(id_name)?.type ?? 'text';
             const id = collection.getSchemaId(id_name);
-            var value = this.get(['properties', id]);
+            const value = this.get(['properties', id]);
             return decodeProperty(schemaType, value!, simple);
         }
         else {
-            var value = this.get(['properties', id_name]);
+            const value = this.get(['properties', id_name]);
             return decodeProperty('text', value, simple);
         }
     }
@@ -464,12 +466,13 @@ export class CollectionViewPageBlock extends Block {
 
     @readonly_record_accessor('view_ids', (x) => (x as any[] ?? []).length)
     public accessor viewCount!: number;
+
     public async getCollection() {
         if (this.isCollection) {
-            var collectionPointer = this.collectionPointer;
+            const collectionPointer = this.collectionPointer;
             if (collectionPointer) {
-                var collectionRecord = await this.recordMap.get(collectionPointer);
-                return Record.wrap(this.client, collectionRecord, collectionPointer.table) as Collection;
+                await this.client.recordMap.get(collectionPointer);
+                return Record.wrap(this.client, collectionPointer) as Collection;
             }
             else {
                 throw new Error('Collection not found');
@@ -479,18 +482,22 @@ export class CollectionViewPageBlock extends Block {
     }
 
     public async getView<T extends CollectionView = CollectionView>(index: number = 0) {
-        var collectionViewId = this.record.view_ids?.[index];
+        const record = this.record;
+        const collectionViewId = this.record.view_ids?.[index];
         if (collectionViewId) {
-            var collectionViewRecord = await this.recordMap.get({ table: 'collection_view', id: collectionViewId });
-            return Record.wrap(this.client, collectionViewRecord, 'collection_view') as T;
+            const viewPointer = { table: 'collection_view', id: collectionViewId, spaceId: record.space_id } as rt.pointered<'collection_view'>;
+            await this.client.recordMap.get(viewPointer);
+            return Record.wrap(this.client, viewPointer) as T;
         }
         return undefined as unknown as T;
     }
 
     public async getViews<T extends CollectionView = CollectionView>() {
-        var collectionViewIds = this.record.view_ids ?? [];
-        var collectionViewRecords = await this.recordMap.getList(collectionViewIds.map(id => ({ table: 'collection_view', id })));
-        return collectionViewRecords.map(record => Record.wrap(this.client, record, 'collection_view') as T);
+        const record = this.record;
+        const collectionViewIds = this.record.view_ids ?? [];
+        const collectionViewPointerList: rt.pointer[] = collectionViewIds.map(id => ({ table: 'collection_view', id, spaceId: record.space_id }));
+        await this.recordMap.getList(collectionViewPointerList);
+        return collectionViewPointerList.map(pointer => Record.wrap(this.client, pointer) as T);
     }
 }
 
@@ -508,12 +515,13 @@ export class CollectionViewBlock extends Block {
 
     @readonly_record_accessor('view_ids', (x) => (x as any[] ?? []).length)
     public accessor viewCount!: number;
+
     public async getCollection() {
         if (this.isCollection) {
-            var collectionPointer = this.collectionPointer;
+            const collectionPointer = this.collectionPointer;
             if (collectionPointer) {
-                var collectionRecord = await this.recordMap.get(collectionPointer);
-                return Record.wrap(this.client, collectionRecord, collectionPointer.table) as Collection;
+                await this.client.recordMap.get(collectionPointer);
+                return Record.wrap(this.client, collectionPointer) as Collection;
             }
             else {
                 throw new Error('Collection not found');
@@ -523,17 +531,21 @@ export class CollectionViewBlock extends Block {
     }
 
     public async getView<T extends CollectionView = CollectionView>(index: number = 0) {
-        var collectionViewId = this.record.view_ids?.[index];
+        const record = this.record;
+        const collectionViewId = this.record.view_ids?.[index];
         if (collectionViewId) {
-            var collectionViewRecord = await this.recordMap.get({ table: 'collection_view', id: collectionViewId });
-            return Record.wrap(this.client, collectionViewRecord, 'collection_view') as T;
+            const viewPointer = { table: 'collection_view', id: collectionViewId, spaceId: record.space_id } as rt.pointered<'collection_view'>;
+            await this.client.recordMap.get(viewPointer);
+            return Record.wrap(this.client, viewPointer) as T;
         }
         return undefined as unknown as T;
     }
 
     public async getViews<T extends CollectionView = CollectionView>() {
-        var collectionViewIds = this.record.view_ids ?? [];
-        var collectionViewRecords = await this.recordMap.getList(collectionViewIds.map(id => ({ table: 'collection_view', id })));
-        return collectionViewRecords.map(record => Record.wrap(this.client, record, 'collection_view') as T);
+        const record = this.record;
+        const collectionViewIds = this.record.view_ids ?? [];
+        const collectionViewPointerList: rt.pointer[] = collectionViewIds.map(id => ({ table: 'collection_view', id, spaceId: record.space_id }));
+        await this.recordMap.getList(collectionViewPointerList);
+        return collectionViewPointerList.map(pointer => Record.wrap(this.client, pointer) as T);
     }
 }

@@ -10,14 +10,15 @@ const recordTypeMap: { [key: string]: new (client: Client, record: rt.record, ta
 
 @as_record()
 export default class Record {
-    static wrap(client: Client, record: rt.record, table: rt.type_of_record = 'block') {
+    static wrap(client: Client, pointer: rt.pointer) {
+        const record = client.recordMap.getLocal(pointer);
         const type = (record as any).type;
-        let key = table;
+        let key = pointer.table;
         if (type) {
             key = key + '.' + type;
         }
-        const ctor = recordTypeMap[key] ?? recordTypeMap[table] ?? recordTypeMap.record;
-        const obj = new ctor(client, record, table);
+        const ctor = recordTypeMap[key] ?? recordTypeMap[pointer.table] ?? recordTypeMap.record;
+        const obj = new ctor(client, record, pointer.table);
         return obj;
     }
 
