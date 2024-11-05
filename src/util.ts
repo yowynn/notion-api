@@ -9,45 +9,47 @@ import config from './config.js';
 import { ArgumentError } from './error.js';
 import log from './log.js';
 
-export function uuid(idOrUrl: rt.string_uuid | rt.string_url, table: rt.type_of_record | 'page' = 'block') {
-    let re = idOrUrl;
-    if (/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(re)) {    // most common case
-        return re;
+export function pointerTo(idOrUrl: rt.string_uuid | rt.string_url, inferTable: rt.type_of_record | 'page' = 'block', spaceId?: rt.string_uuid): rt.pointer {
+    let id = idOrUrl;
+    let table: rt.type_of_record = inferTable === 'page' ? 'block' : inferTable;
+    if (/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(id)) {    // most common case
+        return { id, table, spaceId };
     }
-    if (re.startsWith(config.NOTION_URL) || re.startsWith('/')) {
+    if (id.startsWith(config.NOTION_URL) || id.startsWith('/')) {
         // https://www.notion.so/yowynn/11f6b80204ff8079942affd53125f620?pvs=4#1306b80204ff8074b4f3c7a29bf248f8
         // https://www.notion.so/yowynn/1306b80204ff80ab9d46c162091e3752?v=1306b80204ff81fda9cb000c838bc26c&pvs=4
         // https://www.notion.so/yowynn/PARA-Dashboard-12d6b80204ff80cba08de44cf82f2b8d?pvs=4
-        switch (table) {
+        switch (inferTable) {
             case 'block': {
-                re = re.split('#').slice(-1)[0].split('/').slice(-1)[0].split('?')[0].split('-').slice(-1)[0];
+                id = id.split('#').slice(-1)[0].split('/').slice(-1)[0].split('?')[0].split('-').slice(-1)[0];
                 break;
             }
             case 'page': {
-                re = re.split('/').slice(-1)[0].split('?')[0].split('-').slice(-1)[0];
+                id = id.split('/').slice(-1)[0].split('?')[0].split('-').slice(-1)[0];
                 break;
             }
             case 'collection_view': {
-                re = re.match(/v=([a-fA-F0-9]{32})/i)?.[1] ?? '';
-                if (!re) {
+                id = id.match(/v=([a-fA-F0-9]{32})/i)?.[1] ?? '';
+                if (!id) {
                     throw new ArgumentError('uuid', 'idOrUrl', idOrUrl);
                 }
                 break;
             }
             default: {
-                throw new ArgumentError('uuid', 'table', table);
+                throw new ArgumentError('uuid', 'table', inferTable);
             }
         }
     }
-    if (/^[a-f0-9]{32}$/i.test(re)) {
-        return re.toLowerCase().replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5');
+    if (/^[a-f0-9]{32}$/i.test(id)) {
+        id = id.toLowerCase().replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5');
     }
-    else if (/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(re)) {
-        return re.toLowerCase();
+    else if (/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(id)) {
+        id = id.toLowerCase();
     }
     else {
         throw new ArgumentError('uuid', 'idOrUrl', idOrUrl);
     }
+    return { id, table, spaceId };
 }
 
 export function newUuid() {

@@ -11,7 +11,7 @@ import SessionApi from './session-api.js';
 import RecordMap from './record-map.js';
 import Transation from './transaction.js';
 import Action from './action.js';
-import { uuid } from './util.js';
+import { pointerTo } from './util.js';
 
 export default class Client {
     public static async fromToken(token: string): Promise<Client> {
@@ -104,8 +104,7 @@ export default class Client {
     }
 
     public async getRecord<T extends Record = Record>(table: rt.type_of_record, id: rt.string_uuid, update: boolean = false) {
-        id = uuid(id);
-        const pointer = { table, id, spaceId: this.spaceId };
+        const pointer = pointerTo(id, table, this.spaceId);
         const r = await this.recordMap.get(pointer, update, true);
         if (!r) {
             throw new Error(`Record not found: ${table}, ${id}`);
