@@ -1,5 +1,5 @@
 import type * as rt from './record-types';
-import md from './markdown.js';
+import md from './markdown-inline.js';
 
 export const rt$date2text = function (date: rt.date) {
     switch (date.type) {
