@@ -49,6 +49,9 @@ export default class RecordMap {
     }
 
     public async getList(pointerList: rt.pointer[]) {
+        if (!pointerList.length) {
+            return [];
+        }
         const data = await this._client.sessionApi.syncRecords(pointerList);
         this.merge(data?.recordMap);
         return pointerList.map(pointer => this.getLocal(pointer));
