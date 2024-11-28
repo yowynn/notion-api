@@ -96,8 +96,9 @@ export async function input(prompt: string) {
     return data;
 }
 
-export async function readFile(path: string) {
-    return fs.promises.readFile(path);
+export async function readFile(path: string, asText: boolean = false) {
+    const buffer = await fs.promises.readFile(path);
+    return asText ? buffer.toString() : buffer;
 }
 
 export async function readCsv(filePath: string) {
