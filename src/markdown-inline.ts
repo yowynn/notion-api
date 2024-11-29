@@ -407,6 +407,7 @@ const toRichText = function (markdown: string) {
                 switch (tagInfo.tag) {
                     case 'br': {
                         text += '\n';
+                        break;
                     }
                     case 'u': {
                         pushText();
