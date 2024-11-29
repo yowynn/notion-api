@@ -240,14 +240,35 @@ export default class Action {
         return pointer;
     }
 
-    public async uploadFile(pointer: rt.pointered<'block'>, filePath: string, blob?: Blob, propertyId?: rt.string_property_id) {
+    private async loadFile(uri: string, blob?: Blob) {
+        const isUrl = uri.startsWith('http://') || uri.startsWith('https://');
+        let name: string;
+        let contentType: string;
+        let contentLength: number;
         if (!blob) {
-            const buffer = await readFile(filePath);
-            blob = new Blob([buffer]);
+            if (isUrl) {
+                const response = await fetch(uri);
+                blob = await response.blob();
+                contentType = response.headers.get('content-type')!;
+                contentLength = parseInt(response.headers.get('content-length')!);
+                name = uri.split('?')[0].split('#')[0].split(/[\\/]/).pop()!;
+            }
+            else {
+                const buffer = await readFile(uri);
+                blob = new Blob([buffer]);
+                name = uri.split(/[\\/]/).pop()!;
+                contentType = inferMimeType(name);
+                contentLength = blob.size;
+            }
         }
-        const name = filePath.split(/[\\/]/).pop()!;
-        const contentType = inferMimeType(name);
-        const contentLength = blob.size;
+        name = name! ?? uri.split('?')[0].split('#')[0].split(/[\\/]/).pop()!;
+        contentType = contentType! ?? inferMimeType(name);
+        contentLength = contentLength! ?? blob.size;
+        return { name, contentType, contentLength, blob };
+    }
+
+    public async uploadFile(pointer: rt.pointered<'block'>, uri: string, fileBlob?: Blob, propertyId?: rt.string_property_id) {
+        const { name, contentType, contentLength, blob } = await this.loadFile(uri, fileBlob);
         const data = await this._client.sessionApi.getUploadFileUrl({ name, contentType, contentLength }, pointer);
         const awsSession = this._client.awsSession;
         await awsSession.awsUploadFile(data, blob);
@@ -267,14 +288,8 @@ export default class Action {
         return data.url as rt.string_url;
     }
 
-    public async uploadFilePublic(filePath: string, blob?: Blob) {
-        if (!blob) {
-            const buffer = await readFile(filePath);
-            blob = new Blob([buffer]);
-        }
-        const name = filePath.split(/[\\/]/).pop()!;
-        const contentType = inferMimeType(name);
-        const contentLength = blob.size;
+    public async uploadFilePublic(uri: string, fileBlob?: Blob) {
+        const { name, contentType, contentLength, blob } = await this.loadFile(uri, fileBlob);
         const data = await this._client.sessionApi.getUploadFileUrl({ name, contentType, contentLength });
         const awsSession = this._client.awsSession;
         await awsSession.awsUploadFile(data, blob);

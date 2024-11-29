@@ -24,8 +24,8 @@ export default class Transation {
         this._isSilent = isSilent;
     }
 
-    public async end(refreshRecords: boolean = true) {
-        await this.submitAll(refreshRecords);
+    public async end(refreshRecords: boolean = true, operationLimit: number = 1000) {
+        await this.submitAll(refreshRecords, operationLimit);
         this._inTransaction = false;
         this._isSilent = false;
     }
@@ -132,14 +132,33 @@ export default class Transation {
         this._operations.push(operation);
     }
 
-    private async submitAll(refreshRecords: boolean = true) {
+    private async submitAll(refreshRecords: boolean = true, operationLimit: number = -1) {
         // log.info('submitting transactions:', this._transactions);
         if (this._transactions.length === 0) {
             return;
         }
         const transactions = this._transactions;
         this._transactions = [];
-        await this._client.sessionApi.submitTransactions(transactions);
+        const totalOperations = transactions.map(transaction => transaction.operations.length).reduce((a, b) => a + b, 0);
+        log.info('submitting transactions:', transactions.length, 'total operations:', totalOperations);
+        if (operationLimit > 0) {
+            let startIndex = 0;
+            let operationSize = 0;
+            for (let i = startIndex; i < transactions.length; i++) {
+                operationSize += transactions[i].operations.length;
+                if (operationSize >= operationLimit) {
+                    await this._client.sessionApi.submitTransactions(transactions.slice(startIndex, i + 1));
+                    startIndex = i + 1;
+                    operationSize = 0;
+                }
+            }
+            if (operationSize > 0) {
+                await this._client.sessionApi.submitTransactions(transactions.slice(startIndex));
+            }
+        }
+        else {
+            await this._client.sessionApi.submitTransactions(transactions);
+        }
         if (refreshRecords) {
             const pointers: rt.pointer[] = transactions.map(transaction => transaction.operations.map(operation => operation.pointer)).flat();
             const uniquePointers = pointers.filter((pointer, index) => pointers.indexOf(pointer) === index);

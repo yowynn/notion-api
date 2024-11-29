@@ -83,21 +83,29 @@ export default class Client {
         this._timezone = timezone;
     }
 
-    public beginTransaction(key: string | number = 'default', isSilent: boolean = false) {
+    public useTransaction(key: string | number = 'default', isSilent: boolean = false) {
         this._transactionKey = key.toString();
         if (!this._transactions[this._transactionKey]) {
             this._transactions[this._transactionKey] = new Transation(this);
         }
-        this.transaction.begin(isSilent);
+        if (this._transactionKey !== 'default') {
+            this.transaction.begin(isSilent);
+        }
     }
 
-    public async endTransaction(key: string | number = 'default', refreshRecords: boolean = true) {
+    public async submitTransaction(key: string | number = 'default', refreshRecords: boolean = true) {
         const strKey = key.toString();
         const transaction = this._transactions[strKey];
-        if (!transaction) {
-            throw new Error(`Transaction ${strKey} not found`);
+        try {
+            if (!transaction) {
+                throw new Error(`Transaction ${strKey} not found`);
+            }
+            await transaction.end(refreshRecords);
         }
-        await transaction.end(refreshRecords);
+        catch (e) {
+            delete this._transactions[strKey];
+            log.error(e);
+        }
         if (strKey === this._transactionKey) {
             this._transactionKey = 'default';
         }

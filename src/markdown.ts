@@ -182,68 +182,6 @@ const fromChunk = async function (children: Block[], indent: number = 0): Promis
     return markdown;
 };
 
-// const toChunk = async function (markdown: string, parent: Block): Promise<void> {
-//     const client = parent.client;
-//     client.beginTransaction('#markdown2hunk');
-//     const lines = markdown.split('\n');
-//     let lineSep = false;
-//     for (let line of lines) {
-//         const indent = Math.floor((line.match(/^\s*/)?.[0].length || 0) / 4);
-//         const content = line.trim();
-//         if (content === '') {
-//             lineSep = true;
-//             continue;
-//         }
-//         else {
-//             // if (content.startsWith('# ')) {
-//             //     const md = content.replace(/^# /, '');
-//             //     const block = await client.createBlock('header', 'child', parent);
-//             //     block.title = md;
-//             //     await block.idle();
-//             // }
-//             // if (content.startsWith('## ')) {
-//             //     const md = content.replace(/^## /, '');
-//             //     const block = await client.createBlock('sub_header', 'child', parent);
-//             //     block.title = md;
-//             //     await block.idle();
-//             // }
-//             // if (content.startsWith('### ')) {
-//             //     const md = content.replace(/^### /, '');
-//             //     const block = await client.createBlock('sub_sub_header', 'child', parent);
-//             //     block.title = md;
-//             //     await block.idle();
-//             // }
-//             // if (content.startsWith('- [x] ')) {
-//             //     const md = content.replace(/^- \[x\] /, '');
-//             //     const block = await client.createBlock('to_do', 'child', parent);
-//             //     block.title = md;
-//             //     (block as ToDoBlock).isChecked = true;
-//             //     await block.idle();
-//             // }
-//             // if (content.startsWith('- [ ] ')) {
-//             //     const md = content.replace(/^- \[ \] /, '');
-//             //     const block = await client.createBlock('to_do', 'child', parent);
-//             //     block.title = md;
-//             //     (block as ToDoBlock).isChecked = false;
-//             //     await block.idle();
-//             // }
-//             // else {
-//             //     const md = content;
-//             //     const block = await client.createBlock('text', 'child', parent);
-//             //     block.title = md;
-//             //     await block.idle();
-//             // }
-//             let normalText = false
-//             // 以若干个#+空格开头
-//             const m = content.match(/^(#+)\s+(.*)/);
-
-//         }
-//     }
-//     client.endTransaction('#markdown2hunk');
-// }
-
-
-
 const markdown2blocks = function (markdown: string) {
     // replace \tab to 4 spaces
     markdown = markdown.replace(/\t/g, '    ');
@@ -442,7 +380,7 @@ const markdown2blocks = function (markdown: string) {
     return rootBlocks;
 }
 
-const createBlocks = async function (blocks: any[], parent: Block) {
+const createBlocks = async function (blocks: any[], parent: Block, state = {uploads: [] as any[]}) {
     const client = parent.client;
     for (let block of blocks) {
         switch (block.type) {
@@ -451,7 +389,7 @@ const createBlocks = async function (blocks: any[], parent: Block) {
                 newBlock.title = block.content;
                 await newBlock.idle();
                 if (block.children) {
-                    await createBlocks(block.children, parent);
+                    await createBlocks(block.children, parent, state);
                 }
                 break;
             }
@@ -460,7 +398,7 @@ const createBlocks = async function (blocks: any[], parent: Block) {
                 newBlock.title = block.content;
                 await newBlock.idle();
                 if (block.children) {
-                    await createBlocks(block.children, parent);
+                    await createBlocks(block.children, parent, state);
                 }
                 break;
             }
@@ -469,7 +407,7 @@ const createBlocks = async function (blocks: any[], parent: Block) {
                 newBlock.title = block.content;
                 await newBlock.idle();
                 if (block.children) {
-                    await createBlocks(block.children, parent);
+                    await createBlocks(block.children, parent, state);
                 }
                 break;
             }
@@ -479,7 +417,7 @@ const createBlocks = async function (blocks: any[], parent: Block) {
                 (newBlock as ToDoBlock).isChecked = block.isChecked;
                 await newBlock.idle();
                 if (block.children) {
-                    await createBlocks(block.children, newBlock);
+                    await createBlocks(block.children, newBlock, state);
                 }
                 break;
             }
@@ -488,7 +426,7 @@ const createBlocks = async function (blocks: any[], parent: Block) {
                 newBlock.title = block.content;
                 await newBlock.idle();
                 if (block.children) {
-                    await createBlocks(block.children, newBlock);
+                    await createBlocks(block.children, newBlock, state);
                 }
                 break;
             }
@@ -497,7 +435,7 @@ const createBlocks = async function (blocks: any[], parent: Block) {
                 newBlock.title = block.content;
                 await newBlock.idle();
                 if (block.children) {
-                    await createBlocks(block.children, newBlock);
+                    await createBlocks(block.children, newBlock, state);
                 }
                 break;
             }
@@ -507,7 +445,7 @@ const createBlocks = async function (blocks: any[], parent: Block) {
                 (newBlock as CodeBlock).language = block.language;
                 await newBlock.idle();
                 if (block.children) {
-                    await createBlocks(block.children, parent);
+                    await createBlocks(block.children, parent, state);
                 }
                 break;
             }
@@ -516,7 +454,7 @@ const createBlocks = async function (blocks: any[], parent: Block) {
                 newBlock.title = block.content;
                 await newBlock.idle();
                 if (block.children) {
-                    await createBlocks(block.children, newBlock);
+                    await createBlocks(block.children, newBlock, state);
                 }
                 break;
             }
@@ -525,7 +463,7 @@ const createBlocks = async function (blocks: any[], parent: Block) {
                 newBlock.titleText = block.content;
                 await newBlock.idle();
                 if (block.children) {
-                    await createBlocks(block.children, parent);
+                    await createBlocks(block.children, parent, state);
                 }
                 break;
             }
@@ -541,7 +479,7 @@ const createBlocks = async function (blocks: any[], parent: Block) {
                 record.format.table_block_column_order = ids;
 
                 if (block.children) {
-                    await createBlocks(block.children, newBlock);
+                    await createBlocks(block.children, newBlock, state);
                 }
                 break;
             }
@@ -551,7 +489,7 @@ const createBlocks = async function (blocks: any[], parent: Block) {
                     await (newBlock as TableRowBlock).setProperty(i, block.props[i]);
                 }
                 if (block.children) {
-                    await createBlocks(block.children, parent);
+                    await createBlocks(block.children, parent, state);
                 }
                 break;
             }
@@ -559,17 +497,25 @@ const createBlocks = async function (blocks: any[], parent: Block) {
                 const newBlock = await client.createBlock('divider', 'child', parent);
                 await newBlock.idle();
                 if (block.children) {
-                    await createBlocks(block.children, parent);
+                    await createBlocks(block.children, parent, state);
                 }
                 break;
             }
             case 'image': {
-                const newBlock = await client.createBlock('image', 'child', parent);
-                newBlock.title = block.alt;
-                (newBlock as ImageBlock).source = block.src;
-                await newBlock.idle();
+                const TRANS_IMAGE_TO_NOTION = (config as any)?.TRANS_IMAGE_TO_NOTION;
+                if (TRANS_IMAGE_TO_NOTION) {
+                    const blockPointer = await client.action.createBlock('image', 'child', parent.pointer);
+                    await client.action.done(true);
+                    state.uploads.push({ pointer: blockPointer, url: block.src });
+                }
+                else {
+                    const newBlock = await client.createBlock('image', 'child', parent);
+                    newBlock.title = block.alt;
+                    (newBlock as ImageBlock).source = block.src;
+                    await newBlock.idle();
+                }
                 if (block.children) {
-                    await createBlocks(block.children, parent);
+                    await createBlocks(block.children, parent, state);
                 }
                 break;
             }
@@ -578,25 +524,28 @@ const createBlocks = async function (blocks: any[], parent: Block) {
                 newBlock.title = block.content;
                 await newBlock.idle();
                 if (block.children) {
-                    await createBlocks(block.children, parent);
+                    await createBlocks(block.children, parent, state);
                 }
                 break;
             }
         }
     }
+    return state;
 }
 
 const toChunk = async function (markdown: string, parent: Block) {
     const client = parent.client;
     const blocks = markdown2blocks(markdown);
-    // every 100 blocks commit a transaction
-    // client.beginTransaction('#markdown2hunk');
-    // await createBlocks(blocks, parent);
-    // await client.endTransaction('#markdown2hunk');
-    for (let i = 0; i < blocks.length; i += 100) {
-        client.beginTransaction('#markdown2hunk');
-        await createBlocks(blocks.slice(i, i + 100), parent);
-        await client.endTransaction('#markdown2hunk');
+    client.useTransaction('#markdown2chunk');
+    const state = await createBlocks(blocks, parent);
+    await client.submitTransaction('#markdown2chunk', false);
+    if (state.uploads.length > 0) {
+        client.useTransaction('#markdown2chunk');
+        for (let upload of state.uploads) {
+            const url = await client.action.uploadFile(upload.pointer, upload.url);
+            await client.action.done(true);
+        }
+        await client.submitTransaction('#markdown2chunk', false);
     }
 }
 

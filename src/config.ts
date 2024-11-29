@@ -10,6 +10,7 @@ const config = {
     NOTION_CLIENT_USER_AGENT    : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36 Edg/129.0.0.0',
     NOTION_DEFAULT_TIMEZONE     : 'Asia/Shanghai' as rt.option_time_zone,
     DEBUG_MODE                  : !!process.env.DEBUG_MODE,
+    TRANS_IMAGE_TO_NOTION       : true,
 };
 
 export default config;

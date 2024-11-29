@@ -14,6 +14,6 @@ var block = await client.getRecord<Block>('block', id);
 // const data = await markdown.fromChunk(children);
 // log.writeFile('output.md', data);
 
-const data = await util.readFile('output.md', true) as string;
+const data = await util.readFile('./test/output.md', true) as string;
 // log.info('data:', data);
 await markdown.toChunk(data, block);
