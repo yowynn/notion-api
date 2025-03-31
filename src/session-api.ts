@@ -230,4 +230,15 @@ export default class SessionApi {
         };
         return this._session.request('POST', endpoint, payload);
     }
+
+    /**
+     * API: 获取工作区的自定义表情
+     */
+    public async getCustomEmojis(spaceId: rt.string_uuid) {
+        const endpoint = 'getCustomEmojisForSpace';
+        const payload = {
+            spaceId,
+        };
+        return this._session.request('POST', endpoint, payload);
+    }
 }

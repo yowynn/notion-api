@@ -48,13 +48,22 @@ export default class Session {
             body,
         });
         if (!response.ok) {
+            if (response.status === 431) {
+                // 431: Request Header Fields Too Large
+                // dump headers
+                log.info('headers:');
+                this.headers.forEach((value, key) => {
+                    log.info(key, value);
+                });
+                log.info('--------------------------------');
+            }
             const text = await response.text();
             log.info('error data:', payload)
             throw new ResponseError(endpoint, response, text);
         }
         const setCookie = response.headers.get('set-cookie');
         if (setCookie) {
-            const pairs = setCookie.split(',').map(x => x.split(';')![0]!.trim().split('='));
+            const pairs = setCookie.split(/, (?=[^=,;]+=)/).map(x => x.split(';')![0]!.trim().split('='));
             for (const [name, value] of pairs) {
                 this.cookie[name] = value;
             }

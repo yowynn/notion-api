@@ -57,6 +57,13 @@ export default class RecordMap {
         return pointerList.map(pointer => this.getLocal(pointer));
     }
 
+    public async getCustomEmojis() {
+        const data = await this._client.sessionApi.getCustomEmojis(this._client.spaceId);
+        this.merge(data?.recordMap);
+        // to list
+        return Object.keys(data.recordMap.custom_emoji).map(key => this.getLocal({ table: 'custom_emoji', id: key }));
+    }
+
 
     public async getQueryedResult(collectionPointer: rt.pointered<'collection'>, collectionViewPointer: rt.pointered<'collection_view'>, options?: rt.collection_query_options, returnType: 'all' | 'query' | 'count' = 'query') {
         const collectionView = await this.get(collectionViewPointer);
