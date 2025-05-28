@@ -41,5 +41,9 @@
     "plugins": [
       "@typescript-eslint"
     ]
+  },
+  "volta": {
+    "node": "22.16.0",
+    "yarn": "4.8.0"
   }
 }
