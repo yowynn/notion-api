@@ -446,7 +446,7 @@ export class CollectionViewPageBlock extends Block {
         return super.record as rt.block_collection_view_page;
     }
 
-    @readonly_record_accessor('collection_id', x => !!x)
+    @readonly_record_accessor('format.collection_pointer', x => !!x)
     public accessor isCollection!: boolean;
 
     @readonly_record_accessor('format.collection_pointer')
@@ -471,6 +471,7 @@ export class CollectionViewPageBlock extends Block {
         if (this.isCollection) {
             const collectionPointer = this.collectionPointer;
             if (collectionPointer) {
+                console.log('get collection', collectionPointer);
                 await this.client.recordMap.get(collectionPointer);
                 return Record.wrap(this.client, collectionPointer) as Collection;
             }

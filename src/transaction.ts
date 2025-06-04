@@ -110,6 +110,16 @@ export default class Transation {
         this.addOperation(operation);
     }
 
+    public opCopyFile(pointer: rt.pointer, args: { fileId: rt.string_uuid, source: rt.pointer }) {
+        const operation = {
+            command: 'copyFile',
+            pointer,
+            path: [],
+            args,
+        }
+        this.addOperation(operation);
+    }
+
     public async submit(refreshRecords: boolean = true) {
         if (this._operations.length === 0) {
             return;
